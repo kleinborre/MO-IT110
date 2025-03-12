@@ -47,12 +47,17 @@ public class Employee implements CSVHandler {
         this.hourlyRate = hourlyRate;
     }
     
-    // For subclasses access
+    // For most subclasses access
     Employee(int employeeNumber){
         this.employeeNumber = employeeNumber;
     }
     
-    
+    // For payslip access
+    Employee(int employeeNumber, double basicSalary, double hourlyRate){
+        this.employeeNumber = employeeNumber;
+        this.basicSalary = basicSalary;
+        this.hourlyRate = hourlyRate;
+    }
 
     public int getEmployeeNumber() {
         return employeeNumber;
@@ -219,6 +224,10 @@ public class Employee implements CSVHandler {
     public double calculateNetSalary(){
         double netSalary = 0;
         return netSalary;
+    }
+    
+    public String getFullName(){
+        return getLastName() + ", " + getFirstName();
     }
 
     @Override

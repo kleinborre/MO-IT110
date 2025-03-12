@@ -11,6 +11,6 @@ import jframes.*;
 public class MotorPHOOP {
 
     public static void main(String[] args) {
-        new Login().setVisible(true);
+        new LoginPage().setVisible(true);
     }
 }

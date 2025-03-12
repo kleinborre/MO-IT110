@@ -1,3 +1,6 @@
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\buttons\grayButton.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\buttons\redButton.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\buttons\whiteButton.java
 C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\classes\Attendance.java
 C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\classes\CSVHandler.java
 C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\classes\Employee.java
@@ -11,5 +14,19 @@ C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\classes\
 C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\classes\Payslip.java
 C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\classes\SystemAdministrator.java
 C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\classes\UserAuthentication.java
-C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\Login.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\EmployeeAttendance.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\EmployeeLeave.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\EmployeeLeaveRequest.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\EmployeeOvertime.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\EmployeeOvertimeRequest.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\EmployeePage.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\EmployeePayslip.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\EmployeeProfileInformation.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\EmployeeProfileInformationUpdateInfo.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\HRManagerAttendance.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\HRManagerPage.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\LoginPage.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\PayrollManagerMonthlyPayrollSummary.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\PayrollManagerPage.java
+C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\jframes\SystemAdministratorPage.java
 C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\java\main\MotorPHOOP.java
