@@ -2,7 +2,7 @@ package classes;
 
 import java.util.Date;
 
-public class Employee implements CSVHandler {
+public class Employee {
     protected int employeeNumber;
     protected String lastName;
     protected String firstName;
@@ -230,17 +230,17 @@ public class Employee implements CSVHandler {
         return getLastName() + ", " + getFirstName();
     }
 
-    @Override
-    public void readFromCSV(String filePath) {
-        filePath = "";
-        System.out.println(filePath);
-    }
-
-    @Override
-    public void writeToCSV(String filePath) {
-        filePath = "";
-        System.out.println(filePath);
-    }
+//    @Override
+//    public void readFromCSV(String filePath) {
+//        filePath = "";
+//        System.out.println(filePath);
+//    }
+//
+//    @Override
+//    public void writeToCSV(String filePath) {
+//        filePath = "";
+//        System.out.println(filePath);
+//    }
     
 
             

@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class Payslip extends Employee implements CSVHandler, PayrollCalculator{
+public class Payslip extends Employee implements PayrollCalculator{
     private double deductions;
     private double grossSalary;
     private double netSalary;
@@ -52,27 +52,27 @@ public class Payslip extends Employee implements CSVHandler, PayrollCalculator{
     
     
 
-    @Override
-    public void readFromCSV(String filePath) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                System.out.println("Reading: " + line);
-            }
-        } catch (IOException e) {
-            System.err.println("Error reading CSV: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void writeToCSV(String filePath) {
-        try (FileWriter writer = new FileWriter(filePath, true)) {
-            writer.write(employeeNumber + "," + grossSalary + "," + deductions + "," + netSalary + "\n");
-            System.out.println("Payslip saved to CSV.");
-        } catch (IOException e) {
-            System.err.println("Error writing CSV: " + e.getMessage());
-        }
-    }
+//    @Override
+//    public void readFromCSV(String filePath) {
+//        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+//            String line;
+//            while ((line = br.readLine()) != null) {
+//                System.out.println("Reading: " + line);
+//            }
+//        } catch (IOException e) {
+//            System.err.println("Error reading CSV: " + e.getMessage());
+//        }
+//    }
+//
+//    @Override
+//    public void writeToCSV(String filePath) {
+//        try (FileWriter writer = new FileWriter(filePath, true)) {
+//            writer.write(employeeNumber + "," + grossSalary + "," + deductions + "," + netSalary + "\n");
+//            System.out.println("Payslip saved to CSV.");
+//        } catch (IOException e) {
+//            System.err.println("Error writing CSV: " + e.getMessage());
+//        }
+//    }
 
     public void printPayslip() {}
     

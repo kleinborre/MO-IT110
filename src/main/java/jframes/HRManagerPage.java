@@ -172,10 +172,10 @@ public class HRManagerPage extends javax.swing.JFrame {
                 employeeAttendanceButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(employeeAttendanceButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 310, 190, 40));
+        getContentPane().add(employeeAttendanceButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 300, 180, 40));
 
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\HR Dashboard.png")); // NOI18N
-        getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 970, -1));
+        getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 960, -1));
 
         pack();
         setLocationRelativeTo(null);
@@ -193,8 +193,7 @@ public class HRManagerPage extends javax.swing.JFrame {
 
     private void rejectOvertimeRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rejectOvertimeRequestButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeOvertime().setVisible(true);
-        dispose();
+//        dispose();
     }//GEN-LAST:event_rejectOvertimeRequestButtonActionPerformed
 
     private void approveLeaveRequestButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_approveLeaveRequestButton1ActionPerformed
@@ -207,6 +206,7 @@ public class HRManagerPage extends javax.swing.JFrame {
 
     private void employeeAttendanceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeAttendanceButtonActionPerformed
         // TODO add your handling code here:
+        new HRManagerAttendance().setVisible(true);
         dispose();
     }//GEN-LAST:event_employeeAttendanceButtonActionPerformed
 

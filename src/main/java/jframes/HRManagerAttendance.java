@@ -74,10 +74,10 @@ public class HRManagerAttendance extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(attendanceTable);
 
-        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 160, 830, 350));
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 150, 830, 360));
 
         searchBar.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        getContentPane().add(searchBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 110, 110, 30));
+        getContentPane().add(searchBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 110, 120, 30));
 
         rejectLeaveRequestButton1.setText("Search");
         rejectLeaveRequestButton1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -86,7 +86,7 @@ public class HRManagerAttendance extends javax.swing.JFrame {
                 rejectLeaveRequestButton1ActionPerformed(evt);
             }
         });
-        getContentPane().add(rejectLeaveRequestButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 110, 110, -1));
+        getContentPane().add(rejectLeaveRequestButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 110, 110, 30));
 
         jLabel2.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(102, 102, 102));
@@ -102,7 +102,7 @@ public class HRManagerAttendance extends javax.swing.JFrame {
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new HRManagerAttendance().setVisible(true);
+        new HRManagerPage().setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 

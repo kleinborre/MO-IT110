@@ -4,6 +4,10 @@
  */
 package jframes;
 
+import classes.SystemAdministrator;
+import java.util.Map;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author STUDY MODE
@@ -15,6 +19,7 @@ public class LoginPage extends javax.swing.JFrame {
      */
     public LoginPage() {
         initComponents();
+        getRootPane().setDefaultButton(loginButton);
     }
 
     /**
@@ -30,6 +35,7 @@ public class LoginPage extends javax.swing.JFrame {
         roleBox = new javax.swing.JComboBox<>();
         usernameText = new javax.swing.JTextField();
         passwordText = new javax.swing.JPasswordField();
+        errorLabel = new javax.swing.JLabel();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -53,6 +59,11 @@ public class LoginPage extends javax.swing.JFrame {
         roleBox.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
         roleBox.setForeground(new java.awt.Color(102, 102, 102));
         roleBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Employee", "HR Manager", "Payroll Manager", "System Administrator" }));
+        roleBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                roleBoxActionPerformed(evt);
+            }
+        });
         getContentPane().add(roleBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 180, 320, 30));
 
         usernameText.setBackground(new java.awt.Color(204, 204, 204));
@@ -69,7 +80,22 @@ public class LoginPage extends javax.swing.JFrame {
         passwordText.setBackground(new java.awt.Color(204, 204, 204));
         passwordText.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
         passwordText.setForeground(new java.awt.Color(102, 102, 102));
+        passwordText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                passwordTextActionPerformed(evt);
+            }
+        });
+        passwordText.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                passwordTextKeyPressed(evt);
+            }
+        });
         getContentPane().add(passwordText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 330, 320, 30));
+
+        errorLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        errorLabel.setForeground(new java.awt.Color(204, 0, 51));
+        errorLabel.setToolTipText("");
+        getContentPane().add(errorLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 360, 170, -1));
 
         background.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Login.png")); // NOI18N
@@ -85,13 +111,94 @@ public class LoginPage extends javax.swing.JFrame {
 
     private void usernameTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usernameTextActionPerformed
         // TODO add your handling code here:
+        loginButton.doClick();
     }//GEN-LAST:event_usernameTextActionPerformed
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
-        // TODO add your handling code here:
-        new EmployeePage().setVisible(true);
-        dispose();
+        String inputUsername = usernameText.getText().trim();
+        String inputPassword = new String(passwordText.getPassword()).trim();
+        String selectedRole = roleBox.getSelectedItem().toString().trim();
+
+        String formattedRole = selectedRole.replaceAll("\\s", "").toLowerCase(); 
+
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", ""); 
+        Map<String, String[]> users = admin.readCSV("src/main/java/databases/Employee Details.csv");
+
+        // Clear previous error messages before checking new input
+        errorLabel.setText("");
+
+        // Check if username is missing
+        if (inputUsername.isEmpty()) {
+            errorLabel.setText("Username is required!");
+            return;
+        }
+
+        // Check if password is missing
+        if (inputPassword.isEmpty()) {
+            errorLabel.setText("Password is required!");
+            return;
+        }
+
+        // Check if user exists in CSV
+        if (!users.containsKey(inputUsername)) {
+            errorLabel.setText("Username/Employee Number not found!");
+            return;
+        }
+
+        String[] userData = users.get(inputUsername);
+        String storedPassword = userData[20].trim();
+        String[] storedRoles = userData[21].trim().toLowerCase().split("\\|");
+
+        // Check if password is incorrect
+        if (!storedPassword.equals(inputPassword)) {
+            errorLabel.setText("Incorrect password!");
+            return;
+        }
+
+        // Check if selected role is incorrect
+        boolean roleMatch = false;
+        for (String role : storedRoles) {
+            if (role.equals(formattedRole)) {
+                roleMatch = true;
+                break;
+            }
+        }
+
+        if (!roleMatch) {
+            errorLabel.setText("Incorrect role selection!");
+            return;
+        }
+
+        // If everything is correct, open the respective page
+        switch (formattedRole) {
+            case "employee":
+                new EmployeePage().setVisible(true);
+                break;
+            case "hrmanager":
+                new HRManagerPage().setVisible(true);
+                break;
+            case "payrollmanager":
+                new PayrollManagerPage().setVisible(true);
+                break;
+            case "systemadministrator":
+                new SystemAdministratorPage().setVisible(true);
+                break;
+        }
+        dispose(); // Close login window after success
     }//GEN-LAST:event_loginButtonActionPerformed
+
+    private void roleBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roleBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_roleBoxActionPerformed
+
+    private void passwordTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordTextActionPerformed
+        // TODO add your handling code here:
+        loginButton.doClick(); 
+    }//GEN-LAST:event_passwordTextActionPerformed
+
+    private void passwordTextKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordTextKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_passwordTextKeyPressed
 
     /**
      * @param args the command line arguments
@@ -131,6 +238,7 @@ public class LoginPage extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
+    private javax.swing.JLabel errorLabel;
     private buttons.redButton loginButton;
     private javax.swing.JPasswordField passwordText;
     private javax.swing.JComboBox<String> roleBox;

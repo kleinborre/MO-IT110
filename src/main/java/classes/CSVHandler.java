@@ -1,6 +1,8 @@
 package classes;
 
-interface CSVHandler{
-    void readFromCSV(String filePath);
-    void writeToCSV(String filePath);
+import java.util.Map;
+
+public interface CSVHandler {
+    Map<String, String[]> readCSV(String filePath);
+    void writeCSV(String filePath);
 }

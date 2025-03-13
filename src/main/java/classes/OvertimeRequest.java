@@ -1,6 +1,6 @@
 package classes;
 
-public class OvertimeRequest extends Employee implements CSVHandler{
+public class OvertimeRequest extends Employee {
     
     private double overtimeHours;
     private double overtimePay;
@@ -37,16 +37,16 @@ public class OvertimeRequest extends Employee implements CSVHandler{
         this.status = status;
     }
     
-    @Override
-    public void readFromCSV(String filePath) {
-        filePath = "";
-        System.out.println(filePath);
-    }
-
-    @Override
-    public void writeToCSV(String filePath) {
-        filePath = "";
-        System.out.println(filePath);
-    } 
+//    @Override
+//    public void readFromCSV(String filePath) {
+//        filePath = "";
+//        System.out.println(filePath);
+//    }
+//
+//    @Override
+//    public void writeToCSV(String filePath) {
+//        filePath = "";
+//        System.out.println(filePath);
+//    } 
     
 }

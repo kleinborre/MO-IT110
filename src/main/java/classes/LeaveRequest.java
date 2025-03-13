@@ -2,7 +2,7 @@ package classes;
 
 import java.time.LocalDate;
 
-public class LeaveRequest extends Employee implements CSVHandler {
+public class LeaveRequest extends Employee {
     
     private String leaveType;
     private LocalDate startDate;
@@ -49,15 +49,15 @@ public class LeaveRequest extends Employee implements CSVHandler {
         this.status = status;
     }
     
-    @Override
-    public void readFromCSV(String filePath) {
-        filePath = "";
-        System.out.println(filePath);
-    }
-
-    @Override
-    public void writeToCSV(String filePath) {
-        filePath = "";
-        System.out.println(filePath);
-    }
+//    @Override
+//    public void readFromCSV(String filePath) {
+//        filePath = "";
+//        System.out.println(filePath);
+//    }
+//
+//    @Override
+//    public void writeToCSV(String filePath) {
+//        filePath = "";
+//        System.out.println(filePath);
+//    }
 }

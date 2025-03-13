@@ -48,7 +48,7 @@ public class PayrollManagerPage extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Inter", 0, 24)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(102, 102, 102));
         jLabel2.setText("Payroll Manager");
-        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 250, -1, -1));
+        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 240, -1, -1));
 
         profileInformationButton.setText("Payroll Summary");
         profileInformationButton.setAlignmentY(0.0F);
@@ -58,7 +58,7 @@ public class PayrollManagerPage extends javax.swing.JFrame {
                 profileInformationButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(profileInformationButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 310, 180, 40));
+        getContentPane().add(profileInformationButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 300, 180, 40));
 
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Manager Dashboard.png")); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -75,7 +75,7 @@ public class PayrollManagerPage extends javax.swing.JFrame {
 
     private void profileInformationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_profileInformationButtonActionPerformed
         // TODO add your handling code here:
-        //        new EmployeeProfileInformation().setVisible(true);
+        new PayrollManagerMonthlyPayrollSummary().setVisible(true);
         dispose();
     }//GEN-LAST:event_profileInformationButtonActionPerformed
 
