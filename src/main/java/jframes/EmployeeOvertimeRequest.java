@@ -9,11 +9,18 @@ package jframes;
  * @author STUDY MODE
  */
 public class EmployeeOvertimeRequest extends javax.swing.JFrame {
-
+    
+    String[] employeeData;
     /**
      * Creates new form EmployeeOvertimeRequest
      */
+    public EmployeeOvertimeRequest(String[] employeeData) {
+        this.employeeData = employeeData;
+        initComponents();
+    }
+    
     public EmployeeOvertimeRequest() {
+        this.employeeData = employeeData;
         initComponents();
     }
 
@@ -83,13 +90,13 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeOvertime().setVisible(true);
+        new EmployeeOvertime(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 
     private void backButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButton1ActionPerformed
         // TODO add your handling code here:
-        new EmployeeOvertime().setVisible(true);
+        new EmployeeOvertime(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButton1ActionPerformed
 

@@ -4,18 +4,100 @@
  */
 package jframes;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvValidationException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author STUDY MODE
  */
 public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
-
+    
+    private String[] employeeData; // Store the logged-in employee's data
+    private static final String FILE_PATH = "src/main/java/databases/Employee Details.csv"; // Path to CSV file
     /**
      * Creates new form EmployeeProfileInformationUpdateInfo
      */
+    
+    public EmployeeProfileInformationUpdateInfo(String[] employeeData) {
+        this.employeeData = employeeData;
+        initComponents();
+        populateProfileInfo();
+    }
+    
     public EmployeeProfileInformationUpdateInfo() {
         initComponents();
     }
+    
+        // Method to populate employee information
+    private void populateProfileInfo() {
+        if (employeeData == null || employeeData.length != 22) {
+            System.out.println("Error: Employee data is missing or incorrect.");
+            return;
+        }
+
+        // Populate labels (read-only fields)
+        employeeNumberLabel.setText(employeeData[0]);  
+        fullNameLabel.setText(employeeData[2] + " " + employeeData[1]); 
+        positionLabel.setText(employeeData[11]);  
+        supervisorLabel.setText(employeeData[12]);
+        statusLabel.setText(employeeData[10]);
+        birthdayLabel.setText(employeeData[3]);
+        sssNumberLabel.setText(employeeData[6]);
+        philhealthNumberLabel.setText(employeeData[7]);
+        pagibigNumberLabel.setText(employeeData[8]);
+        tinNumberLabel.setText(employeeData[9]);
+        basicSalaryLabel.setText(employeeData[13]);
+        riceSubsidyLabel.setText(employeeData[14]);
+        phoneAllowanceLabel.setText(employeeData[15]);
+        clothingAllowanceLabel.setText(employeeData[16]);
+        grossSemiMonthlyRateLabel.setText(employeeData[17]);
+        hourlyRateLabel.setText(employeeData[18]);
+
+        // Editable fields
+        phoneNumberLabel.setText(employeeData[5]);  // Allow phone number editing
+        addressLabel.setText(employeeData[4]);  // Allow address editing
+    }
+    
+    // 🔹 Method to update CSV file
+    private void updateEmployeeInfoInCSV(String empNumber, String newPhone, String newAddress) {
+        List<String[]> allUsers = new ArrayList<>();
+        boolean found = false;
+
+        try (CSVReader reader = new CSVReader(new FileReader(FILE_PATH))) {
+            String[] headers = reader.readNext(); // Read header row
+            allUsers.add(headers); // Preserve headers
+
+            String[] nextLine;
+            while ((nextLine = reader.readNext()) != null) {
+                if (nextLine[0].equals(empNumber)) {  
+                    nextLine[4] = newAddress;  // Update Address
+                    nextLine[5] = newPhone;  // Update Phone Number
+                    found = true;
+                }
+                allUsers.add(nextLine);
+            }
+        } catch (IOException | CsvValidationException e) {
+            e.printStackTrace();
+        }
+
+        if (found) {
+            try (CSVWriter writer = new CSVWriter(new FileWriter(FILE_PATH))) {
+                writer.writeAll(allUsers);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Employee not found!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }   
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -65,7 +147,6 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         clothingAllowanceLabel = new javax.swing.JTextField();
         backButton1 = new buttons.grayButton();
-        resetButton = new buttons.grayButton();
         doneButton = new buttons.redButton();
         jLabel1 = new javax.swing.JLabel();
 
@@ -362,18 +443,14 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
         });
         getContentPane().add(backButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 270, 130, -1));
 
-        resetButton.setText("Reset");
-        resetButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        resetButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resetButtonActionPerformed(evt);
-            }
-        });
-        getContentPane().add(resetButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 320, 130, -1));
-
         doneButton.setText("Done");
         doneButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        getContentPane().add(doneButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 370, 130, -1));
+        doneButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                doneButtonActionPerformed(evt);
+            }
+        });
+        getContentPane().add(doneButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 320, 130, -1));
 
         jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Profile Information.png")); // NOI18N
         jLabel1.setToolTipText("");
@@ -385,7 +462,7 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeProfileInformation().setVisible(true);
+        new EmployeeProfileInformation(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 
@@ -459,13 +536,30 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
 
     private void backButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButton1ActionPerformed
         // TODO add your handling code here:
-        new EmployeeProfileInformation().setVisible(true);
+        new EmployeeProfileInformation(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButton1ActionPerformed
 
-    private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_resetButtonActionPerformed
+    private void doneButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_doneButtonActionPerformed
+        // Get updated values
+        String updatedPhoneNumber = phoneNumberLabel.getText().trim();
+        String updatedAddress = addressLabel.getText().trim();
+        String employeeNumber = employeeData[0];  // Employee ID is primary key
+
+        // Update CSV
+        updateEmployeeInfoInCSV(employeeNumber, updatedPhoneNumber, updatedAddress);
+
+        // **Update employeeData for real-time reflection**
+        employeeData[5] = updatedPhoneNumber;
+        employeeData[4] = updatedAddress;
+
+        // Show success message
+        JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+        // **Pass updated data back to EmployeeProfileInformation**
+        new EmployeeProfileInformation(employeeData).setVisible(true);
+        dispose();  // Close this window       
+    }//GEN-LAST:event_doneButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -539,7 +633,6 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
     private javax.swing.JTextField phoneAllowanceLabel;
     private javax.swing.JTextField phoneNumberLabel;
     private javax.swing.JTextField positionLabel;
-    private buttons.grayButton resetButton;
     private javax.swing.JTextField riceSubsidyLabel;
     private javax.swing.JTextField sssNumberLabel;
     private javax.swing.JTextField statusLabel;

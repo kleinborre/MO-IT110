@@ -9,14 +9,50 @@ package jframes;
  * @author STUDY MODE
  */
 public class EmployeeProfileInformation extends javax.swing.JFrame {
-
+    
+    private String[] employeeData; // Store the logged-in employee's data
     /**
      * Creates new form EmployeeProfileInformation
      */
-    public EmployeeProfileInformation() {
+    public EmployeeProfileInformation(String[] employeeData) {
+        this.employeeData = employeeData;
+        initComponents();
+        populateProfileInfo();
+    }
+    
+    public EmployeeProfileInformation(){
         initComponents();
     }
+    
+    // Method to populate employee information
+    private void populateProfileInfo() {
+        if (employeeData == null || employeeData.length != 22) {
+            System.out.println("Error: Employee data is missing or incorrect.");
+            return;
+        }
 
+        // Update UI with latest data
+        employeeNumberLabel.setText(employeeData[0]);  
+        fullNameLabel.setText(employeeData[2] + " " + employeeData[1]); 
+        positionLabel.setText(employeeData[11]);  
+        supervisorLabel.setText(employeeData[12]);
+        statusLabel.setText(employeeData[10]);
+        birthdayLabel.setText(employeeData[3]);
+        sssNumberLabel.setText(employeeData[6]);
+        philhealthNumberLabel.setText(employeeData[7]);
+        pagibigNumberLabel.setText(employeeData[8]);
+        tinNumberLabel.setText(employeeData[9]);
+        basicSalaryLabel.setText(employeeData[13]);
+        riceSubsidyLabel.setText(employeeData[14]);
+        phoneAllowanceLabel.setText(employeeData[15]);
+        clothingAllowanceLabel.setText(employeeData[16]);
+        grossSemiMonthlyRateLabel.setText(employeeData[17]);
+        hourlyRateLabel.setText(employeeData[18]);
+
+        // **Show updated Phone Number & Address**
+        phoneNumberLabel.setText(employeeData[5]);  
+        addressLabel.setText(employeeData[4]);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -372,7 +408,7 @@ public class EmployeeProfileInformation extends javax.swing.JFrame {
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeePage().setVisible(true);
+        new EmployeePage(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 
@@ -446,7 +482,7 @@ public class EmployeeProfileInformation extends javax.swing.JFrame {
 
     private void updateInfoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateInfoButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeProfileInformationUpdateInfo().setVisible(true);
+        new EmployeeProfileInformationUpdateInfo(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_updateInfoButtonActionPerformed
 

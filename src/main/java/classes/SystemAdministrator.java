@@ -3,36 +3,37 @@ package classes;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.*;
+import java.util.*;
+import javax.swing.JOptionPane;
 
 public class SystemAdministrator extends Employee implements CSVHandler {
     
     private Login login;
     private static final String FILE_PATH = "src/main/java/databases/Employee Details.csv";
-    
-    public SystemAdministrator(int employeeNumber, String username, String password, String role){
-        super(employeeNumber);
+
+    // Constructor
+    public SystemAdministrator(int employeeNumber, String username, String password, String role) {
+        super(employeeNumber);  // Inherit from Employee
         this.login = new Login(username, password, role);
     }
-    
+
+    public String getRole() {
+        return login.getRole();
+    }
+
+    // **🔹 Authenticate User**
     public boolean authenticate(String inputUsername, String inputPassword, String selectedRole) {
         Map<String, String[]> users = readCSV(FILE_PATH);
-
         if (users.containsKey(inputUsername)) {
             String[] userData = users.get(inputUsername);
-            String storedPassword = userData[1].trim();
-            String[] storedRoles = userData[2].trim().toLowerCase().split("\\|"); // Split multiple roles
+            String storedPassword = userData[20].trim();
+            String[] storedRoles = userData[21].trim().toLowerCase().split("\\|");
 
             if (storedPassword.equals(inputPassword)) {
                 for (String role : storedRoles) {
                     if (role.equals(selectedRole.trim().toLowerCase())) {
-                        return true; // Valid role match
+                        return true; // Role match
                     }
                 }
             }
@@ -40,84 +41,131 @@ public class SystemAdministrator extends Employee implements CSVHandler {
         return false;
     }
 
+    // **🔹 Create User**
+    public void createUser(String[] newUser) {
+        List<String[]> allUsers = readAllUsers();
 
-    
-    public String getRole() {
-        return login.getRole();
-    }
-    
-    public void createUser(String newUsername, String newPassword, String newRole) {
-        System.out.println("User created: " + newUsername + " with role " + newRole);
+        // Check if Employee ID already exists
+        for (String[] user : allUsers) {
+            if (user[0].equals(newUser[0])) {
+                JOptionPane.showMessageDialog(null, "Employee ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        allUsers.add(newUser);
+        writeCSV(FILE_PATH, allUsers);
+        System.out.println("User " + newUser[0] + " created successfully.");
     }
 
-    public void deleteUser(String username) {
-        System.out.println("User deleted: " + username);
+    // **🔹 Delete User**
+    public void deleteUser(String empNumber) {
+        List<String[]> allUsers = readAllUsers();
+        boolean userFound = false;
+
+        Iterator<String[]> iterator = allUsers.iterator();
+        while (iterator.hasNext()) {
+            String[] user = iterator.next();
+            if (user[0].equals(empNumber)) {
+                iterator.remove();
+                userFound = true;
+                break;
+            }
+        }
+
+        if (userFound) {
+            writeCSV(FILE_PATH, allUsers);
+            JOptionPane.showMessageDialog(null, "User deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "User not found!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
-    public void updateUser(String username, String newRole) {
-        System.out.println("Updated user: " + username + " to role " + newRole);
+    // **🔹 Update User**
+    public void updateUser(String employeeID, String[] updatedUser) {
+        List<String[]> allUsers = readAllUsers();
+        boolean found = false;
+
+        for (int i = 0; i < allUsers.size(); i++) {
+            if (allUsers.get(i)[0].equals(employeeID)) {
+                allUsers.set(i, updatedUser); // Update matching row
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            writeCSV(FILE_PATH, allUsers);
+            System.out.println("User " + employeeID + " updated successfully.");
+        } else {
+            System.out.println("Error: Employee ID " + employeeID + " not found!");
+        }
     }
 
+    // **🔹 Assign Role**
     public void assignRole(String username, String newRole) {
         System.out.println("Assigned new role to " + username + ": " + newRole);
     }
-    
+
+    // **🔹 Read CSV and Return Map**
     @Override
     public Map<String, String[]> readCSV(String filePath) {
         Map<String, String[]> userMap = new HashMap<>();
 
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            String[] headers = reader.readNext(); // Read header row
+            reader.readNext(); // Skip header
             String[] nextLine;
 
             while ((nextLine = reader.readNext()) != null) {
-                if (nextLine.length >= 22) { // Ensure all required columns exist
-                    String empNumber = nextLine[0].trim();
-                    String lastName = nextLine[1].trim();
-                    String firstName = nextLine[2].trim();
-                    String birthday = nextLine[3].trim();
-                    String address = nextLine[4].trim();
-                    String phoneNumber = nextLine[5].trim();
-                    String sssNumber = nextLine[6].trim();
-                    String philHealthNumber = nextLine[7].trim();
-                    String tinNumber = nextLine[8].trim();
-                    String pagIbigNumber = nextLine[9].trim();
-                    String status = nextLine[10].trim();
-                    String position = nextLine[11].trim();
-                    String immediateSupervisor = nextLine[12].trim();
-                    String basicSalary = nextLine[13].trim();
-                    String riceSubsidy = nextLine[14].trim();
-                    String phoneAllowance = nextLine[15].trim();
-                    String clothingAllowance = nextLine[16].trim();
-                    String grossSemiMonthlyRate = nextLine[17].trim();
-                    String hourlyRate = nextLine[18].trim();
-                    String username = nextLine[19].trim();
-                    String password = nextLine[20].trim();
-                    String role = nextLine[21].trim();
-
-                    // Store full row data for CRUD operations
-                    userMap.put(empNumber, nextLine); 
-                    userMap.put(username, nextLine);
+                if (nextLine.length >= 22) { // Ensure all columns exist
+                    userMap.put(nextLine[0], nextLine); // Store by Employee Number
+                    userMap.put(nextLine[19], nextLine); // Store by Username
                 }
             }
         } catch (IOException | CsvValidationException e) {
-            Logger.getLogger(SystemAdministrator.class.getName()).log(Level.SEVERE, null, e);
+            e.printStackTrace();
         }
         return userMap;
     }
 
-    
+    // **🔹 Write Data to CSV**
     @Override
-    public void writeCSV(String filePath) {
+    public void writeCSV(String filePath, List<String[]> data) {
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
-            // Write header
-            writer.writeNext(new String[]{"Employee #", "Username", "Password", "Role"});
-
-            // Example of writing a new user (Can be modified for actual CRUD operations)
-            writer.writeNext(new String[]{"10035", "employee35", "password", "employee"});
+            String[] header = {
+                "Employee #", "Last Name", "First Name", "Birthday", "Address", "Phone Number",
+                "SSS #", "Philhealth #", "TIN #", "Pag-ibig #", "Status", "Position",
+                "Immediate Supervisor", "Basic Salary", "Rice Subsidy", "Phone Allowance",
+                "Clothing Allowance", "Gross Semi-monthly Rate", "Hourly Rate",
+                "Username", "Password", "Role"
+            };
+            writer.writeNext(header);
+            writer.writeAll(data);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
+
+    // **🔹 Read All Users from CSV**
+    public List<String[]> readAllUsers() {
+        List<String[]> usersList = new ArrayList<>();
+
+        try (CSVReader reader = new CSVReader(new FileReader(FILE_PATH))) {
+            reader.readNext(); // Skip header
+            String[] nextLine;
+
+            while ((nextLine = reader.readNext()) != null) {
+                usersList.add(nextLine);
+            }
+        } catch (IOException | CsvValidationException e) {
+            e.printStackTrace();
+        }
+        return usersList;
+    }
+
+    // **🔹 Get All Users as Table Data**
+    public String[][] getAllUsers() {
+        List<String[]> usersList = readAllUsers();
+        return usersList.toArray(new String[0][0]);
+    }
 }

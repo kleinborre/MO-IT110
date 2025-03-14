@@ -9,10 +9,16 @@ package jframes;
  * @author STUDY MODE
  */
 public class EmployeePayslip extends javax.swing.JFrame {
-
+    
+    String[] employeeData;
     /**
      * Creates new form EmployeePayslip
      */
+    public EmployeePayslip(String[] employeeData) {
+        this.employeeData = employeeData;
+        initComponents();
+    }
+    
     public EmployeePayslip() {
         initComponents();
     }
@@ -326,7 +332,7 @@ public class EmployeePayslip extends javax.swing.JFrame {
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeePage().setVisible(true);
+        new EmployeePage(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 

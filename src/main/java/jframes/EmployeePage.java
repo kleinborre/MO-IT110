@@ -9,12 +9,34 @@ package jframes;
  * @author STUDY MODE
  */
 public class EmployeePage extends javax.swing.JFrame {
+    
+    private String[] employeeData; // Store employee details
 
     /**
      * Creates new form EmployeePage
      */
     public EmployeePage() {
+        this.employeeData = new String[22]; // Ensure it has 22 empty values
         initComponents();
+        populateEmployeeInfo();
+    }
+    
+    public EmployeePage(String[] employeeData) {
+        this.employeeData = employeeData;
+        initComponents();
+        populateEmployeeInfo();
+    }   
+    
+    // Method to populate employee information on the GUI
+    private void populateEmployeeInfo() {
+        if (employeeData == null || employeeData.length != 22) {
+        System.out.println("Error: Incorrect employee data format.");
+        return;
+        }
+
+        // Set name and position
+        nameProfileLabel.setText(employeeData[2] + " " + employeeData[1]); // First Name + Last Name
+        positionProfileLabel.setText(employeeData[11]); // Position
     }
 
     /**
@@ -26,7 +48,6 @@ public class EmployeePage extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        attendanceButton = new buttons.redButton();
         profileInformationButton = new buttons.redButton();
         leaveRequestButton = new buttons.redButton();
         overtimeRequestButton = new buttons.redButton();
@@ -37,6 +58,11 @@ public class EmployeePage extends javax.swing.JFrame {
         clockInButton = new buttons.grayButton();
         clockoutButton = new buttons.grayButton();
         dateTimeProfileLabel = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        attendanceTable = new javax.swing.JTable();
+        jLabel1 = new javax.swing.JLabel();
+        monthYearjDateChooser = new com.toedter.calendar.JDateChooser();
+        jLabel3 = new javax.swing.JLabel();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -46,16 +72,6 @@ public class EmployeePage extends javax.swing.JFrame {
         setName("employeePage"); // NOI18N
         setResizable(false);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        attendanceButton.setText("Attendance");
-        attendanceButton.setAlignmentY(0.0F);
-        attendanceButton.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
-        attendanceButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                attendanceButtonActionPerformed(evt);
-            }
-        });
-        getContentPane().add(attendanceButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 330, 160, 40));
 
         profileInformationButton.setText("Profile Info");
         profileInformationButton.setAlignmentY(0.0F);
@@ -75,7 +91,7 @@ public class EmployeePage extends javax.swing.JFrame {
                 leaveRequestButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(leaveRequestButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 380, 160, 40));
+        getContentPane().add(leaveRequestButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 330, 160, 40));
 
         overtimeRequestButton.setText("Overtime");
         overtimeRequestButton.setAlignmentY(0.0F);
@@ -85,7 +101,7 @@ public class EmployeePage extends javax.swing.JFrame {
                 overtimeRequestButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(overtimeRequestButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 430, 160, 40));
+        getContentPane().add(overtimeRequestButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 380, 160, 40));
 
         payslipButton.setText("Payslip");
         payslipButton.setAlignmentY(0.0F);
@@ -95,17 +111,20 @@ public class EmployeePage extends javax.swing.JFrame {
                 payslipButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(payslipButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 480, 160, 40));
+        getContentPane().add(payslipButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 430, 160, 40));
 
         nameProfileLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         nameProfileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        nameProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         nameProfileLabel.setText("Name");
-        getContentPane().add(nameProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 230, -1, -1));
+        getContentPane().add(nameProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(59, 230, 140, -1));
 
-        positionProfileLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        positionProfileLabel.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         positionProfileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        positionProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         positionProfileLabel.setText("Position");
-        getContentPane().add(positionProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 250, -1, -1));
+        positionProfileLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        getContentPane().add(positionProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 250, 200, -1));
 
         logoutButton.setText("Logout");
         logoutButton.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
@@ -129,6 +148,45 @@ public class EmployeePage extends javax.swing.JFrame {
         dateTimeProfileLabel.setText("Date & Time");
         getContentPane().add(dateTimeProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 140, -1, -1));
 
+        attendanceTable.setBackground(new java.awt.Color(204, 204, 204));
+        attendanceTable.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        attendanceTable.setForeground(new java.awt.Color(51, 51, 51));
+        attendanceTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Date", "Log In", "Log Out"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(attendanceTable);
+
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 360, 640, 150));
+
+        jLabel1.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel1.setText("Attendance Record");
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 320, 170, 40));
+
+        monthYearjDateChooser.setBackground(new java.awt.Color(204, 204, 204));
+        getContentPane().add(monthYearjDateChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 330, 190, -1));
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel3.setText("Choose Date:");
+        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 330, -1, -1));
+
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Employee Dashboard.png")); // NOI18N
         background.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -137,33 +195,27 @@ public class EmployeePage extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void attendanceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attendanceButtonActionPerformed
-        // TODO add your handling code here:
-        new EmployeeAttendance().setVisible(true);
-        dispose();
-    }//GEN-LAST:event_attendanceButtonActionPerformed
-
     private void profileInformationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_profileInformationButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeProfileInformation().setVisible(true);
+        new EmployeeProfileInformation(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_profileInformationButtonActionPerformed
 
     private void leaveRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leaveRequestButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeLeave().setVisible(true);
+        new EmployeeLeave(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_leaveRequestButtonActionPerformed
 
     private void overtimeRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_overtimeRequestButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeOvertime().setVisible(true);
+        new EmployeeOvertime(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_overtimeRequestButtonActionPerformed
 
     private void payslipButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_payslipButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeePayslip().setVisible(true);
+        new EmployeePayslip(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_payslipButtonActionPerformed
 
@@ -209,13 +261,17 @@ public class EmployeePage extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private buttons.redButton attendanceButton;
+    private javax.swing.JTable attendanceTable;
     private javax.swing.JLabel background;
     private buttons.grayButton clockInButton;
     private buttons.grayButton clockoutButton;
     private javax.swing.JLabel dateTimeProfileLabel;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JScrollPane jScrollPane1;
     private buttons.redButton leaveRequestButton;
     private buttons.whiteButton logoutButton;
+    private com.toedter.calendar.JDateChooser monthYearjDateChooser;
     private javax.swing.JLabel nameProfileLabel;
     private buttons.redButton overtimeRequestButton;
     private buttons.redButton payslipButton;

@@ -9,10 +9,16 @@ package jframes;
  * @author STUDY MODE
  */
 public class EmployeeLeaveRequest extends javax.swing.JFrame {
-
+    
+    String[] employeeData;
     /**
      * Creates new form EmployeeLeaveRequest
      */
+    public EmployeeLeaveRequest(String[] employeeData) {
+        this.employeeData = employeeData;
+        initComponents();
+    }
+    
     public EmployeeLeaveRequest() {
         initComponents();
     }
@@ -99,13 +105,13 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
 
     private void backButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButton1ActionPerformed
         // TODO add your handling code here:
-        new EmployeeLeave().setVisible(true);
+        new EmployeeLeave(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButton1ActionPerformed
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeLeave().setVisible(true);
+        new EmployeeLeave(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 

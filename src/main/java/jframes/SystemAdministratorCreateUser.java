@@ -4,6 +4,11 @@
  */
 package jframes;
 
+import classes.SystemAdministrator;
+import java.text.SimpleDateFormat;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+
 /**
  *
  * @author STUDY MODE
@@ -48,9 +53,9 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         sssNumberText = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
-        philhealthNumberText1 = new javax.swing.JTextField();
+        philhealthNumberText = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
-        tinNumberText1 = new javax.swing.JTextField();
+        tinNumberText = new javax.swing.JTextField();
         roleBox = new javax.swing.JComboBox<>();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -71,6 +76,8 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         hourlyRateText = new javax.swing.JTextField();
         clearButton = new buttons.grayButton();
         createUserButton = new buttons.redButton();
+        jLabel22 = new javax.swing.JLabel();
+        employeeNumberText = new javax.swing.JTextField();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -226,30 +233,30 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         jLabel11.setText("Philhealth #");
         getContentPane().add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 270, -1, -1));
 
-        philhealthNumberText1.setBackground(new java.awt.Color(204, 204, 204));
-        philhealthNumberText1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        philhealthNumberText1.setText("N/A");
-        philhealthNumberText1.addActionListener(new java.awt.event.ActionListener() {
+        philhealthNumberText.setBackground(new java.awt.Color(204, 204, 204));
+        philhealthNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        philhealthNumberText.setText("N/A");
+        philhealthNumberText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                philhealthNumberText1ActionPerformed(evt);
+                philhealthNumberTextActionPerformed(evt);
             }
         });
-        getContentPane().add(philhealthNumberText1, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 290, 140, -1));
+        getContentPane().add(philhealthNumberText, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 290, 140, -1));
 
         jLabel12.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel12.setForeground(new java.awt.Color(102, 102, 102));
         jLabel12.setText("TIN #");
         getContentPane().add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 320, -1, -1));
 
-        tinNumberText1.setBackground(new java.awt.Color(204, 204, 204));
-        tinNumberText1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        tinNumberText1.setText("N/A");
-        tinNumberText1.addActionListener(new java.awt.event.ActionListener() {
+        tinNumberText.setBackground(new java.awt.Color(204, 204, 204));
+        tinNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        tinNumberText.setText("N/A");
+        tinNumberText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                tinNumberText1ActionPerformed(evt);
+                tinNumberTextActionPerformed(evt);
             }
         });
-        getContentPane().add(tinNumberText1, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 340, 140, -1));
+        getContentPane().add(tinNumberText, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 340, 140, -1));
 
         roleBox.setBackground(new java.awt.Color(204, 204, 204));
         roleBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -376,6 +383,20 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         });
         getContentPane().add(createUserButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 450, 150, -1));
 
+        jLabel22.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        jLabel22.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel22.setText("Employee #");
+        getContentPane().add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 370, -1, -1));
+
+        employeeNumberText.setBackground(new java.awt.Color(204, 204, 204));
+        employeeNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        employeeNumberText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                employeeNumberTextActionPerformed(evt);
+            }
+        });
+        getContentPane().add(employeeNumberText, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 390, 140, -1));
+
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Admin Create User.png")); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
@@ -421,13 +442,13 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_sssNumberTextActionPerformed
 
-    private void philhealthNumberText1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_philhealthNumberText1ActionPerformed
+    private void philhealthNumberTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_philhealthNumberTextActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_philhealthNumberText1ActionPerformed
+    }//GEN-LAST:event_philhealthNumberTextActionPerformed
 
-    private void tinNumberText1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tinNumberText1ActionPerformed
+    private void tinNumberTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tinNumberTextActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_tinNumberText1ActionPerformed
+    }//GEN-LAST:event_tinNumberTextActionPerformed
 
     private void riceSubsidyTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_riceSubsidyTextActionPerformed
         // TODO add your handling code here:
@@ -450,8 +471,49 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void createUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createUserButtonActionPerformed
-        // TODO add your handling code here:
+    // Format birthday from JCalendar
+    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy"); 
+    String birthday = dateFormat.format(birthdayCalendar.getDate());
+
+    // Collect user input into an array
+    String[] newUser = {
+        employeeNumberText.getText().trim(),
+        lastNameText.getText().trim(),
+        firstNameText.getText().trim(),
+        birthday,
+        addressText.getText().trim(),
+        phoneNumberText1.getText().trim(),
+        sssNumberText.getText().trim(),
+        philhealthNumberText.getText().trim(),
+        tinNumberText.getText().trim(),
+        pagIbigText.getText().trim(),
+        statusBox.getSelectedItem().toString().trim(),
+        positionBox.getSelectedItem().toString().trim(),
+        supervisorBox.getSelectedItem().toString().trim(),
+        basicSalaryText.getText().trim(),
+        riceSubsidyText.getText().trim(),
+        phoneAllowanceBox.getSelectedItem().toString().trim(),
+        clothingAllowanceBox.getSelectedItem().toString().trim(),
+        grossSemiMonthlyRateText.getText().trim(),
+        hourlyRateText.getText().trim(),
+        usernameText.getText().trim(),
+        passwordText.getText().trim(),
+        roleBox.getSelectedItem().toString().trim()
+    };
+
+    // Create an instance of SystemAdministrator and call createUser()
+    SystemAdministrator admin = new SystemAdministrator(0, "", "", ""); 
+    admin.createUser(newUser);  // Now it matches the new method
+
+    // Show confirmation message
+    JOptionPane.showMessageDialog(this, "User created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+    new SystemAdministratorPage().setVisible(true);
+    dispose();
     }//GEN-LAST:event_createUserButtonActionPerformed
+
+    private void employeeNumberTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeNumberTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_employeeNumberTextActionPerformed
 
     /**
      * @param args the command line arguments
@@ -497,6 +559,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     private buttons.grayButton clearButton;
     private javax.swing.JComboBox<String> clothingAllowanceBox;
     private buttons.redButton createUserButton;
+    private javax.swing.JTextField employeeNumberText;
     private javax.swing.JTextField firstNameText;
     private javax.swing.JTextField grossSemiMonthlyRateText;
     private javax.swing.JTextField hourlyRateText;
@@ -514,6 +577,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -524,7 +588,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     private javax.swing.JTextField lastNameText;
     private javax.swing.JTextField pagIbigText;
     private javax.swing.JTextField passwordText;
-    private javax.swing.JTextField philhealthNumberText1;
+    private javax.swing.JTextField philhealthNumberText;
     private javax.swing.JComboBox<String> phoneAllowanceBox;
     private javax.swing.JTextField phoneNumberText1;
     private javax.swing.JComboBox<String> positionBox;
@@ -533,7 +597,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     private javax.swing.JTextField sssNumberText;
     private javax.swing.JComboBox<String> statusBox;
     private javax.swing.JComboBox<String> supervisorBox;
-    private javax.swing.JTextField tinNumberText1;
+    private javax.swing.JTextField tinNumberText;
     private javax.swing.JTextField usernameText;
     // End of variables declaration//GEN-END:variables
 }

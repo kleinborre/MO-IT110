@@ -4,6 +4,9 @@
  */
 package jframes;
 
+import classes.SystemAdministrator;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author STUDY MODE
@@ -15,7 +18,27 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
      */
     public SystemAdministratorPage() {
         initComponents();
+        loadUserData(); // Load CSV data into userAccountTable
     }
+    
+    private void loadUserData() {
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        String[][] userData = admin.getAllUsers(); // Get CSV data
+
+        // Define column headers (must match CSV structure)
+        String[] columnHeaders = {
+            "Employee #", "Last Name", "First Name", "Birthday", "Address", "Phone Number",
+            "SSS #", "Philhealth #", "TIN #", "Pag-ibig #", "Status", "Position",
+            "Immediate Supervisor", "Basic Salary", "Rice Subsidy", "Phone Allowance",
+            "Clothing Allowance", "Gross Semi-monthly Rate", "Hourly Rate",
+            "Username", "Password", "Role"
+        };
+
+        // Set data to JTable
+        DefaultTableModel model = new DefaultTableModel(userData, columnHeaders);
+        userAccountTable.setModel(model);
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -30,9 +53,7 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         userAccountTable = new javax.swing.JTable();
         createButton = new buttons.redButton();
-        deleteButton = new buttons.grayButton();
-        updateButton = new buttons.grayButton();
-        refreshButton = new buttons.grayButton();
+        jLabel1 = new javax.swing.JLabel();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -75,45 +96,55 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         });
         userAccountTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         userAccountTable.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        userAccountTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        userAccountTable.setShowGrid(false);
+        userAccountTable.getTableHeader().setReorderingAllowed(false);
+        userAccountTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                userAccountTableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(userAccountTable);
+        if (userAccountTable.getColumnModel().getColumnCount() > 0) {
+            userAccountTable.getColumnModel().getColumn(0).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(1).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(2).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(3).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(4).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(5).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(6).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(7).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(8).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(9).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(10).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(11).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(12).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(13).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(14).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(15).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(16).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(17).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(18).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(19).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(20).setResizable(false);
+            userAccountTable.getColumnModel().getColumn(21).setResizable(false);
+        }
 
-        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 110, 830, 350));
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 110, 840, 350));
 
-        createButton.setText("Create User");
+        createButton.setText("Create New User");
         createButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         createButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 createButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(createButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 470, 150, -1));
+        getContentPane().add(createButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 470, 180, -1));
 
-        deleteButton.setText("Delete User");
-        deleteButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        deleteButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteButtonActionPerformed(evt);
-            }
-        });
-        getContentPane().add(deleteButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 470, 150, -1));
-
-        updateButton.setText("Update User");
-        updateButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        updateButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                updateButtonActionPerformed(evt);
-            }
-        });
-        getContentPane().add(updateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 470, 150, -1));
-
-        refreshButton.setText("Refresh DB");
-        refreshButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        refreshButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                refreshButtonActionPerformed(evt);
-            }
-        });
-        getContentPane().add(refreshButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 470, 150, -1));
+        jLabel1.setFont(new java.awt.Font("Inter", 2, 12)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel1.setText("(Clicked the table to update or delete a user.)");
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 470, -1, -1));
 
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Admin Dashboard.png")); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -134,19 +165,54 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         dispose();
     }//GEN-LAST:event_createButtonActionPerformed
 
-    private void updateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateButtonActionPerformed
-        // TODO add your handling code here:
-        new SystemAdministratorUpdateUser().setVisible(true);
-        dispose();
-    }//GEN-LAST:event_updateButtonActionPerformed
+    private void userAccountTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_userAccountTableMouseClicked
+        int row = userAccountTable.getSelectedRow(); // Get selected row index
 
-    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_deleteButtonActionPerformed
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "No row selected!", "Error", JOptionPane.ERROR_MESSAGE);
+            return; // Stop if no row is selected
+        }
 
-    private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_refreshButtonActionPerformed
+        int columnCount = userAccountTable.getColumnCount();
+    
+        // Ensure column count matches expected number of fields
+        if (columnCount != 22) {
+            JOptionPane.showMessageDialog(this, "Column count mismatch! Expected 22, got: " + columnCount, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String[] selectedUser = new String[columnCount];
+
+        for (int i = 0; i < columnCount; i++) {
+            Object cellValue = userAccountTable.getValueAt(row, i);
+            selectedUser[i] = (cellValue != null) ? cellValue.toString() : ""; // Prevent null values
+        }
+
+        String empNumber = selectedUser[0]; // Employee ID
+
+        // Show confirmation dialog for Update or Delete
+        int choice = JOptionPane.showOptionDialog(
+            this,
+            "Do you want to UPDATE or DELETE this user?",
+            "User Action",
+            JOptionPane.YES_NO_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            new String[]{"Update", "Delete", "Cancel"}, 
+            "Update"
+        );
+
+        if (choice == 0) { // Update
+            new SystemAdministratorUpdateUser(selectedUser).setVisible(true);
+            dispose();
+        } else if (choice == 1) { // Delete
+            SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+            admin.deleteUser(empNumber);
+
+            // Refresh the table after deleting
+            loadUserData();
+        }
+    }//GEN-LAST:event_userAccountTableMouseClicked
 
     /**
      * @param args the command line arguments
@@ -186,11 +252,9 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
     private buttons.redButton createButton;
-    private buttons.grayButton deleteButton;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private buttons.whiteButton logoutButton;
-    private buttons.grayButton refreshButton;
-    private buttons.grayButton updateButton;
     private javax.swing.JTable userAccountTable;
     // End of variables declaration//GEN-END:variables
 }

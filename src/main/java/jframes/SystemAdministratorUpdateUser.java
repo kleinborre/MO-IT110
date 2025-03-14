@@ -4,6 +4,12 @@
  */
 package jframes;
 
+import classes.SystemAdministrator;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author STUDY MODE
@@ -13,8 +19,52 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     /**
      * Creates new form SystemAdministratorUpdateUser
      */
-    public SystemAdministratorUpdateUser() {
+
+    private String[] selectedUser;
+
+    public SystemAdministratorUpdateUser(String[] selectedUser) {
+        this.selectedUser = selectedUser;
         initComponents();
+        populateFields(selectedUser);
+    }
+    
+    private void populateFields(String[] userData) {
+        if (userData == null || userData.length != 22) { // Ensure correct array size
+            System.out.println("Error: Incorrect user data length. Expected 22, got " + (userData != null ? userData.length : 0));
+            return;
+        }
+
+        employeeNumberText.setText(userData[0]);
+        lastNameText.setText(userData[1]);
+        firstNameText.setText(userData[2]);
+
+        // Convert date format for JCalendar
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            Date date = dateFormat.parse(userData[3]);
+            birthdayCalendar.setDate(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        addressText.setText(userData[4]);
+        phoneNumberText1.setText(userData[5]);
+        sssNumberText.setText(userData[6]);
+        philhealthNumberText1.setText(userData[7]);
+        tinNumberText1.setText(userData[8]);
+        pagIbigText.setText(userData[9]);
+        statusBox.setSelectedItem(userData[10]);
+        positionBox.setSelectedItem(userData[11]);
+        supervisorBox.setSelectedItem(userData[12]);
+        basicSalaryText.setText(userData[13]);
+        riceSubsidyText.setText(userData[14]);
+        phoneAllowanceBox.setSelectedItem(userData[15]);
+        clothingAllowanceBox.setSelectedItem(userData[16]);
+        grossSemiMonthlyRateText.setText(userData[17]);
+        hourlyRateText.setText(userData[18]);
+        usernameText.setText(userData[19]);
+        passwordText.setText(userData[20]);
+        roleBox.setSelectedItem(userData[21]);
     }
 
     /**
@@ -69,6 +119,10 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         grossSemiMonthlyRateText = new javax.swing.JTextField();
         clearButton = new buttons.grayButton();
         UpdateUserButton = new buttons.redButton();
+        jLabel18 = new javax.swing.JLabel();
+        hourlyRateText = new javax.swing.JTextField();
+        jLabel22 = new javax.swing.JLabel();
+        employeeNumberText = new javax.swing.JTextField();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -87,8 +141,8 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         jLabel7.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel7.setText("Username");
-        getContentPane().add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 120, -1, -1));
+        jLabel7.setText("Employee #");
+        getContentPane().add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 370, -1, -1));
 
         usernameText.setBackground(new java.awt.Color(204, 204, 204));
         usernameText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -360,6 +414,34 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         });
         getContentPane().add(UpdateUserButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 450, 150, -1));
 
+        jLabel18.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        jLabel18.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel18.setText("Hourly Rate");
+        getContentPane().add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 320, -1, -1));
+
+        hourlyRateText.setBackground(new java.awt.Color(204, 204, 204));
+        hourlyRateText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        hourlyRateText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hourlyRateTextActionPerformed(evt);
+            }
+        });
+        getContentPane().add(hourlyRateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 340, 140, -1));
+
+        jLabel22.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        jLabel22.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel22.setText("Username");
+        getContentPane().add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 120, -1, -1));
+
+        employeeNumberText.setBackground(new java.awt.Color(204, 204, 204));
+        employeeNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        employeeNumberText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                employeeNumberTextActionPerformed(evt);
+            }
+        });
+        getContentPane().add(employeeNumberText, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 390, 140, -1));
+
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Admin Update User.png")); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
@@ -431,42 +513,81 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
     private void UpdateUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateUserButtonActionPerformed
         // TODO add your handling code here:
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        String birthday = dateFormat.format(birthdayCalendar.getDate());
+
+        String[] updatedUser = {
+            employeeNumberText.getText().trim(),
+            lastNameText.getText().trim(),
+            firstNameText.getText().trim(),
+            birthday,
+            addressText.getText().trim(),
+            phoneNumberText1.getText().trim(),
+            sssNumberText.getText().trim(),
+            philhealthNumberText1.getText().trim(),
+            tinNumberText1.getText().trim(),
+            pagIbigText.getText().trim(),
+            statusBox.getSelectedItem().toString().trim(),
+            positionBox.getSelectedItem().toString().trim(),
+            supervisorBox.getSelectedItem().toString().trim(),
+            basicSalaryText.getText().trim(),
+            riceSubsidyText.getText().trim(),
+            phoneAllowanceBox.getSelectedItem().toString().trim(),
+            clothingAllowanceBox.getSelectedItem().toString().trim(),
+            grossSemiMonthlyRateText.getText().trim(),
+            hourlyRateText.getText().trim(),
+            usernameText.getText().trim(),
+            passwordText.getText().trim(),
+            roleBox.getSelectedItem().toString().trim()
+        };
+
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", ""); 
+        admin.updateUser(employeeNumberText.getText().trim(), updatedUser);
+
+        JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        new SystemAdministratorPage().setVisible(true);
+        dispose(); // Close window after update
     }//GEN-LAST:event_UpdateUserButtonActionPerformed
+
+    private void hourlyRateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hourlyRateTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_hourlyRateTextActionPerformed
+
+    private void employeeNumberTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeNumberTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_employeeNumberTextActionPerformed
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
+public static void main(String args[]) {
+    /* Set the Nimbus look and feel */
+    try {
+        for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            if ("Nimbus".equals(info.getName())) {
+                javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                break;
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(SystemAdministratorUpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SystemAdministratorUpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SystemAdministratorUpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(SystemAdministratorUpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new SystemAdministratorUpdateUser().setVisible(true);
-            }
-        });
+    } catch (Exception ex) {
+        java.util.logging.Logger.getLogger(SystemAdministratorUpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
     }
+
+    /* Create and display the form with test data */
+    java.awt.EventQueue.invokeLater(new Runnable() {
+        public void run() {
+            // Provide test data to avoid constructor error
+            String[] testUser = {
+                "10001", "Garcia", "Manuel III", "10/11/1983", "Valero Carpark Building",
+                "966-860-270", "44-4506057-3", "820126853951", "442-605-657-000", "691295330870",
+                "Regular", "Chief Executive Officer", "N/A", "90000", "1500", "2000",
+                "1000", "45000", "535.71", "employee1", "password", "employee"
+            };
+            new SystemAdministratorUpdateUser(testUser).setVisible(true);
+        }
+    });
+}
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private buttons.redButton UpdateUserButton;
@@ -477,8 +598,10 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     private com.toedter.calendar.JCalendar birthdayCalendar;
     private buttons.grayButton clearButton;
     private javax.swing.JComboBox<String> clothingAllowanceBox;
+    private javax.swing.JTextField employeeNumberText;
     private javax.swing.JTextField firstNameText;
     private javax.swing.JTextField grossSemiMonthlyRateText;
+    private javax.swing.JTextField hourlyRateText;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -488,10 +611,12 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;

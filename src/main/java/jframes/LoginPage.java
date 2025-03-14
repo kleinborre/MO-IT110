@@ -172,7 +172,7 @@ public class LoginPage extends javax.swing.JFrame {
         // If everything is correct, open the respective page
         switch (formattedRole) {
             case "employee":
-                new EmployeePage().setVisible(true);
+                new EmployeePage(userData).setVisible(true);
                 break;
             case "hrmanager":
                 new HRManagerPage().setVisible(true);
@@ -245,9 +245,4 @@ public class LoginPage extends javax.swing.JFrame {
     private javax.swing.JTextField usernameText;
     // End of variables declaration//GEN-END:variables
 
-    public static class setVisible {
-
-        public setVisible(boolean b) {
-        }
-    }
 }
