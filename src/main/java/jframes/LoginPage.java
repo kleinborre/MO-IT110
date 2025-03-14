@@ -5,7 +5,7 @@
 package jframes;
 
 import classes.SystemAdministrator;
-import java.util.Map;
+import java.util.List;
 import javax.swing.JOptionPane;
 
 /**
@@ -117,60 +117,72 @@ public class LoginPage extends javax.swing.JFrame {
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         String inputUsername = usernameText.getText().trim();
         String inputPassword = new String(passwordText.getPassword()).trim();
-        String selectedRole = roleBox.getSelectedItem().toString().trim();
+        String selectedRole = roleBox.getSelectedItem().toString().trim().replaceAll("\\s", "").toLowerCase();
 
-        String formattedRole = selectedRole.replaceAll("\\s", "").toLowerCase(); 
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        List<String[]> users = admin.readCSV("src/main/java/databases/Employee Details.csv");
 
-        SystemAdministrator admin = new SystemAdministrator(0, "", "", ""); 
-        Map<String, String[]> users = admin.readCSV("src/main/java/databases/Employee Details.csv");
-
-        // Clear previous error messages before checking new input
+        // Reset error label before validation
         errorLabel.setText("");
 
-        // Check if username is missing
+        // Input validation
         if (inputUsername.isEmpty()) {
             errorLabel.setText("Username is required!");
             return;
         }
-
-        // Check if password is missing
         if (inputPassword.isEmpty()) {
             errorLabel.setText("Password is required!");
             return;
         }
 
-        // Check if user exists in CSV
-        if (!users.containsKey(inputUsername)) {
+        // Search for the user in the CSV data
+        String[] userData = findUser(users, inputUsername);
+        if (userData == null) {
             errorLabel.setText("Username/Employee Number not found!");
             return;
         }
 
-        String[] userData = users.get(inputUsername);
+        // Validate password
         String storedPassword = userData[20].trim();
-        String[] storedRoles = userData[21].trim().toLowerCase().split("\\|");
-
-        // Check if password is incorrect
         if (!storedPassword.equals(inputPassword)) {
             errorLabel.setText("Incorrect password!");
             return;
         }
 
-        // Check if selected role is incorrect
-        boolean roleMatch = false;
-        for (String role : storedRoles) {
-            if (role.equals(formattedRole)) {
-                roleMatch = true;
-                break;
-            }
-        }
-
-        if (!roleMatch) {
+        // Validate role
+        String[] storedRoles = userData[21].trim().toLowerCase().split("\\|");
+        if (!isRoleValid(storedRoles, selectedRole)) {
             errorLabel.setText("Incorrect role selection!");
             return;
         }
 
-        // If everything is correct, open the respective page
-        switch (formattedRole) {
+        // Open the corresponding page based on role
+        openUserDashboard(selectedRole, userData);
+    }
+
+    // ** Helper Method: Find User in CSV Data **
+    private String[] findUser(List<String[]> users, String usernameOrEmpNumber) {
+        for (String[] user : users) {
+            if (user.length >= 22 && (user[0].equals(usernameOrEmpNumber) || user[19].equals(usernameOrEmpNumber))) {
+                return user; // Found user
+            }
+        }
+        return null; // User not found
+    }
+
+    // ** Helper Method: Validate Role **
+    private boolean isRoleValid(String[] storedRoles, String selectedRole) {
+        for (String role : storedRoles) {
+            if (role.equals(selectedRole)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ** Helper Method: Open User Dashboard **
+    private void openUserDashboard(String role, String[] userData) {
+        switch (role) {
             case "employee":
                 new EmployeePage(userData).setVisible(true);
                 break;
@@ -183,6 +195,9 @@ public class LoginPage extends javax.swing.JFrame {
             case "systemadministrator":
                 new SystemAdministratorPage().setVisible(true);
                 break;
+            default:
+                errorLabel.setText("Invalid role selected!");
+                return;
         }
         dispose(); // Close login window after success
     }//GEN-LAST:event_loginButtonActionPerformed

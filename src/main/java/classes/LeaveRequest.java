@@ -3,15 +3,12 @@ package classes;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * LeaveRequest class that manages employee leave requests and handles CSV operations.
@@ -71,21 +68,20 @@ public class LeaveRequest extends Employee implements CSVHandler {
         this.status = status;
     }
 
-    /** 
-     * Reads all leave requests from the CSV file and returns them as a map.
-     * Key: Employee Number, Value: Leave Request details.
+    /**
+     * Reads all leave requests from the CSV file.
      */
     @Override
-    public Map<String, String[]> readCSV(String filePath) {
-        Map<String, String[]> leaveRequests = new HashMap<>();
+    public List<String[]> readCSV(String filePath) {
+        List<String[]> leaveRequests = new ArrayList<>();
 
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            String[] headers = reader.readNext(); // Skip header row
+            reader.readNext(); // Skip header row
             String[] nextLine;
 
             while ((nextLine = reader.readNext()) != null) {
                 if (nextLine.length >= 5) {
-                    leaveRequests.put(nextLine[0], nextLine);
+                    leaveRequests.add(nextLine);
                 }
             }
         } catch (IOException | CsvValidationException e) {
@@ -95,18 +91,15 @@ public class LeaveRequest extends Employee implements CSVHandler {
         return leaveRequests;
     }
 
-    /** 
+    /**
      * Writes all leave requests back to the CSV file.
      */
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) { // "false" ensures overwrite
             String[] header = {"EmployeeNumber", "LeaveType", "StartDate", "EndDate", "Status"};
             writer.writeNext(header); // Write header first
-
-            for (String[] row : data) {
-                writer.writeNext(row);
-            }
+            writer.writeAll(data);    // Write all records
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -116,11 +109,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
      * Submits a new leave request and writes it to the CSV file.
      */
     public void submitLeaveRequest() {
-        List<String[]> allRequests = new ArrayList<>();
-
-        // Read existing leave requests
-        Map<String, String[]> existingRequests = readCSV(FILE_PATH);
-        allRequests.addAll(existingRequests.values()); // Convert Map to List
+        List<String[]> allRequests = readCSV(FILE_PATH); // Load existing requests
 
         // Add new leave request
         String[] newRequest = {
@@ -137,32 +126,26 @@ public class LeaveRequest extends Employee implements CSVHandler {
     /**
      * Cancels a leave request by removing it from the CSV file.
      */
-    public void cancelLeaveRequest() {
-        List<String[]> allRequests = new ArrayList<>();
+    public void deleteLeaveRequest() {
+        List<String[]> allRequests = readCSV(FILE_PATH);
         boolean requestFound = false;
 
-        try (CSVReader reader = new CSVReader(new FileReader(FILE_PATH))) {
-            String[] headers = reader.readNext();
-            allRequests.add(headers); // Keep header row
-
-            String[] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
-                if (!nextLine[0].equals(String.valueOf(getEmployeeNumber())) || 
-                    !nextLine[1].equals(leaveType) || 
-                    !nextLine[2].equals(startDate.toString())) {
-                    allRequests.add(nextLine); // Keep other records
-                } else {
-                    requestFound = true;
-                }
+        // Filter out the leave request to delete
+        List<String[]> updatedRequests = new ArrayList<>();
+        for (String[] request : allRequests) {
+            if (!(request[0].equals(String.valueOf(getEmployeeNumber())) &&
+                  request[1].equals(leaveType) &&
+                  request[2].equals(startDate.toString()))) {
+                updatedRequests.add(request); // Keep all other requests
+            } else {
+                requestFound = true; // Mark that we found the request to delete
             }
-        } catch (IOException | CsvValidationException e) {
-            e.printStackTrace();
         }
 
+        // Write the updated list back to CSV
         if (requestFound) {
-            // Write updated list back to CSV
-            writeCSV(FILE_PATH, allRequests);
-            System.out.println("Leave request cancelled successfully.");
+            writeCSV(FILE_PATH, updatedRequests);
+            System.out.println("Leave request deleted successfully.");
         } else {
             System.out.println("Error: Leave request not found.");
         }

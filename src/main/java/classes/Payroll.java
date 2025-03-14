@@ -9,17 +9,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
- * Payroll class that manages employee payslips.
+ * Payroll class that manages employee payslips and payroll records.
  */
 public class Payroll implements CSVHandler {
     private String month;
     private int year;
     private List<Payslip> payslips;
-    
+
     private static final String FILE_PATH = "src/main/java/databases/Payroll Records.csv";
 
     /**
@@ -32,30 +30,14 @@ public class Payroll implements CSVHandler {
     }
 
     /** Getters */
-    public String getMonth() {
-        return month;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public List<Payslip> getPayslips() {
-        return payslips;
-    }
+    public String getMonth() { return month; }
+    public int getYear() { return year; }
+    public List<Payslip> getPayslips() { return payslips; }
 
     /** Setters */
-    public void setMonth(String month) {
-        this.month = month;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public void setPayslips(List<Payslip> payslips) {
-        this.payslips = payslips;
-    }
+    public void setMonth(String month) { this.month = month; }
+    public void setYear(int year) { this.year = year; }
+    public void setPayslips(List<Payslip> payslips) { this.payslips = payslips; }
 
     /**
      * Adds a payslip to the payroll.
@@ -68,50 +50,36 @@ public class Payroll implements CSVHandler {
      * Calculates total gross salaries for all payslips.
      */
     public double getTotalGrossSalaries() {
-        double total = 0;
-        for (Payslip payslip : payslips) {
-            total += payslip.calculateGrossSalary();
-        }
-        return total;
+        return payslips.stream().mapToDouble(Payslip::calculateGrossSalary).sum();
     }
 
     /**
      * Calculates total deductions for all payslips.
      */
     public double getTotalDeductions() {
-        double total = 0;
-        for (Payslip payslip : payslips) {
-            total += payslip.calculateDeductions();
-        }
-        return total;
+        return payslips.stream().mapToDouble(Payslip::calculateDeductions).sum();
     }
 
     /**
      * Calculates total net salaries for all payslips.
      */
     public double getTotalNetSalaries() {
-        double total = 0;
-        for (Payslip payslip : payslips) {
-            total += payslip.calculateNetSalary();
-        }
-        return total;
+        return payslips.stream().mapToDouble(Payslip::calculateNetSalary).sum();
     }
 
     /**
      * Reads payroll records from CSV.
      */
     @Override
-    public Map<String, String[]> readCSV(String filePath) {
-        Map<String, String[]> payrollRecords = new HashMap<>();
+    public List<String[]> readCSV(String filePath) {
+        List<String[]> payrollRecords = new ArrayList<>();
 
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            String[] headers = reader.readNext(); // Skip header row
+            reader.readNext(); // Skip header row
             String[] nextLine;
 
             while ((nextLine = reader.readNext()) != null) {
-                if (nextLine.length >= 4) { // Ensure correct column count
-                    payrollRecords.put(nextLine[0], nextLine);
-                }
+                payrollRecords.add(nextLine);
             }
         } catch (IOException | CsvValidationException e) {
             e.printStackTrace();
@@ -125,13 +93,10 @@ public class Payroll implements CSVHandler {
      */
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) {
             String[] header = {"Month", "Year", "TotalGrossSalary", "TotalDeductions", "TotalNetSalary"};
             writer.writeNext(header); // Write header first
-
-            for (String[] row : data) {
-                writer.writeNext(row);
-            }
+            writer.writeAll(data);    // Write actual data
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -141,13 +106,12 @@ public class Payroll implements CSVHandler {
      * Saves payroll summary to CSV.
      */
     public void savePayroll() {
-        List<String[]> allPayrolls = new ArrayList<>();
+        List<String[]> allPayrolls = readCSV(FILE_PATH);
 
-        // Read existing payroll records
-        Map<String, String[]> existingPayrolls = readCSV(FILE_PATH);
-        allPayrolls.addAll(existingPayrolls.values()); // Convert Map to List
+        // Remove any existing payroll entry for the same month & year
+        allPayrolls.removeIf(record -> record[0].equals(month) && record[1].equals(String.valueOf(year)));
 
-        // Add new payroll record
+        // Add the new payroll record
         String[] newPayroll = {
             month,
             String.valueOf(year),

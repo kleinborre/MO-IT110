@@ -4,23 +4,104 @@
  */
 package jframes;
 
+import classes.LeaveRequest;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.time.LocalDate;
+import java.util.List;
 /**
  *
  * @author STUDY MODE
  */
 public class EmployeeLeave extends javax.swing.JFrame {
     
-    String[] employeeData;
+    private String[] employeeData;
+    private static final String FILE_PATH = "src/main/java/databases/Leave Requests.csv";
     /**
      * Creates new form EmployeeLeave
      */
     public EmployeeLeave(String[] employeeData) {
         this.employeeData = employeeData;
         initComponents();
+        loadEmployeeLeaveRequests();
+        addTableClickListener();
     }
     
     public EmployeeLeave() {
         initComponents();
+    }
+    
+    /**
+     * Loads only the leave requests of the logged-in employee.
+     */
+    private void loadEmployeeLeaveRequests() {
+        DefaultTableModel model = (DefaultTableModel) leaveTable.getModel();
+        model.setRowCount(0); // Clear previous data
+
+        String loggedInEmployeeNumber = employeeData[0]; // Employee number of logged-in user
+        LeaveRequest leaveRequest = new LeaveRequest(0, "", null, null, "");
+
+        // Read leave requests from CSV
+        List<String[]> leaveRequests = leaveRequest.readCSV(FILE_PATH);
+        for (String[] record : leaveRequests) {
+            if (record.length >= 5 && record[0].equals(loggedInEmployeeNumber)) { // Only show logged-in employee's requests
+                model.addRow(new Object[]{record[1], record[4], record[2], record[3]});
+            }
+        }
+    }
+
+    // Refresh table after submitting a request
+    public void refreshTable() {
+        loadEmployeeLeaveRequests();
+    }
+    
+    /**
+     * Adds a mouse listener to detect clicks on table rows.
+     */
+    private void addTableClickListener() {
+        leaveTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                int row = leaveTable.getSelectedRow();
+                if (row != -1) {
+                    handleLeaveRequestAction(row);
+                }
+            }
+        });
+    }
+    
+    /**
+     * Handles the dialog for updating or canceling a leave request.
+     */
+    private void handleLeaveRequestAction(int row) {
+        String leaveType = leaveTable.getValueAt(row, 0).toString();
+        String status = leaveTable.getValueAt(row, 1).toString();
+        LocalDate startDate = LocalDate.parse(leaveTable.getValueAt(row, 2).toString());
+        LocalDate endDate = LocalDate.parse(leaveTable.getValueAt(row, 3).toString());
+
+        int employeeNumber = Integer.parseInt(employeeData[0]);
+        LeaveRequest leaveRequest = new LeaveRequest(employeeNumber, leaveType, startDate, endDate, status);
+
+        String[] options = {"Update", "Delete"};
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                "Do you want to update or delete this leave request?",
+                "Leave Request Action",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (choice == JOptionPane.YES_OPTION) { // Update
+            new EmployeeLeaveRequest(employeeData, leaveRequest).setVisible(true);
+            dispose();
+        } else if (choice == JOptionPane.NO_OPTION) { // Cancel
+            leaveRequest.deleteLeaveRequest();
+            refreshTable();
+        }
     }
 
     /**

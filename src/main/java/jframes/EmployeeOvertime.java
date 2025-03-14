@@ -4,25 +4,75 @@
  */
 package jframes;
 
+import classes.OvertimeRequest;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
+
 /**
  *
  * @author STUDY MODE
  */
 public class EmployeeOvertime extends javax.swing.JFrame {
     
-    String[] employeeData;
-    /**
-     * Creates new form EmployeeOvertime
-     */
+    private String[] employeeData;
+ 
     public EmployeeOvertime(String[] employeeData) {
         this.employeeData = employeeData;
         initComponents();
+        loadOvertimeRequests();
+        
+        // Add MouseListener directly in the constructor
+        overtimeTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                overtimeTableMouseClicked(evt);
+            }
+        });
     }
     
     public EmployeeOvertime() {
         initComponents();
     }
+    
+    private void loadOvertimeRequests() {
+        OvertimeRequest overtimeRequest = new OvertimeRequest(Integer.parseInt(employeeData[0]), 0, 0, "");
+        List<String[]> overtimeData = overtimeRequest.readCSV("src/main/java/databases/Overtime Requests.csv");
 
+        DefaultTableModel model = (DefaultTableModel) overtimeTable.getModel();
+        model.setRowCount(0); // Clear existing rows
+
+        for (String[] data : overtimeData) {
+            if (data[0].equals(employeeData[0])) { // Only show current employee’s requests
+                model.addRow(new Object[]{data[3], data[1], data[2]});
+            }
+        }
+    }
+    
+    private void overtimeTableMouseClicked(java.awt.event.MouseEvent evt) {                                        
+        int row = overtimeTable.getSelectedRow();
+        if (row == -1) return; // Ensure a row is selected
+
+        String status = overtimeTable.getValueAt(row, 0).toString();
+        double hours = Double.parseDouble(overtimeTable.getValueAt(row, 1).toString());
+        double pay = Double.parseDouble(overtimeTable.getValueAt(row, 2).toString());
+
+        int choice = JOptionPane.showOptionDialog(this,
+            "Update or Delete this request?", "Action Required",
+            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+            null, new String[]{"Update", "Delete"}, "Update");
+
+        if (choice == JOptionPane.YES_OPTION) {
+            // Open update request page
+            new EmployeeOvertimeRequest(employeeData, hours, pay, status).setVisible(true);
+            dispose();
+        } else if (choice == JOptionPane.NO_OPTION) {
+            // Cancel the selected request
+            OvertimeRequest request = new OvertimeRequest(Integer.parseInt(employeeData[0]), hours, pay, status);
+            request.cancelOvertimeRequest();
+            loadOvertimeRequests(); // Refresh table after deletion
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -67,7 +117,7 @@ public class EmployeeOvertime extends javax.swing.JFrame {
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                true, false, false
+                false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {

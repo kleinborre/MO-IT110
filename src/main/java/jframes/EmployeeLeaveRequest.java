@@ -4,13 +4,21 @@
  */
 package jframes;
 
+import classes.LeaveRequest;
+import com.toedter.calendar.JDateChooser;
+import javax.swing.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
 /**
  *
  * @author STUDY MODE
  */
 public class EmployeeLeaveRequest extends javax.swing.JFrame {
     
-    String[] employeeData;
+    private String[] employeeData;
+    private LeaveRequest existingRequest = null;
+    private static final String FILE_PATH = "src/main/java/databases/Leave Requests.csv";
+
     /**
      * Creates new form EmployeeLeaveRequest
      */
@@ -22,6 +30,34 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
     public EmployeeLeaveRequest() {
         initComponents();
     }
+    
+    public EmployeeLeaveRequest(String[] employeeData, LeaveRequest existingRequest) {
+        this.employeeData = employeeData;
+        this.existingRequest = existingRequest;
+        initComponents();
+        populateExistingRequest();
+    }
+    
+    /**
+     * If updating, populate fields with existing request data.
+     */
+    private void populateExistingRequest() {
+        if (existingRequest != null) {
+            leaveTypeCombo.setSelectedItem(existingRequest.getLeaveType());
+            startDateChooser.setDate(java.util.Date.from(existingRequest.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            endDateChooser.setDate(java.util.Date.from(existingRequest.getEndDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        }
+    }
+    
+    /**
+     * Converts JDateChooser to LocalDate.
+     */
+    private LocalDate convertToLocalDate(JDateChooser dateChooser) {
+        if (dateChooser.getDate() != null) {
+            return dateChooser.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        }
+        return null;
+    }  
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -38,8 +74,8 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        startDatejDateChooser = new com.toedter.calendar.JDateChooser();
-        startDatejDateChooser1 = new com.toedter.calendar.JDateChooser();
+        startDateChooser = new com.toedter.calendar.JDateChooser();
+        endDateChooser = new com.toedter.calendar.JDateChooser();
         submitButton = new buttons.redButton();
         jLabel1 = new javax.swing.JLabel();
 
@@ -84,8 +120,8 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
         jLabel5.setForeground(new java.awt.Color(102, 102, 102));
         jLabel5.setText("Start Date");
         getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 250, -1, -1));
-        getContentPane().add(startDatejDateChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 280, 190, -1));
-        getContentPane().add(startDatejDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 350, 190, -1));
+        getContentPane().add(startDateChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 280, 190, -1));
+        getContentPane().add(endDateChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 350, 190, -1));
 
         submitButton.setText("Submit");
         submitButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -116,7 +152,39 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
     }//GEN-LAST:event_backButtonActionPerformed
 
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
-        // TODO add your handling code here:
+        String leaveType = leaveTypeCombo.getSelectedItem().toString();
+        LocalDate startDate = convertToLocalDate(startDateChooser);
+        LocalDate endDate = convertToLocalDate(endDateChooser);
+
+        if (leaveType.equals("----") || startDate == null || endDate == null) {
+            JOptionPane.showMessageDialog(this, "Please fill all fields before submitting.");
+            return;
+        }
+        if (endDate.isBefore(startDate)) {
+            JOptionPane.showMessageDialog(this, "End date cannot be before start date.");
+            return;
+        }
+
+        int employeeNumber = Integer.parseInt(employeeData[0]);
+
+        if (existingRequest == null) { // New request
+            LeaveRequest leaveRequest = new LeaveRequest(employeeNumber, leaveType, startDate, endDate, "Pending");
+            leaveRequest.submitLeaveRequest();
+            JOptionPane.showMessageDialog(this, "Leave request submitted successfully.");
+        } else { // Update request
+            existingRequest.deleteLeaveRequest(); // Remove old request
+            existingRequest.setLeaveType(leaveType);
+            existingRequest.setStartDate(startDate);
+            existingRequest.setEndDate(endDate);
+            existingRequest.setStatus("Pending");
+            existingRequest.submitLeaveRequest();
+            JOptionPane.showMessageDialog(this, "Leave request updated successfully.");
+        }
+
+        EmployeeLeave employeeLeavePage = new EmployeeLeave(employeeData);
+        employeeLeavePage.refreshTable();
+        employeeLeavePage.setVisible(true);
+        dispose();
     }//GEN-LAST:event_submitButtonActionPerformed
 
     /**
@@ -157,13 +225,13 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private buttons.whiteButton backButton;
     private buttons.grayButton backButton1;
+    private com.toedter.calendar.JDateChooser endDateChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JComboBox<String> leaveTypeCombo;
-    private com.toedter.calendar.JDateChooser startDatejDateChooser;
-    private com.toedter.calendar.JDateChooser startDatejDateChooser1;
+    private com.toedter.calendar.JDateChooser startDateChooser;
     private buttons.redButton submitButton;
     // End of variables declaration//GEN-END:variables
 }

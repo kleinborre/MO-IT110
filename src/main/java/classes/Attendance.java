@@ -3,7 +3,6 @@ package classes;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,8 +10,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Attendance class that records employee attendance and manages CSV data.
@@ -64,23 +61,22 @@ public class Attendance extends Employee implements CSVHandler {
      * Reads attendance records from CSV file.
      */
     @Override
-    public Map<String, String[]> readCSV(String filePath) {
-        Map<String, String[]> attendanceMap = new HashMap<>();
-        
+    public List<String[]> readCSV(String filePath) {
+        List<String[]> attendanceRecords = new ArrayList<>();
+
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            String[] headers = reader.readNext(); // Read header row
+            reader.readNext(); // Skip header row
             String[] nextLine;
-            
+
             while ((nextLine = reader.readNext()) != null) {
                 if (nextLine.length >= 4) { // Ensure correct data format
-                    String empNumber = nextLine[0].trim();
-                    attendanceMap.put(empNumber, nextLine);
+                    attendanceRecords.add(nextLine);
                 }
             }
         } catch (IOException | CsvValidationException e) {
             e.printStackTrace();
         }
-        return attendanceMap;
+        return attendanceRecords;
     }
 
     /**
@@ -88,15 +84,13 @@ public class Attendance extends Employee implements CSVHandler {
      */
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) { // Overwrite file
             // Define headers for CSV
             String[] header = { "Employee #", "Date", "Login Time", "Logout Time" };
             writer.writeNext(header);
 
             // Write attendance data
-            for (String[] row : data) {
-                writer.writeNext(row);
-            }
+            writer.writeAll(data);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -106,20 +100,7 @@ public class Attendance extends Employee implements CSVHandler {
      * Logs attendance data (adds a new attendance record).
      */
     public void logAttendance() {
-        List<String[]> allRecords = new ArrayList<>();
-
-        // Read existing attendance records
-        try (CSVReader reader = new CSVReader(new FileReader(FILE_PATH))) {
-            String[] headers = reader.readNext(); // Read header row
-            allRecords.add(headers); // Preserve headers
-            
-            String[] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
-                allRecords.add(nextLine);
-            }
-        } catch (IOException | CsvValidationException e) {
-            e.printStackTrace();
-        }
+        List<String[]> allRecords = readCSV(FILE_PATH); // Load existing records
 
         // Add new attendance record
         String[] newRecord = {
@@ -130,7 +111,8 @@ public class Attendance extends Employee implements CSVHandler {
         };
         allRecords.add(newRecord);
 
-        // Write back to CSV
+        // Write updated records back to CSV
         writeCSV(FILE_PATH, allRecords);
+        System.out.println("Attendance logged successfully.");
     }
 }

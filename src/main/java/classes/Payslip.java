@@ -3,14 +3,11 @@ package classes;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Payslip class that calculates salaries and manages payslip records.
@@ -132,20 +129,19 @@ public class Payslip extends Employee implements PayrollCalculator, CSVHandler {
     }
 
     /**
-     * Reads all payslip records from CSV and returns them as a map.
-     * Key: Employee Number, Value: Payslip details.
+     * Reads all payslip records from CSV.
      */
     @Override
-    public Map<String, String[]> readCSV(String filePath) {
-        Map<String, String[]> payslipRecords = new HashMap<>();
+    public List<String[]> readCSV(String filePath) {
+        List<String[]> payslipRecords = new ArrayList<>();
 
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            String[] headers = reader.readNext(); // Skip header row
+            reader.readNext(); // Skip header row
             String[] nextLine;
 
             while ((nextLine = reader.readNext()) != null) {
-                if (nextLine.length >= 7) { // Ensure correct column count
-                    payslipRecords.put(nextLine[0], nextLine);
+                if (nextLine.length >= 8) { // Ensure correct column count
+                    payslipRecords.add(nextLine);
                 }
             }
         } catch (IOException | CsvValidationException e) {
@@ -160,13 +156,10 @@ public class Payslip extends Employee implements PayrollCalculator, CSVHandler {
      */
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) { // "false" ensures overwrite
             String[] header = {"EmployeeNumber", "GrossSalary", "Deductions", "NetSalary", "SSS", "PhilHealth", "Pagibig", "WithholdingTax"};
             writer.writeNext(header); // Write header first
-
-            for (String[] row : data) {
-                writer.writeNext(row);
-            }
+            writer.writeAll(data);    // Write all records
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -180,11 +173,10 @@ public class Payslip extends Employee implements PayrollCalculator, CSVHandler {
         calculateDeductions();
         calculateNetSalary();
 
-        List<String[]> allPayslips = new ArrayList<>();
+        List<String[]> allPayslips = readCSV(FILE_PATH);
 
-        // Read existing payslip records
-        Map<String, String[]> existingPayslips = readCSV(FILE_PATH);
-        allPayslips.addAll(existingPayslips.values()); // Convert Map to List
+        // Remove previous payslip if it exists
+        allPayslips.removeIf(payslip -> payslip[0].equals(String.valueOf(getEmployeeNumber())));
 
         // Add new payslip record
         String[] newPayslip = {

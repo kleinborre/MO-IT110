@@ -1,1 +1,3 @@
-Employee #, Leave Type, Start Date, End Date, Status
+"EmployeeNumber","LeaveType","StartDate","EndDate","Status"
+"10001","Sick","2025-03-12","2025-03-18","Pending"
+"10001","Vacation","2025-03-28","2025-03-31","Pending"

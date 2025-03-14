@@ -40,6 +40,7 @@ jframes\SystemAdministratorCreateUser$11.class
 jframes\EmployeeProfileInformationUpdateInfo$16.class
 jframes\EmployeeProfileInformationUpdateInfo$21.class
 jframes\SystemAdministratorCreateUser$6.class
+jframes\EmployeeLeave$5.class
 jframes\HRManagerPage$8.class
 buttons\whiteButton.class
 classes\CSVHandler.class
@@ -164,6 +165,7 @@ jframes\SystemAdministratorCreateUser$5.class
 jframes\EmployeeProfileInformation$6.class
 jframes\PayrollManagerMonthlyPayrollSummary$3.class
 jframes\EmployeeLeave$3.class
+jframes\EmployeeOvertime$5.class
 classes\HRManager.class
 jframes\SystemAdministratorUpdateUser$16.class
 jframes\PayrollManagerPage.class

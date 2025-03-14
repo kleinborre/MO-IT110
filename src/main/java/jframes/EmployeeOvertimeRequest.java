@@ -4,6 +4,10 @@
  */
 package jframes;
 
+import classes.Employee;
+import classes.OvertimeRequest;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author STUDY MODE
@@ -11,17 +15,37 @@ package jframes;
 public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     
     String[] employeeData;
-    /**
-     * Creates new form EmployeeOvertimeRequest
-     */
+    private double overtimeHours;
+
+    //Creates new form EmployeeOvertimeRequest
     public EmployeeOvertimeRequest(String[] employeeData) {
         this.employeeData = employeeData;
         initComponents();
     }
     
+    // Standard constructor to avoid errors
     public EmployeeOvertimeRequest() {
         this.employeeData = employeeData;
         initComponents();
+    }
+    
+    // New Constructor for updating an existing overtime request
+    public EmployeeOvertimeRequest(String[] employeeData, double overtimeHours) {
+        this.employeeData = employeeData;
+        this.overtimeHours = overtimeHours;
+        initComponents();
+        preloadOvertimeRequest();
+    }
+    
+    public EmployeeOvertimeRequest(String[] employeeData, double overtimeHours, double overtimePay, String status) {
+        this.employeeData = employeeData;
+        initComponents();
+        overtimejSpinner.setValue(overtimeHours);
+    }
+    
+    // Method to preload overtime hours when updating a request
+    private void preloadOvertimeRequest() {
+    overtimejSpinner.setValue(overtimeHours); 
     }
 
     /**
@@ -101,7 +125,23 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     }//GEN-LAST:event_backButton1ActionPerformed
 
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling code here:      
+        Employee employee = new Employee(Integer.parseInt(employeeData[0])); 
+        double hourlyRate = employee.getHourlyRate(); 
+
+        Number value = (Number) overtimejSpinner.getValue();
+        double overtimeHours = value.doubleValue(); 
+
+        double overtimePay = overtimeHours * hourlyRate;
+        String status = "Pending";
+
+        OvertimeRequest request = new OvertimeRequest(Integer.parseInt(employeeData[0]), overtimeHours, overtimePay, status);
+        request.submitOvertimeRequest();
+
+        JOptionPane.showMessageDialog(this, "Overtime request submitted successfully!");
+
+        new EmployeeOvertime(employeeData).setVisible(true);
+        dispose();
     }//GEN-LAST:event_submitButtonActionPerformed
 
     /**
