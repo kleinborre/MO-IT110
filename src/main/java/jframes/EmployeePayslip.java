@@ -4,25 +4,107 @@
  */
 package jframes;
 
+import classes.Payslip;
+import classes.Employee;
+
 /**
  *
  * @author STUDY MODE
  */
 public class EmployeePayslip extends javax.swing.JFrame {
     
-    String[] employeeData;
+    private Payslip payslip;
+    private Employee employee;
+    private String[] employeeData; // Holds authenticated user details
     /**
      * Creates new form EmployeePayslip
      */
     public EmployeePayslip(String[] employeeData) {
+        this.employeeData = employeeData; // Store logged-in employee's data
+        initComponents(); // Initialize UI components
+        
+        int employeeNumber = Integer.parseInt(employeeData[0]); // Get employee number
+        int selectedMonth = payslipMonthChooser.getMonth() + 1;
+        int selectedYear = jYearChooser.getYear();
+
+        this.payslip = new Payslip(employeeNumber, selectedMonth, selectedYear);
+        this.employee = new Employee(employeeNumber);
+        updatePayslipDetails(); // Populate UI fields
+        addListeners(); // Sync date pickers
+    }
+    
+    public EmployeePayslip() {
         this.employeeData = employeeData;
         initComponents();
     }
     
-    public EmployeePayslip() {
-        initComponents();
+        /**
+     * Updates Payslip Information on the UI
+     */
+    private void updatePayslipDetails() {
+        int selectedMonth = payslipMonthChooser.getMonth() + 1; // Month is 0-based, so add 1
+        int selectedYear = jYearChooser.getYear();
+
+        // Format dates as MM/DD/YYYY
+        String formattedStartDate = String.format("%02d/01/%d", selectedMonth, selectedYear);
+        String formattedEndDate = String.format("%02d/15/%d", selectedMonth, selectedYear);
+
+        startDateText.setText(formattedStartDate);
+        endDateText.setText(formattedEndDate);
+
+        basicSalary.setText(String.format("%.2f", employee.getBasicSalary()));
+        dailyRateText.setText(String.format("%.2f", employee.getHourlyRate() * 8));
+        totalDaysWorked.setText(String.format("%.2f", payslip.getTotalWorkedHours() / 8));
+
+        riceSubsidyText.setText(String.format("%.2f", employee.getRiceSubsidy()));
+        phoneAllowanceText.setText(String.format("%.2f", employee.getPhoneAllowance()));
+        clothingAllowanceText.setText(String.format("%.2f", employee.getClothingAllowance()));
+
+        double totalBenefits = employee.getTotalBenefits();
+        totalBenefitsText.setText(String.format("%.2f", totalBenefits));
+        totalBenefitsText1.setText(String.format("%.2f", totalBenefits)); // Reflect total benefits
+
+        double grossSalary = payslip.getGrossSalary();
+        grossSalaryText.setText(String.format("%.2f", grossSalary));
+        grossSalaryText1.setText(String.format("%.2f", grossSalary)); // Reflect gross salary
+
+        double totalDeductions = payslip.getTotalDeductions();
+        totalDeductionsText.setText(String.format("%.2f", totalDeductions));
+        totalDeductionsText1.setText(String.format("%.2f", totalDeductions)); // Reflect total deductions
+
+        // Overtime Hours Logic: Only show overtime for March 2025
+        double overtimeHours = (selectedMonth == 3 && selectedYear == 2025) ? payslip.getOvertimeHours() : 0;
+        overtimeHoursText.setText(String.format("%.2f", overtimeHours));
+
+        sssDeductionText.setText(String.format("%.2f", payslip.getSssDeduction()));
+        philhealthDeductionText.setText(String.format("%.2f", payslip.getPhilhealthDeduction()));
+        pagibigDeductionText.setText(String.format("%.2f", payslip.getPagibigDeduction()));
+        witholdingTaxDeductionText.setText(String.format("%.2f", payslip.getWithholdingTax()));
+
+        netPayText.setText(String.format("%.2f", payslip.getNetSalary()));
+    }
+    
+    /**
+     * Refresh Payslip Details when Month/Year is Changed
+     */
+    private void refreshPayslip() {
+        int employeeNumber = Integer.parseInt(employeeData[0]); // Extract employee number
+        int selectedMonth = payslipMonthChooser.getMonth() + 1;
+        int selectedYear = jYearChooser.getYear();
+
+        this.payslip = new Payslip(employeeNumber, selectedMonth, selectedYear);
+        updatePayslipDetails(); // Refresh fields with updated values
     }
 
+
+    /**
+     * Synchronizes Month and Year Choosers
+     */
+    private void addListeners() {
+        payslipMonthChooser.addPropertyChangeListener(evt -> refreshPayslip());
+        jYearChooser.addPropertyChangeListener(evt -> refreshPayslip());
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -40,9 +122,7 @@ public class EmployeePayslip extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         payslipMonthChooser = new com.toedter.calendar.JMonthChooser();
         jLabel8 = new javax.swing.JLabel();
-        periodEndDateLabel = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
-        grossIncomeLabel = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -60,25 +140,29 @@ public class EmployeePayslip extends javax.swing.JFrame {
         jLabel26 = new javax.swing.JLabel();
         jLabel27 = new javax.swing.JLabel();
         jLabel28 = new javax.swing.JLabel();
-        netSalaryLabel = new javax.swing.JLabel();
-        dailyRateLabel = new javax.swing.JLabel();
-        daysWorkedLabel = new javax.swing.JLabel();
-        overtimeHoursLabel = new javax.swing.JLabel();
-        basicSalaryLabel5 = new javax.swing.JLabel();
-        witholdingTaxLabel = new javax.swing.JLabel();
-        phoneAllowanceLabel = new javax.swing.JLabel();
-        clothingAllowanceLabel = new javax.swing.JLabel();
-        benefitsLabel = new javax.swing.JLabel();
-        deductionsLabel = new javax.swing.JLabel();
-        riceSubsidyLabel = new javax.swing.JLabel();
-        deductions = new javax.swing.JLabel();
-        philhealthDeductionLabel = new javax.swing.JLabel();
-        pagibigDeductionLabel = new javax.swing.JLabel();
-        sssDeductionLabel = new javax.swing.JLabel();
-        grossIncome = new javax.swing.JLabel();
-        benefits = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        periodStartDateLabel = new javax.swing.JLabel();
+        jYearChooser = new com.toedter.calendar.JYearChooser();
+        dailyRateText = new javax.swing.JTextField();
+        basicSalary = new javax.swing.JTextField();
+        totalDaysWorked = new javax.swing.JTextField();
+        grossSalaryText = new javax.swing.JTextField();
+        endDateText = new javax.swing.JTextField();
+        overtimeHoursText = new javax.swing.JTextField();
+        overtimeHoursText3 = new javax.swing.JTextField();
+        startDateText = new javax.swing.JTextField();
+        phoneAllowanceText = new javax.swing.JTextField();
+        riceSubsidyText = new javax.swing.JTextField();
+        clothingAllowanceText = new javax.swing.JTextField();
+        totalBenefitsText = new javax.swing.JTextField();
+        philhealthDeductionText = new javax.swing.JTextField();
+        sssDeductionText = new javax.swing.JTextField();
+        netPayText = new javax.swing.JTextField();
+        pagibigDeductionText = new javax.swing.JTextField();
+        witholdingTaxDeductionText = new javax.swing.JTextField();
+        totalDeductionsText = new javax.swing.JTextField();
+        grossSalaryText1 = new javax.swing.JTextField();
+        totalBenefitsText1 = new javax.swing.JTextField();
+        totalDeductionsText1 = new javax.swing.JTextField();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -118,30 +202,21 @@ public class EmployeePayslip extends javax.swing.JFrame {
         jLabel5.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(102, 102, 102));
         jLabel5.setText("Period End Date:");
-        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 120, -1, -1));
+        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 120, -1, -1));
 
+        payslipMonthChooser.setForeground(new java.awt.Color(255, 255, 255));
         payslipMonthChooser.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        getContentPane().add(payslipMonthChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 150, -1, -1));
+        getContentPane().add(payslipMonthChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 150, 90, -1));
 
         jLabel8.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(102, 102, 102));
         jLabel8.setText("Choose Period:");
         getContentPane().add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 120, -1, -1));
 
-        periodEndDateLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        periodEndDateLabel.setForeground(new java.awt.Color(102, 102, 102));
-        periodEndDateLabel.setText("endDate();");
-        getContentPane().add(periodEndDateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 150, -1, -1));
-
         jLabel10.setFont(new java.awt.Font("Inter", 1, 18)); // NOI18N
         jLabel10.setForeground(new java.awt.Color(102, 102, 102));
         jLabel10.setText("EARNINGS");
         getContentPane().add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 180, -1, -1));
-
-        grossIncomeLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        grossIncomeLabel.setForeground(new java.awt.Color(102, 102, 102));
-        grossIncomeLabel.setText("calculateGrossSalary();");
-        getContentPane().add(grossIncomeLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 490, -1, -1));
 
         jLabel12.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel12.setForeground(new java.awt.Color(102, 102, 102));
@@ -175,7 +250,7 @@ public class EmployeePayslip extends javax.swing.JFrame {
 
         jLabel18.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel18.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel18.setText("Deducations");
+        jLabel18.setText("Deductions");
         getContentPane().add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 340, -1, -1));
 
         jLabel19.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -228,100 +303,83 @@ public class EmployeePayslip extends javax.swing.JFrame {
         jLabel28.setText("Monthly Rate");
         getContentPane().add(jLabel28, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 220, -1, -1));
 
-        netSalaryLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        netSalaryLabel.setForeground(new java.awt.Color(102, 102, 102));
-        netSalaryLabel.setText("calculateNetSalary();");
-        getContentPane().add(netSalaryLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 490, -1, -1));
-
-        dailyRateLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        dailyRateLabel.setForeground(new java.awt.Color(102, 102, 102));
-        dailyRateLabel.setText("getDailyRate();");
-        getContentPane().add(dailyRateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 310, -1, -1));
-
-        daysWorkedLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        daysWorkedLabel.setForeground(new java.awt.Color(102, 102, 102));
-        daysWorkedLabel.setText("getDaysWorked();");
-        getContentPane().add(daysWorkedLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 370, -1, -1));
-
-        overtimeHoursLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        overtimeHoursLabel.setForeground(new java.awt.Color(102, 102, 102));
-        overtimeHoursLabel.setText("getOvertimeHours();");
-        getContentPane().add(overtimeHoursLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 430, -1, -1));
-
-        basicSalaryLabel5.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        basicSalaryLabel5.setForeground(new java.awt.Color(102, 102, 102));
-        basicSalaryLabel5.setText("getBasicSalary()");
-        getContentPane().add(basicSalaryLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 250, -1, -1));
-
-        witholdingTaxLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        witholdingTaxLabel.setForeground(new java.awt.Color(102, 102, 102));
-        witholdingTaxLabel.setText("witholdingTax();");
-        getContentPane().add(witholdingTaxLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 430, -1, -1));
-
-        phoneAllowanceLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        phoneAllowanceLabel.setForeground(new java.awt.Color(102, 102, 102));
-        phoneAllowanceLabel.setText("getPhoneAllowance();");
-        getContentPane().add(phoneAllowanceLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 310, -1, -1));
-
-        clothingAllowanceLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        clothingAllowanceLabel.setForeground(new java.awt.Color(102, 102, 102));
-        clothingAllowanceLabel.setText("getClothingAllowance();");
-        getContentPane().add(clothingAllowanceLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 370, -1, -1));
-
-        benefitsLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        benefitsLabel.setForeground(new java.awt.Color(102, 102, 102));
-        benefitsLabel.setText("calculateBenefits();");
-        getContentPane().add(benefitsLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 490, -1, -1));
-
-        deductionsLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        deductionsLabel.setForeground(new java.awt.Color(102, 102, 102));
-        deductionsLabel.setText("calculateDeductions();");
-        getContentPane().add(deductionsLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 490, -1, -1));
-
-        riceSubsidyLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        riceSubsidyLabel.setForeground(new java.awt.Color(102, 102, 102));
-        riceSubsidyLabel.setText("getRiceSubsidy();");
-        getContentPane().add(riceSubsidyLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 250, -1, -1));
-
-        deductions.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        deductions.setForeground(new java.awt.Color(102, 102, 102));
-        deductions.setText("calculateDeductions();");
-        getContentPane().add(deductions, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 370, -1, -1));
-
-        philhealthDeductionLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        philhealthDeductionLabel.setForeground(new java.awt.Color(102, 102, 102));
-        philhealthDeductionLabel.setText("philhealthDeduction();");
-        getContentPane().add(philhealthDeductionLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 310, -1, -1));
-
-        pagibigDeductionLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        pagibigDeductionLabel.setForeground(new java.awt.Color(102, 102, 102));
-        pagibigDeductionLabel.setText("pagibigDeduction();");
-        getContentPane().add(pagibigDeductionLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 370, -1, -1));
-
-        sssDeductionLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        sssDeductionLabel.setForeground(new java.awt.Color(102, 102, 102));
-        sssDeductionLabel.setText("sssDeduction();");
-        getContentPane().add(sssDeductionLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 250, -1, -1));
-
-        grossIncome.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        grossIncome.setForeground(new java.awt.Color(102, 102, 102));
-        grossIncome.setText("calculateGrossSalary();");
-        getContentPane().add(grossIncome, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 250, -1, -1));
-
-        benefits.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        benefits.setForeground(new java.awt.Color(102, 102, 102));
-        benefits.setText("calculateBenefits();");
-        getContentPane().add(benefits, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 310, -1, -1));
-
         jLabel11.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel11.setForeground(new java.awt.Color(102, 102, 102));
         jLabel11.setText("Period Start Date:");
-        getContentPane().add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 120, -1, -1));
+        getContentPane().add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 120, -1, -1));
 
-        periodStartDateLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        periodStartDateLabel.setForeground(new java.awt.Color(102, 102, 102));
-        periodStartDateLabel.setText("startDate();");
-        getContentPane().add(periodStartDateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 150, -1, -1));
+        jYearChooser.setBackground(new java.awt.Color(204, 204, 204));
+        jYearChooser.setForeground(new java.awt.Color(204, 204, 204));
+        jYearChooser.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(jYearChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 150, 70, -1));
+
+        dailyRateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        dailyRateText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dailyRateTextActionPerformed(evt);
+            }
+        });
+        getContentPane().add(dailyRateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 310, 130, -1));
+
+        basicSalary.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(basicSalary, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 250, 130, -1));
+
+        totalDaysWorked.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(totalDaysWorked, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 370, 130, -1));
+
+        grossSalaryText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(grossSalaryText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 480, 130, -1));
+
+        endDateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(endDateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 150, 130, -1));
+
+        overtimeHoursText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(overtimeHoursText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 430, 130, -1));
+
+        overtimeHoursText3.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(overtimeHoursText3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 430, 130, -1));
+
+        startDateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(startDateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 150, 130, -1));
+
+        phoneAllowanceText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(phoneAllowanceText, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 310, 130, -1));
+
+        riceSubsidyText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(riceSubsidyText, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 250, 130, -1));
+
+        clothingAllowanceText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(clothingAllowanceText, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 370, 130, -1));
+
+        totalBenefitsText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(totalBenefitsText, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 480, 130, -1));
+
+        philhealthDeductionText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(philhealthDeductionText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 310, 130, -1));
+
+        sssDeductionText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(sssDeductionText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 250, 130, -1));
+
+        netPayText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(netPayText, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 480, 130, -1));
+
+        pagibigDeductionText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(pagibigDeductionText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 370, 130, -1));
+
+        witholdingTaxDeductionText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(witholdingTaxDeductionText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 430, 130, -1));
+
+        totalDeductionsText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(totalDeductionsText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 480, 130, -1));
+
+        grossSalaryText1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(grossSalaryText1, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 250, 130, -1));
+
+        totalBenefitsText1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(totalBenefitsText1, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 310, 130, -1));
+
+        totalDeductionsText1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(totalDeductionsText1, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 370, 130, -1));
 
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Payslip Information.png")); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -335,6 +393,10 @@ public class EmployeePayslip extends javax.swing.JFrame {
         new EmployeePage(this.employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
+
+    private void dailyRateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dailyRateTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dailyRateTextActionPerformed
 
     /**
      * @param args the command line arguments
@@ -374,16 +436,12 @@ public class EmployeePayslip extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private buttons.whiteButton backButton;
     private javax.swing.JLabel background;
-    private javax.swing.JLabel basicSalaryLabel5;
-    private javax.swing.JLabel benefits;
-    private javax.swing.JLabel benefitsLabel;
-    private javax.swing.JLabel clothingAllowanceLabel;
-    private javax.swing.JLabel dailyRateLabel;
-    private javax.swing.JLabel daysWorkedLabel;
-    private javax.swing.JLabel deductions;
-    private javax.swing.JLabel deductionsLabel;
-    private javax.swing.JLabel grossIncome;
-    private javax.swing.JLabel grossIncomeLabel;
+    private javax.swing.JTextField basicSalary;
+    private javax.swing.JTextField clothingAllowanceText;
+    private javax.swing.JTextField dailyRateText;
+    private javax.swing.JTextField endDateText;
+    private javax.swing.JTextField grossSalaryText;
+    private javax.swing.JTextField grossSalaryText1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
@@ -409,16 +467,22 @@ public class EmployeePayslip extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel netSalaryLabel;
-    private javax.swing.JLabel overtimeHoursLabel;
-    private javax.swing.JLabel pagibigDeductionLabel;
+    private com.toedter.calendar.JYearChooser jYearChooser;
+    private javax.swing.JTextField netPayText;
+    private javax.swing.JTextField overtimeHoursText;
+    private javax.swing.JTextField overtimeHoursText3;
+    private javax.swing.JTextField pagibigDeductionText;
     private com.toedter.calendar.JMonthChooser payslipMonthChooser;
-    private javax.swing.JLabel periodEndDateLabel;
-    private javax.swing.JLabel periodStartDateLabel;
-    private javax.swing.JLabel philhealthDeductionLabel;
-    private javax.swing.JLabel phoneAllowanceLabel;
-    private javax.swing.JLabel riceSubsidyLabel;
-    private javax.swing.JLabel sssDeductionLabel;
-    private javax.swing.JLabel witholdingTaxLabel;
+    private javax.swing.JTextField philhealthDeductionText;
+    private javax.swing.JTextField phoneAllowanceText;
+    private javax.swing.JTextField riceSubsidyText;
+    private javax.swing.JTextField sssDeductionText;
+    private javax.swing.JTextField startDateText;
+    private javax.swing.JTextField totalBenefitsText;
+    private javax.swing.JTextField totalBenefitsText1;
+    private javax.swing.JTextField totalDaysWorked;
+    private javax.swing.JTextField totalDeductionsText;
+    private javax.swing.JTextField totalDeductionsText1;
+    private javax.swing.JTextField witholdingTaxDeductionText;
     // End of variables declaration//GEN-END:variables
 }
