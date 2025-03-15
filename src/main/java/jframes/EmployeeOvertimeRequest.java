@@ -7,6 +7,8 @@ package jframes;
 import classes.Employee;
 import classes.OvertimeRequest;
 import javax.swing.JOptionPane;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -14,27 +16,37 @@ import javax.swing.JOptionPane;
  */
 public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     
-    String[] employeeData;
+    private String[] employeeData;
     private double overtimeHours;
-
-    //Creates new form EmployeeOvertimeRequest
+    private double overtimePay;
+    private String status;
+    private String date;
+    
+    // Constructor for new overtime request
     public EmployeeOvertimeRequest(String[] employeeData) {
         this.employeeData = employeeData;
         initComponents();
     }
     
-    // Standard constructor to avoid errors
+    // Default constructor (avoid errors)
     public EmployeeOvertimeRequest() {
-        this.employeeData = employeeData;
+        this.employeeData = null;
         initComponents();
     }
     
-    // New Constructor for updating an existing overtime request
-    public EmployeeOvertimeRequest(String[] employeeData, double overtimeHours) {
+    // Constructor for updating an overtime request
+    public EmployeeOvertimeRequest(String[] employeeData, String date, double overtimeHours, double overtimePay, String status) {
         this.employeeData = employeeData;
+        this.date = date;
         this.overtimeHours = overtimeHours;
+        this.overtimePay = overtimePay;
+        this.status = status;
+        
         initComponents();
-        preloadOvertimeRequest();
+        
+        // Preload overtime details in the form
+        overtimejSpinner.setValue(overtimeHours);
+        
     }
     
     public EmployeeOvertimeRequest(String[] employeeData, double overtimeHours, double overtimePay, String status) {
@@ -45,7 +57,7 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     
     // Method to preload overtime hours when updating a request
     private void preloadOvertimeRequest() {
-    overtimejSpinner.setValue(overtimeHours); 
+        overtimejSpinner.setValue(overtimeHours); 
     }
 
     /**
@@ -62,6 +74,8 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
         submitButton = new buttons.redButton();
         jLabel3 = new javax.swing.JLabel();
         overtimejSpinner = new javax.swing.JSpinner();
+        jLabel4 = new javax.swing.JLabel();
+        chooseDatejDateChooser = new com.toedter.calendar.JDateChooser();
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -98,12 +112,21 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
 
         jLabel3.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel3.setText("Overtime Hours");
-        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 240, -1, -1));
+        jLabel3.setText("Choose Date");
+        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 190, -1, -1));
 
         overtimejSpinner.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         overtimejSpinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, 4, 1));
-        getContentPane().add(overtimejSpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 280, 130, -1));
+        getContentPane().add(overtimejSpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 330, 130, -1));
+
+        jLabel4.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel4.setText("Overtime Hours");
+        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 290, -1, -1));
+
+        chooseDatejDateChooser.setBackground(new java.awt.Color(204, 204, 204));
+        chooseDatejDateChooser.setForeground(new java.awt.Color(255, 255, 255));
+        getContentPane().add(chooseDatejDateChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 230, 130, 30));
 
         jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Overtime Request.png")); // NOI18N
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -127,7 +150,7 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
         // TODO add your handling code here:      
         Employee employee = new Employee(Integer.parseInt(employeeData[0])); 
-        double hourlyRate = employee.getHourlyRate(); 
+        double hourlyRate = employee.getHourlyRate();
 
         Number value = (Number) overtimejSpinner.getValue();
         double overtimeHours = value.doubleValue(); 
@@ -135,7 +158,19 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
         double overtimePay = overtimeHours * hourlyRate;
         String status = "Pending";
 
-        OvertimeRequest request = new OvertimeRequest(Integer.parseInt(employeeData[0]), overtimeHours, overtimePay, status);
+        // Extract the selected date from jDateChooser
+        Date selectedDate = chooseDatejDateChooser.getDate();
+    
+        if (selectedDate == null) {
+            JOptionPane.showMessageDialog(this, "Please select a date.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Convert Date to String format (YYYY-MM-DD)
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String date = dateFormat.format(selectedDate);
+
+        OvertimeRequest request = new OvertimeRequest(Integer.parseInt(employeeData[0]), date, overtimeHours, overtimePay, status);
         request.submitOvertimeRequest();
 
         JOptionPane.showMessageDialog(this, "Overtime request submitted successfully!");
@@ -182,8 +217,10 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private buttons.whiteButton backButton;
     private buttons.grayButton backButton1;
+    private com.toedter.calendar.JDateChooser chooseDatejDateChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JSpinner overtimejSpinner;
     private buttons.redButton submitButton;
     // End of variables declaration//GEN-END:variables

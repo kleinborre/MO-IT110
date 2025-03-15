@@ -61,17 +61,21 @@ public class Employee implements CSVHandler {
                     this.status = data[10];
                     this.position = data[11];
                     this.immediateSupervisor = data[12];
-                    this.basicSalary = Double.parseDouble(data[13]);
-                    this.riceSubsidy = Double.parseDouble(data[14]);
-                    this.phoneAllowance = Double.parseDouble(data[15]);
-                    this.clothingAllowance = Double.parseDouble(data[16]);
-                    this.grossSemiMonthlyRate = Double.parseDouble(data[17]);
-                    this.hourlyRate = Double.parseDouble(data[18]);
+                    
+                    // **Trim and clean all double values**
+                    this.basicSalary = Double.parseDouble(data[13].trim().replace(",", ""));
+                    this.riceSubsidy = Double.parseDouble(data[14].trim().replace(",", ""));
+                    this.phoneAllowance = Double.parseDouble(data[15].trim().replace(",", ""));
+                    this.clothingAllowance = Double.parseDouble(data[16].trim().replace(",", ""));
+                    this.grossSemiMonthlyRate = Double.parseDouble(data[17].trim().replace(",", ""));
+                    this.hourlyRate = Double.parseDouble(data[18].trim().replace(",", ""));
+                    
                     this.username = data[19];
                     this.password = data[20];
                     this.role = data[21];
                 } catch (NumberFormatException e) {
                     System.err.println("Error parsing numeric values for Employee #" + employeeNumber);
+                    e.printStackTrace();
                 }
                 break;
             }
@@ -81,6 +85,8 @@ public class Employee implements CSVHandler {
     // ** Getters **
     public int getEmployeeNumber() { return employeeNumber; }
     public String getFullName() { return lastName + ", " + firstName; }
+    public String getFirstName() { return firstName; }
+    public String getLastName() { return lastName; }
     public String getAddress() { return address; }
     public String getPhoneNumber() { return phoneNumber; }
     public String getSssNumber() { return sssNumber; }
