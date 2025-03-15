@@ -185,14 +185,17 @@ public class Payslip extends Employee implements CSVHandler {
     }
 
     private void calculateNetSalary() {
-    netSalary = grossSalary - deductions;
+    double totalBenefits = getTotalBenefits(); // Get non-taxable benefits
 
-    // If Overtime Pay is from previous years (before 2025), subtract from Net Salary
+    // Calculate net salary
+    netSalary = (grossSalary - deductions) + totalBenefits; // Add benefits to net pay
+
+    // If Overtime Pay is from previous years (before 2025), subtract it from Net Salary
     if (year < 2025) {
         netSalary -= overtimePay;
         System.out.println("Overtime Pay deducted as it's not from 2025: -" + overtimePay);
     }
-    }
+}
 
     //  Getter Methods
     public double getTotalWorkedHours() { return totalWorkedHours; }
