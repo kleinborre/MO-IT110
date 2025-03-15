@@ -49,12 +49,13 @@ public class EmployeePayslip extends javax.swing.JFrame {
         String formattedStartDate = String.format("%02d/01/%d", selectedMonth, selectedYear);
         String formattedEndDate = String.format("%02d/15/%d", selectedMonth, selectedYear);
 
-        startDateText.setText(formattedStartDate);
-        endDateText.setText(formattedEndDate);
+        startDateText.setText(payslip.getStartDate());
+        endDateText.setText(payslip.getEndDate());
+
 
         basicSalary.setText(String.format("%.2f", employee.getBasicSalary()));
-        dailyRateText.setText(String.format("%.2f", employee.getHourlyRate() * 8));
-        totalDaysWorked.setText(String.format("%.2f", payslip.getTotalWorkedHours() / 8));
+        dailyRateText.setText(String.format("%.2f", employee.getHourlyRate()));
+        totalDaysWorked.setText(String.format("%.2f", payslip.getTotalWorkedHours()));
 
         riceSubsidyText.setText(String.format("%.2f", employee.getRiceSubsidy()));
         phoneAllowanceText.setText(String.format("%.2f", employee.getPhoneAllowance()));
@@ -75,7 +76,6 @@ public class EmployeePayslip extends javax.swing.JFrame {
         // Overtime Hours Logic: Only show overtime for March 2025
         double overtimeHours = (selectedMonth == 3 && selectedYear == 2025) ? payslip.getOvertimeHours() : 0;
         overtimeHoursText.setText(String.format("%.2f", overtimeHours));
-
         sssDeductionText.setText(String.format("%.2f", payslip.getSssDeduction()));
         philhealthDeductionText.setText(String.format("%.2f", payslip.getPhilhealthDeduction()));
         pagibigDeductionText.setText(String.format("%.2f", payslip.getPagibigDeduction()));
@@ -225,7 +225,7 @@ public class EmployeePayslip extends javax.swing.JFrame {
 
         jLabel13.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel13.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel13.setText("Days Worked");
+        jLabel13.setText("Hours Worked");
         getContentPane().add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 340, -1, -1));
 
         jLabel14.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -309,8 +309,6 @@ public class EmployeePayslip extends javax.swing.JFrame {
         getContentPane().add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 120, -1, -1));
 
         jYearChooser.setBackground(new java.awt.Color(204, 204, 204));
-        jYearChooser.setForeground(new java.awt.Color(204, 204, 204));
-        jYearChooser.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(jYearChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 150, 70, -1));
 
         dailyRateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
@@ -328,6 +326,11 @@ public class EmployeePayslip extends javax.swing.JFrame {
         getContentPane().add(totalDaysWorked, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 370, 130, -1));
 
         grossSalaryText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        grossSalaryText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                grossSalaryTextActionPerformed(evt);
+            }
+        });
         getContentPane().add(grossSalaryText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 480, 130, -1));
 
         endDateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
@@ -340,6 +343,11 @@ public class EmployeePayslip extends javax.swing.JFrame {
         getContentPane().add(overtimeHoursText3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 430, 130, -1));
 
         startDateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        startDateText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                startDateTextActionPerformed(evt);
+            }
+        });
         getContentPane().add(startDateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 150, 130, -1));
 
         phoneAllowanceText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
@@ -397,6 +405,14 @@ public class EmployeePayslip extends javax.swing.JFrame {
     private void dailyRateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dailyRateTextActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_dailyRateTextActionPerformed
+
+    private void startDateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startDateTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_startDateTextActionPerformed
+
+    private void grossSalaryTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_grossSalaryTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_grossSalaryTextActionPerformed
 
     /**
      * @param args the command line arguments
