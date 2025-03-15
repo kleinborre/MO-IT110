@@ -101,40 +101,43 @@ public class EmployeePage extends javax.swing.JFrame {
     
     // Fetch and display attendance records
     private void updateAttendanceTable(int month, int year) {
-        Attendance attendance = new Attendance();
         int employeeNumber = Integer.parseInt(employeeData[0]);
-        List<String[]> records = attendance.getEmployeeAttendance(employeeNumber, month, year);
+        List<String[]> records = Attendance.getEmployeeAttendance(employeeNumber, month, year);
 
         DefaultTableModel model = (DefaultTableModel) attendanceTable.getModel();
         model.setRowCount(0); // Clear table
 
         for (String[] record : records) {
-            model.addRow(record);
+            model.addRow(new Object[]{
+                record[3], // Date
+                record[4], // Log In
+                record[5]  // Log Out
+            });
         }
     }
     
     private void updateClockButtons() {
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        String formattedDate = today.format(dateFormatter);
+    LocalDate today = LocalDate.now();
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    String formattedDate = today.format(dateFormatter);
 
-        int employeeNumber = Integer.parseInt(employeeData[0]);
-        Attendance attendance = new Attendance();
-        List<String[]> records = attendance.readCSV("src/main/java/databases/Attendance Records.csv");
+    int employeeNumber = Integer.parseInt(employeeData[0]);
+    List<String[]> records = Attendance.getEmployeeAttendance(employeeNumber, -1, -1);
 
-        boolean hasClockedIn = false;
-        boolean hasClockedOut = false;
+    boolean hasClockedIn = false;
+    boolean hasClockedOut = false;
 
-        for (String[] record : records) {
-            if (record[0].equals(String.valueOf(employeeNumber)) && record[3].equals(formattedDate)) {
-                if (!record[4].equals("N/A")) hasClockedIn = true;
-                if (!record[5].equals("N/A")) hasClockedOut = true;
-                break;
-            }
+    for (String[] record : records) {
+        if (record[3].equals(formattedDate)) {
+            if (!record[4].equals("N/A")) hasClockedIn = true; // Valid Clock-In
+            if (!record[5].equals("N/A")) hasClockedOut = true; // Valid Clock-Out
+            break;
         }
+    }
 
-        clockInButton.setEnabled(!hasClockedIn);
-        clockoutButton.setEnabled(hasClockedIn && !hasClockedOut);
+    // Set button states correctly
+    clockInButton.setEnabled(!hasClockedIn);
+    clockoutButton.setEnabled(hasClockedIn && !hasClockedOut);
     }    
 
     /**
@@ -300,9 +303,6 @@ public class EmployeePage extends javax.swing.JFrame {
         jMonthChooser1.setForeground(new java.awt.Color(51, 51, 51));
         jMonthChooser1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(jMonthChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 330, -1, 30));
-
-        jYearChooser.setForeground(new java.awt.Color(51, 51, 51));
-        jYearChooser.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(jYearChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 330, 70, 30));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -363,28 +363,26 @@ public class EmployeePage extends javax.swing.JFrame {
 
         int employeeNumber = Integer.parseInt(employeeData[0]);
 
-        Attendance attendance = new Attendance();
-        List<String[]> records = attendance.readCSV("src/main/java/databases/Attendance Records.csv");
+        // Load latest attendance records from CSV
+        List<String[]> records = Attendance.getAllAttendanceRecords();
 
-        // Prevent duplicate Clock-In using updateClockButtons logic before appending
-        boolean hasClockedIn = false;
+        // Strict check to prevent duplicate entry
         for (String[] record : records) {
             if (record[0].equals(String.valueOf(employeeNumber)) && record[3].equals(formattedDate)) {
-                hasClockedIn = true;
-                break;
+                System.out.println("Already clocked in!");
+                return; // Prevent duplicate entry
             }
         }
 
-        if (hasClockedIn) {
-            System.out.println("Already clocked in!");
-            return; // Exit early to avoid duplicate entry
-        }
+        // Disable Clock-In button immediately to reflect UI changes
+        clockInButton.setEnabled(false);
+        clockoutButton.setEnabled(true);
 
-        // Append new Clock-In entry
-        String[] newRecord = {String.valueOf(employeeNumber), employeeData[1], employeeData[2], formattedDate, formattedTime, "N/A"};
-        attendance.appendToCSV("src/main/java/databases/Attendance Records.csv", newRecord);
+        // Append a single Clock-In record to CSV
+        String[] newRecord = { String.valueOf(employeeNumber), employeeData[1], employeeData[2], formattedDate, formattedTime, "N/A" };
+        Attendance.appendToCSV(newRecord);
 
-        updateClockButtons(); // Ensure buttons update immediately
+        // Force UI update before CSV is written
         updateAttendanceTable(-1, -1);
     }//GEN-LAST:event_clockInButtonActionPerformed
 
@@ -398,23 +396,33 @@ public class EmployeePage extends javax.swing.JFrame {
 
         int employeeNumber = Integer.parseInt(employeeData[0]);
 
-        Attendance attendance = new Attendance();
-        List<String[]> records = attendance.readCSV("src/main/java/databases/Attendance Records.csv");
+        // Load latest attendance records from CSV
+        List<String[]> records = Attendance.getAllAttendanceRecords();
 
         boolean clockOutSuccess = false;
+        int updateIndex = -1;
 
-        for (String[] record : records) {
+        // Find the latest "N/A" logout entry for today
+        for (int i = records.size() - 1; i >= 0; i--) {
+            String[] record = records.get(i);
+
             if (record[0].equals(String.valueOf(employeeNumber)) && record[3].equals(formattedDate) && record[5].equals("N/A")) {
-                record[5] = formattedTime; // Update logout time
+                record[5] = formattedTime;  // ✅ Update the logout time
+                updateIndex = i;
                 clockOutSuccess = true;
                 break;
             }
         }
 
         if (clockOutSuccess) {
+            // Ensure we're only modifying the Attendance CSV (not Employee Details)
+            Attendance attendance = new Attendance();
             attendance.writeCSV("src/main/java/databases/Attendance Records.csv", records);
-            updateClockButtons(); // Ensure buttons update immediately
+
+            // Refresh UI without affecting login behavior
+            updateClockButtons();
             updateAttendanceTable(-1, -1);
+            System.out.println("Clock-Out successful.");
         } else {
             System.out.println("Clock-Out failed: No matching Clock-In found or already clocked out.");
         }

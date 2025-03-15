@@ -1,8 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package jframes;
+
+import classes.LeaveRequest;
+import classes.OvertimeRequest;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -15,6 +17,56 @@ public class HRManagerPage extends javax.swing.JFrame {
      */
     public HRManagerPage() {
         initComponents();
+        loadLeaveRequests();
+        loadOvertimeRequests();
+    }
+    
+    /**
+     * Loads all Leave Requests into hrManagerLeaveTable.
+     */
+    private void loadLeaveRequests() {
+        DefaultTableModel model = (DefaultTableModel) hrManagerLeaveTable.getModel();
+        model.setRowCount(0); // Clear existing rows
+
+        List<String[]> leaveRequests = LeaveRequest.getAllLeaveRequests();
+        for (String[] request : leaveRequests) {
+            model.addRow(new Object[]{
+                request[0], // Employee Number
+                request[1], // Name
+                request[2], // Leave Type
+                request[3], // Start Date
+                request[4], // End Date
+                request[5]  // Status
+            });
+        }
+    }
+    
+    /**
+     * Loads all Overtime Requests into hrManagerOvertimeTable.
+     */
+    private void loadOvertimeRequests() {
+        DefaultTableModel model = (DefaultTableModel) hrManagerOvertimeTable.getModel();
+        model.setRowCount(0); // Clear existing rows
+
+        List<String[]> overtimeRequests = OvertimeRequest.getAllOvertimeRequests();
+        for (String[] request : overtimeRequests) {
+            model.addRow(new Object[]{
+                request[0], // Employee Number
+                request[1], // Name
+                request[2], // Date
+                request[3], // Overtime Hours
+                request[4], // Overtime Pay
+                request[5]  // Status
+            });
+        }
+    }
+
+    /**
+     * Call these methods when the HR Manager page opens
+     */
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {                                  
+        loadLeaveRequests();
+        loadOvertimeRequests();
     }
 
     /**
@@ -70,7 +122,6 @@ public class HRManagerPage extends javax.swing.JFrame {
         jLabel3.setText("Employees Leave Request List");
         getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 100, -1, -1));
 
-        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         jScrollPane1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
 
         hrManagerLeaveTable.setBackground(new java.awt.Color(204, 204, 204));
@@ -96,10 +147,12 @@ public class HRManagerPage extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(hrManagerLeaveTable);
+        if (hrManagerLeaveTable.getColumnModel().getColumnCount() > 0) {
+            hrManagerLeaveTable.getColumnModel().getColumn(1).setHeaderValue("Name");
+        }
 
-        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 130, 630, 100));
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 130, 620, 100));
 
-        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         jScrollPane2.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
 
         hrManagerOvertimeTable.setBackground(new java.awt.Color(204, 204, 204));
@@ -107,17 +160,17 @@ public class HRManagerPage extends javax.swing.JFrame {
         hrManagerOvertimeTable.setForeground(new java.awt.Color(51, 51, 51));
         hrManagerOvertimeTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
             },
             new String [] {
-                "Employee Number", "Name", "Overtime Hours", "Overtime Pay", "Status"
+                "Employee Number", "Name", "Date", "Overtime Hours", "Overtime Pay", "Status"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -189,19 +242,76 @@ public class HRManagerPage extends javax.swing.JFrame {
 
     private void approveOvertimeRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_approveOvertimeRequestButtonActionPerformed
         // TODO add your handling code here:
+        int row = hrManagerOvertimeTable.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Please select an overtime request to approve.");
+            return;
+        }
+
+        int employeeNumber = Integer.parseInt(hrManagerOvertimeTable.getValueAt(row, 0).toString());
+        String date = hrManagerOvertimeTable.getValueAt(row, 2).toString();
+
+        // Update status in CSV
+        OvertimeRequest.updateOvertimeStatus(employeeNumber, date, "Approved");
+
+        JOptionPane.showMessageDialog(this, "Overtime request approved.");
+        loadOvertimeRequests(); // Refresh table        
     }//GEN-LAST:event_approveOvertimeRequestButtonActionPerformed
 
     private void rejectOvertimeRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rejectOvertimeRequestButtonActionPerformed
         // TODO add your handling code here:
-//        dispose();
+        int row = hrManagerOvertimeTable.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Please select an overtime request to reject.");
+            return;
+        }
+
+        int employeeNumber = Integer.parseInt(hrManagerOvertimeTable.getValueAt(row, 0).toString());
+        String date = hrManagerOvertimeTable.getValueAt(row, 2).toString();
+
+        // Update status in CSV
+        OvertimeRequest.updateOvertimeStatus(employeeNumber, date, "Rejected");
+
+        JOptionPane.showMessageDialog(this, "Overtime request rejected.");
+        loadOvertimeRequests(); // Refresh table
     }//GEN-LAST:event_rejectOvertimeRequestButtonActionPerformed
 
     private void approveLeaveRequestButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_approveLeaveRequestButton1ActionPerformed
         // TODO add your handling code here:
+        int row = hrManagerLeaveTable.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a leave request to approve.");
+            return;
+        }
+
+        int employeeNumber = Integer.parseInt(hrManagerLeaveTable.getValueAt(row, 0).toString());
+        String leaveType = hrManagerLeaveTable.getValueAt(row, 2).toString();
+        String startDate = hrManagerLeaveTable.getValueAt(row, 3).toString();
+
+        // Update status in CSV
+        LeaveRequest.updateLeaveStatus(employeeNumber, leaveType, startDate, "Approved");
+
+        JOptionPane.showMessageDialog(this, "Leave request approved.");
+        loadLeaveRequests(); // Refresh table
     }//GEN-LAST:event_approveLeaveRequestButton1ActionPerformed
 
     private void rejectLeaveRequestButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rejectLeaveRequestButton1ActionPerformed
         // TODO add your handling code here:
+        int row = hrManagerLeaveTable.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a leave request to reject.");
+            return;
+        }
+
+        int employeeNumber = Integer.parseInt(hrManagerLeaveTable.getValueAt(row, 0).toString());
+        String leaveType = hrManagerLeaveTable.getValueAt(row, 2).toString();
+        String startDate = hrManagerLeaveTable.getValueAt(row, 3).toString();
+
+        // Update status in CSV
+        LeaveRequest.updateLeaveStatus(employeeNumber, leaveType, startDate, "Rejected");
+
+        JOptionPane.showMessageDialog(this, "Leave request rejected.");
+        loadLeaveRequests(); // Refresh table
     }//GEN-LAST:event_rejectLeaveRequestButton1ActionPerformed
 
     private void employeeAttendanceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeAttendanceButtonActionPerformed

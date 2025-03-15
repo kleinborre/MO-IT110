@@ -38,7 +38,7 @@ public class EmployeeLeave extends javax.swing.JFrame {
      */
     private void loadEmployeeLeaveRequests() {
         DefaultTableModel model = (DefaultTableModel) leaveTable.getModel();
-        model.setRowCount(0); // Clear previous data
+        model.setRowCount(0); // Clear existing rows
 
         String loggedInEmployeeNumber = employeeData[0]; // Employee number of logged-in user
         LeaveRequest leaveRequest = new LeaveRequest(0, "", null, null, "");
@@ -46,8 +46,13 @@ public class EmployeeLeave extends javax.swing.JFrame {
         // Read leave requests from CSV
         List<String[]> leaveRequests = leaveRequest.readCSV(FILE_PATH);
         for (String[] record : leaveRequests) {
-            if (record.length >= 5 && record[0].equals(loggedInEmployeeNumber)) { // Only show logged-in employee's requests
-                model.addRow(new Object[]{record[1], record[4], record[2], record[3]});
+            if (record.length >= 6 && record[0].equals(loggedInEmployeeNumber)) { // Only show logged-in employee's requests
+                model.addRow(new Object[]{
+                    record[2], // Leave Type
+                    record[5], // Status
+                    record[3], // Start Date
+                    record[4]  // End Date
+                });
             }
         }
     }

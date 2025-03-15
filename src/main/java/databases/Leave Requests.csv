@@ -1,1 +1,3 @@
-"EmployeeNumber","LeaveType","StartDate","EndDate","Status"
+"EmployeeNumber","Name","LeaveType","StartDate","EndDate","Status"
+"10001","Garcia, Manuel III","Vacation","2025-03-15","2025-03-29","Rejected"
+"10002","Lim, Antonio","Vacation","2025-03-15","2025-03-29","Approved"

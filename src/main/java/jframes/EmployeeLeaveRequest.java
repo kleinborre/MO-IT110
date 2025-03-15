@@ -39,13 +39,20 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
     }
     
     /**
-     * If updating, populate fields with existing request data.
-     */
+    * If updating, populate fields with existing request data.
+    */
     private void populateExistingRequest() {
         if (existingRequest != null) {
             leaveTypeCombo.setSelectedItem(existingRequest.getLeaveType());
-            startDateChooser.setDate(java.util.Date.from(existingRequest.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-            endDateChooser.setDate(java.util.Date.from(existingRequest.getEndDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+            // Convert date string to LocalDate and set it in JDateChooser
+            startDateChooser.setDate(java.util.Date.from(
+                existingRequest.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant())
+            );
+
+            endDateChooser.setDate(java.util.Date.from(
+                existingRequest.getEndDate().atStartOfDay(ZoneId.systemDefault()).toInstant())
+            );
         }
     }
     

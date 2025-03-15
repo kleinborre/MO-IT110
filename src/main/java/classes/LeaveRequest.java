@@ -80,7 +80,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
             String[] nextLine;
 
             while ((nextLine = reader.readNext()) != null) {
-                if (nextLine.length >= 5) {
+                if (nextLine.length >= 6) { // Ensure correct column count
                     leaveRequests.add(nextLine);
                 }
             }
@@ -96,9 +96,9 @@ public class LeaveRequest extends Employee implements CSVHandler {
      */
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) { // "false" ensures overwrite
-            String[] header = {"EmployeeNumber", "LeaveType", "StartDate", "EndDate", "Status"};
-            writer.writeNext(header); // Write header first
+        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) {
+            String[] header = {"EmployeeNumber", "Name", "LeaveType", "StartDate", "EndDate", "Status"};
+            writer.writeNext(header); // Write header only once
             writer.writeAll(data);    // Write all records
         } catch (IOException e) {
             e.printStackTrace();
@@ -109,17 +109,24 @@ public class LeaveRequest extends Employee implements CSVHandler {
      * Submits a new leave request and writes it to the CSV file.
      */
     public void submitLeaveRequest() {
-        List<String[]> allRequests = readCSV(FILE_PATH); // Load existing requests
+        List<String[]> allRequests = readCSV(FILE_PATH);
 
-        // Add new leave request
+        // Get employee's full name
+        String employeeName = getFullName();
+
+        // Create new leave request entry
         String[] newRequest = {
-            String.valueOf(getEmployeeNumber()), leaveType, 
-            startDate.toString(), endDate.toString(), status
+            String.valueOf(getEmployeeNumber()), 
+            employeeName, 
+            leaveType, 
+            startDate.toString(), 
+            endDate.toString(), 
+            status
         };
-        allRequests.add(newRequest);
 
-        // Write updated leave requests back to CSV
-        writeCSV(FILE_PATH, allRequests);
+        allRequests.add(newRequest); // Add new request
+
+        writeCSV(FILE_PATH, allRequests); // Overwrite file with updated list
         System.out.println("Leave request submitted successfully.");
     }
 
@@ -128,26 +135,59 @@ public class LeaveRequest extends Employee implements CSVHandler {
      */
     public void deleteLeaveRequest() {
         List<String[]> allRequests = readCSV(FILE_PATH);
-        boolean requestFound = false;
-
-        // Filter out the leave request to delete
         List<String[]> updatedRequests = new ArrayList<>();
+        boolean isDeleted = false;
+
         for (String[] request : allRequests) {
-            if (!(request[0].equals(String.valueOf(getEmployeeNumber())) &&
-                  request[1].equals(leaveType) &&
-                  request[2].equals(startDate.toString()))) {
-                updatedRequests.add(request); // Keep all other requests
-            } else {
-                requestFound = true; // Mark that we found the request to delete
+            if (request[0].equals(String.valueOf(getEmployeeNumber())) && request[2].equals(leaveType) && request[3].equals(startDate.toString())) {
+                isDeleted = true; // Found and removed this request
+                continue;
+            }
+            updatedRequests.add(request);
+        }
+
+        writeCSV(FILE_PATH, updatedRequests); // Overwrite file with updated data
+
+        if (isDeleted) {
+            System.out.println("Leave request cancelled successfully.");
+        } else {
+            System.out.println("No matching leave request found.");
+        }
+    }
+    
+    /**
+    * Retrieves all leave requests for HR Manager to review.
+    */
+    public static List<String[]> getAllLeaveRequests() {
+        LeaveRequest leaveRequestInstance = new LeaveRequest(0, "", null, null, ""); // Dummy instance
+        return leaveRequestInstance.readCSV(FILE_PATH); // Use instance method
+    }
+    
+    /**
+    * Updates the status of a leave request (Approve/Reject)
+    */
+    public static void updateLeaveStatus(int employeeNumber, String leaveType, String startDate, String status) {
+        LeaveRequest leaveRequestInstance = new LeaveRequest(0, "", null, null, ""); // Dummy instance to use readCSV & writeCSV
+        List<String[]> allRequests = leaveRequestInstance.readCSV(FILE_PATH); // Use instance method
+        boolean updated = false;
+
+        for (String[] request : allRequests) {
+            if (request.length >= 6 && 
+                request[0].equals(String.valueOf(employeeNumber)) &&
+                request[2].equals(leaveType) &&
+                request[3].equals(startDate)) {
+            
+                request[5] = status; // Update Status
+                updated = true;
+                break;
             }
         }
 
-        // Write the updated list back to CSV
-        if (requestFound) {
-            writeCSV(FILE_PATH, updatedRequests);
-            System.out.println("Leave request deleted successfully.");
+        if (updated) {
+            leaveRequestInstance.writeCSV(FILE_PATH, allRequests); // Use instance method
+            System.out.println("Leave request status updated to: " + status);
         } else {
-            System.out.println("Error: Leave request not found.");
+            System.out.println("No matching leave request found.");
         }
     }
 }

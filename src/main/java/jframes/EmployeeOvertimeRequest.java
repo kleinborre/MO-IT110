@@ -35,19 +35,29 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     }
     
     // Constructor for updating an overtime request
-    public EmployeeOvertimeRequest(String[] employeeData, String date, double overtimeHours, double overtimePay, String status) {
-        this.employeeData = employeeData;
-        this.date = date;
-        this.overtimeHours = overtimeHours;
-        this.overtimePay = overtimePay;
-        this.status = status;
-        
-        initComponents();
-        
-        // Preload overtime details in the form
-        overtimejSpinner.setValue(overtimeHours);
-        
+public EmployeeOvertimeRequest(String[] employeeData, String date, double overtimeHours, double overtimePay, String status) {
+    this.employeeData = employeeData;
+    this.date = date;
+    this.overtimeHours = overtimeHours;
+    this.overtimePay = overtimePay;
+    this.status = status;
+
+    initComponents();
+
+    // Set overtime hours
+    overtimejSpinner.setValue(overtimeHours);
+
+    // Convert the date string to Date format and set it in chooseDatejDateChooser
+    try {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date formattedDate = dateFormat.parse(date);
+        chooseDatejDateChooser.setDate(formattedDate);
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error setting date: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
+}
+
     
     public EmployeeOvertimeRequest(String[] employeeData, double overtimeHours, double overtimePay, String status) {
         this.employeeData = employeeData;

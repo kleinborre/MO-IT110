@@ -95,13 +95,14 @@ public class OvertimeRequest extends Employee implements CSVHandler {
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) {
-            String[] header = {"EmployeeNumber", "Date", "OvertimeHours", "OvertimePay", "Status"};
+            String[] header = {"EmployeeNumber", "Name", "Date", "OvertimeHours", "OvertimePay", "Status"};
             writer.writeNext(header); // Write header only once
             writer.writeAll(data);    // Write all records
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     /**
      * Submits a new overtime request and writes it to the CSV file.
@@ -110,9 +111,13 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         List<String[]> allRequests = readCSV(FILE_PATH);
         boolean isUpdated = false;
 
-        // Create new overtime request entry
+        // Get full name of the employee
+        String fullName = getFullName(); 
+
+        // Create new overtime request entry with full name at index 1
         String[] newRequest = {
             String.valueOf(getEmployeeNumber()), 
+            fullName,  // Insert full name here
             date, 
             String.valueOf(overtimeHours), 
             String.valueOf(overtimePay), 
@@ -122,13 +127,13 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         // Check if a request for the same employee on the same date exists (update instead of duplicate)
         for (int i = 0; i < allRequests.size(); i++) {
             String[] request = allRequests.get(i);
-            if (request[0].equals(String.valueOf(getEmployeeNumber())) && request[1].equals(date)) {
+            if (request[0].equals(String.valueOf(getEmployeeNumber())) && request[2].equals(date)) {
                 allRequests.set(i, newRequest); // Update existing request
                 isUpdated = true;
                 break;
             }
         }
-
+        
         if (!isUpdated) {
             allRequests.add(newRequest); // Add new request if it doesn’t exist
         }
@@ -136,6 +141,7 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         writeCSV(FILE_PATH, allRequests); // Overwrite file with updated list
         System.out.println("Overtime request " + (isUpdated ? "updated" : "submitted") + " successfully.");
     }
+
 
     /**
      * Cancels an overtime request by removing it from the CSV file.
@@ -146,7 +152,7 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         boolean isDeleted = false;
 
         for (String[] request : allRequests) {
-            if (request[0].equals(String.valueOf(getEmployeeNumber())) && request[1].equals(date)) {
+            if (request.length >= 6 && request[0].equals(String.valueOf(getEmployeeNumber())) && request[2].equals(date)) {
                 isDeleted = true; // Found and removed this request
                 continue;
             }
@@ -157,6 +163,41 @@ public class OvertimeRequest extends Employee implements CSVHandler {
 
         if (isDeleted) {
             System.out.println("Overtime request cancelled successfully.");
+        } else {
+            System.out.println("No matching overtime request found.");
+        }
+    }
+    
+    /**
+    * Retrieves all overtime requests for HR Manager to review.
+    */
+    public static List<String[]> getAllOvertimeRequests() {
+        OvertimeRequest overtimeRequestInstance = new OvertimeRequest(0, "", 0.0, 0.0, ""); // Dummy instance
+        return overtimeRequestInstance.readCSV(FILE_PATH); // Use instance method
+    }
+
+    /**
+    * Updates the status of an overtime request (Approve/Reject)
+    */
+    public static void updateOvertimeStatus(int employeeNumber, String date, String status) {
+        OvertimeRequest overtimeRequestInstance = new OvertimeRequest(0, "", 0.0, 0.0, ""); // Dummy instance
+        List<String[]> allRequests = overtimeRequestInstance.readCSV(FILE_PATH); // Use instance method
+        boolean updated = false;
+
+        for (String[] request : allRequests) {
+            if (request.length >= 6 && 
+                request[0].equals(String.valueOf(employeeNumber)) &&
+                request[2].equals(date)) {
+
+                request[5] = status; // Update Status
+                updated = true;
+                break;
+            }
+        }
+
+        if (updated) {
+            overtimeRequestInstance.writeCSV(FILE_PATH, allRequests); // Use instance method
+            System.out.println("Overtime request status updated to: " + status);
         } else {
             System.out.println("No matching overtime request found.");
         }
