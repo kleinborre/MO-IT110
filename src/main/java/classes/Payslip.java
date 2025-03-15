@@ -51,72 +51,72 @@ public class Payslip extends Employee implements CSVHandler {
     }
 
     private void processAttendance() {
-    List<String[]> records = readCSV(ATTENDANCE_FILE);
-    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        List<String[]> records = readCSV(ATTENDANCE_FILE);
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-    totalWorkedHours = 0.0; // Reset before calculation
-    HashSet<LocalDate> processedDates = new HashSet<>(); // To track unique days
+        totalWorkedHours = 0.0; // Reset before calculation
+        HashSet<LocalDate> processedDates = new HashSet<>(); // To track unique days
 
-    for (int i = 1; i < records.size(); i++) { // Skip headers
-        String[] record = records.get(i);
+        for (int i = 1; i < records.size(); i++) { // Skip headers
+            String[] record = records.get(i);
 
-        if (record.length >= 6 && record[0].equals(String.valueOf(employeeNumber))) {
-            try {
-                LocalDate date = LocalDate.parse(record[3], dateFormatter);
+            if (record.length >= 6 && record[0].equals(String.valueOf(employeeNumber))) {
+                try {
+                    LocalDate date = LocalDate.parse(record[3], dateFormatter);
 
-                // **Ensure we only process each date once**
-                if (date.getMonthValue() == month && date.getYear() == year && !processedDates.contains(date)) {
-                    String loginStr = record[4].trim();
-                    String logoutStr = record[5].trim();
+                        // **Ensure we only process each date once**
+                        if (date.getMonthValue() == month && date.getYear() == year && !processedDates.contains(date)) {
+                            String loginStr = record[4].trim();
+                            String logoutStr = record[5].trim();
 
-                    // **Fix: Skip if login/logout are empty**
-                    if (loginStr.isEmpty() || logoutStr.isEmpty()) {
-                        System.err.println(" Skipping empty login/logout for Employee #" + employeeNumber + " on " + date);
-                        continue;
+                        // **Fix: Skip if login/logout are empty**
+                        if (loginStr.isEmpty() || logoutStr.isEmpty()) {
+                            System.err.println(" Skipping empty login/logout for Employee #" + employeeNumber + " on " + date);
+                            continue;
+                        }
+
+                        // **Fix: Normalize time values to HH:mm format**
+                        String[] loginParts = loginStr.split(":");
+                        String[] logoutParts = logoutStr.split(":");
+
+                        if (loginParts.length < 2 || logoutParts.length < 2) {
+                            System.err.println(" Skipping invalid time format for Employee #" + employeeNumber + " on " + date);
+                            continue;
+                        }
+
+                        String normalizedLogin = String.format("%02d:%s", Integer.parseInt(loginParts[0]), loginParts[1]);
+                        String normalizedLogout = String.format("%02d:%s", Integer.parseInt(logoutParts[0]), logoutParts[1]);
+
+                        LocalTime loginTime = LocalTime.parse(normalizedLogin, timeFormatter);
+                        LocalTime logoutTime = LocalTime.parse(normalizedLogout, timeFormatter);
+
+                        // **Fix: Prevent processing if login & logout times are identical**
+                        if (logoutTime.equals(loginTime)) {
+                            System.err.println(" Skipping invalid time (Same login/logout): " + loginStr + " - " + logoutStr + " for Employee #" + employeeNumber);
+                            continue;
+                        }
+
+                        // **Fix: Prevent negative worked hours (logout before login)**
+                        if (logoutTime.isBefore(loginTime)) {
+                            System.err.println(" Skipping invalid time (Logout before Login): " + loginStr + " - " + logoutStr + " for Employee #" + employeeNumber);
+                            continue;
+                        }
+
+                        double hoursWorked = Duration.between(loginTime, logoutTime).toMinutes() / 60.0;
+                        totalWorkedHours += hoursWorked;
+
+                        // **Track this date to prevent duplicate processing**
+                        processedDates.add(date);
+
+                        System.out.println(" Processed: " + date + " | " + normalizedLogin + " - " + normalizedLogout + " | Hours: " + hoursWorked);
                     }
-
-                    // **Fix: Normalize time values to HH:mm format**
-                    String[] loginParts = loginStr.split(":");
-                    String[] logoutParts = logoutStr.split(":");
-
-                    if (loginParts.length < 2 || logoutParts.length < 2) {
-                        System.err.println(" Skipping invalid time format for Employee #" + employeeNumber + " on " + date);
-                        continue;
+                } catch (Exception e) {
+                    System.err.println(" Error processing attendance record for Employee #" + employeeNumber + " | " + record[3]);
+                    e.printStackTrace();
                     }
-
-                    String normalizedLogin = String.format("%02d:%s", Integer.parseInt(loginParts[0]), loginParts[1]);
-                    String normalizedLogout = String.format("%02d:%s", Integer.parseInt(logoutParts[0]), logoutParts[1]);
-
-                    LocalTime loginTime = LocalTime.parse(normalizedLogin, timeFormatter);
-                    LocalTime logoutTime = LocalTime.parse(normalizedLogout, timeFormatter);
-
-                    // **Fix: Prevent processing if login & logout times are identical**
-                    if (logoutTime.equals(loginTime)) {
-                        System.err.println(" Skipping invalid time (Same login/logout): " + loginStr + " - " + logoutStr + " for Employee #" + employeeNumber);
-                        continue;
-                    }
-
-                    // **Fix: Prevent negative worked hours (logout before login)**
-                    if (logoutTime.isBefore(loginTime)) {
-                        System.err.println(" Skipping invalid time (Logout before Login): " + loginStr + " - " + logoutStr + " for Employee #" + employeeNumber);
-                        continue;
-                    }
-
-                    double hoursWorked = Duration.between(loginTime, logoutTime).toMinutes() / 60.0;
-                    totalWorkedHours += hoursWorked;
-
-                    // **Track this date to prevent duplicate processing**
-                    processedDates.add(date);
-
-                    System.out.println(" Processed: " + date + " | " + normalizedLogin + " - " + normalizedLogout + " | Hours: " + hoursWorked);
-                }
-            } catch (Exception e) {
-                System.err.println(" Error processing attendance record for Employee #" + employeeNumber + " | " + record[3]);
-                e.printStackTrace();
                 }
             }
-        }
 
         System.out.println(" Total Worked Hours for Employee #" + employeeNumber + " in " + month + "/" + year + ": " + totalWorkedHours);
     }
@@ -137,9 +137,15 @@ public class Payslip extends Employee implements CSVHandler {
         }
     }
 
-    //  Calculate Gross Salary
+    // Calculate Gross Salary
     private void calculateGrossSalary() {
-        grossSalary = (totalWorkedHours * getHourlyRate()) + overtimePay;
+        if (year > 2025 || (year == 2025 && month >= 3)) {
+            // Include overtimePay for March 2025 and beyond
+            grossSalary = (totalWorkedHours * getHourlyRate()) + overtimePay;
+        } else {
+            // Exclude overtimePay for months before March 2025
+            grossSalary = totalWorkedHours * getHourlyRate();
+        }
     }
 
     //  Calculate SSS Deduction based on Salary Bracket
@@ -185,17 +191,67 @@ public class Payslip extends Employee implements CSVHandler {
     }
 
     private void calculateNetSalary() {
-    double totalBenefits = getTotalBenefits(); // Get non-taxable benefits
+        double totalBenefits = getTotalBenefits(); // Get non-taxable benefits
 
-    // Calculate net salary
-    netSalary = (grossSalary - deductions) + totalBenefits; // Add benefits to net pay
-
-    // If Overtime Pay is from previous years (before 2025), subtract it from Net Salary
-    if (year < 2025) {
-        netSalary -= overtimePay;
-        System.out.println("Overtime Pay deducted as it's not from 2025: -" + overtimePay);
+        // Calculate net salary
+        netSalary = (grossSalary - deductions) + totalBenefits; // Add benefits to net pay
     }
-}
+
+    
+    // Returns the first attendance date for the selected month and year
+    public String getStartDate() {
+        List<String[]> records = readCSV(ATTENDANCE_FILE);
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
+        LocalDate startDate = null;
+
+        for (String[] record : records) {
+            if (record.length >= 6 && record[0].equals(String.valueOf(employeeNumber))) {
+                try {
+                    LocalDate date = LocalDate.parse(record[3], dateFormatter);
+                
+                    // Filter records for the selected month and year
+                    if (date.getMonthValue() == month && date.getYear() == year) {
+                        if (startDate == null || date.isBefore(startDate)) {
+                            startDate = date;
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error processing start date for Employee #" + employeeNumber);
+                }
+            }
+        }
+
+        return (startDate != null) ? startDate.format(dateFormatter) : "N/A";
+    }
+
+    // Returns the last attendance date for the selected month and year
+    public String getEndDate() {
+        List<String[]> records = readCSV(ATTENDANCE_FILE);
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
+        LocalDate endDate = null;
+
+        for (String[] record : records) {
+            if (record.length >= 6 && record[0].equals(String.valueOf(employeeNumber))) {
+                try {
+                    LocalDate date = LocalDate.parse(record[3], dateFormatter);
+                    
+                    // Filter records for the selected month and year
+                    if (date.getMonthValue() == month && date.getYear() == year) {
+                        if (endDate == null || date.isAfter(endDate)) {
+                            endDate = date;
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error processing end date for Employee #" + employeeNumber);
+                }
+            }
+        }
+
+        return (endDate != null) ? endDate.format(dateFormatter) : "N/A";
+    }
+
 
     //  Getter Methods
     public double getTotalWorkedHours() { return totalWorkedHours; }
