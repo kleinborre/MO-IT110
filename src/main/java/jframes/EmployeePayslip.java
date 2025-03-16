@@ -47,76 +47,75 @@ public class EmployeePayslip extends javax.swing.JFrame {
 
 
     /**
- * Updates the UI text fields with the latest Payslip calculations.
- */
-private void updatePayslipDetails() {
-    // Pull the current month/year from the UI
-    int selectedMonth = payslipMonthChooser.getMonth() + 1;
-    int selectedYear = jYearChooser.getYear();
+    * Updates the UI text fields with the latest Payslip calculations.
+    */
+    private void updatePayslipDetails() {
+        // Pull the current month/year from the UI
+        int selectedMonth = payslipMonthChooser.getMonth() + 1;
+        int selectedYear = jYearChooser.getYear();
 
-    // Update the Payslip with new month and year
-    payslip.updatePayslip(selectedMonth, selectedYear);
+        // Update the Payslip with new month and year
+        payslip.updatePayslip(selectedMonth, selectedYear);
 
-    // **Process calculations to reflect in UI**
-    payslip.processAttendance();
-    payslip.processOvertime();
-    payslip.calculateGrossSalary();
-    payslip.calculateDeductions();
-    payslip.calculateNetSalary();
+        // **Process calculations to reflect in UI**
+        payslip.processAttendance();
+        payslip.processOvertime();
+        payslip.calculateGrossSalary();
+        payslip.calculateDeductions();
+        payslip.calculateNetSalary();
 
-    // **Start/End Date**
-    startDateText.setText(payslip.getStartDate().equals("No Records") ? "No records" : payslip.getStartDate());
-    endDateText.setText(payslip.getEndDate().equals("No Records") ? "No records" : payslip.getEndDate());
+        // **Start/End Date**
+        startDateText.setText(payslip.getStartDate().equals("No Records") ? "No records" : payslip.getStartDate());
+        endDateText.setText(payslip.getEndDate().equals("No Records") ? "No records" : payslip.getEndDate());
 
-    // **Employee Information**
-    basicSalaryText.setText(String.format("%.2f", employee.getBasicSalary()));
-    hourlyRateText.setText(String.format("%.2f", employee.getHourlyRate()));
+        // **Employee Information**
+        basicSalaryText.setText(String.format("%.2f", payslip.getComputedBasicSalary()));
+        hourlyRateText.setText(String.format("%.2f", employee.getHourlyRate()));
 
-    // **Worked Hours & Overtime**
-    totalHoursText.setText(String.format("%.2f", payslip.getTotalWorkedHours()));
-    overtimeHoursText.setText(String.format("%.2f", payslip.getOvertimeHours()));
+        // **Worked Hours & Overtime**
+        totalHoursText.setText(String.format("%.2f", payslip.getTotalWorkedHours()));
+        overtimeHoursText.setText(String.format("%.2f", payslip.getOvertimeHours()));
 
-    // **Earnings**
-    grossSalaryText.setText(String.format("%.2f", payslip.getGrossSalary()));
-    grossSalaryText1.setText(String.format("%.2f", payslip.getGrossSalary()));
+        // **Earnings**
+        grossSalaryText.setText(String.format("%.2f", payslip.getGrossSalary()));
+        grossSalaryText1.setText(String.format("%.2f", payslip.getGrossSalary()));
 
-    // **Benefits**
-    riceSubsidyText.setText(String.format("%.2f", employee.getRiceSubsidy()));
-    phoneAllowanceText.setText(String.format("%.2f", employee.getPhoneAllowance()));
-    clothingAllowanceText.setText(String.format("%.2f", employee.getClothingAllowance()));
+        // **Benefits**
+        riceSubsidyText.setText(String.format("%.2f", employee.getRiceSubsidy()));
+        phoneAllowanceText.setText(String.format("%.2f", employee.getPhoneAllowance()));
+        clothingAllowanceText.setText(String.format("%.2f", employee.getClothingAllowance()));
 
-    totalBenefitsText.setText(String.format("%.2f", employee.getTotalBenefits()));
-    totalBenefitsText1.setText(String.format("%.2f", employee.getTotalBenefits()));
+        totalBenefitsText.setText(String.format("%.2f", employee.getTotalBenefits()));
+        totalBenefitsText1.setText(String.format("%.2f", employee.getTotalBenefits()));
 
-    // **Deductions**
-    sssDeductionText.setText(String.format("%.2f", payslip.getSssDeduction()));
-    philhealthDeductionText.setText(String.format("%.2f", payslip.getPhilhealthDeduction()));
-    pagibigDeductionText.setText(String.format("%.2f", payslip.getPagibigDeduction()));
-    witholdingTaxDeductionText.setText(String.format("%.2f", payslip.getWithholdingTax()));
+        // **Deductions**
+        sssDeductionText.setText(String.format("%.2f", payslip.getSssDeduction()));
+        philhealthDeductionText.setText(String.format("%.2f", payslip.getPhilhealthDeduction()));
+        pagibigDeductionText.setText(String.format("%.2f", payslip.getPagibigDeduction()));
+        witholdingTaxDeductionText.setText(String.format("%.2f", payslip.getWithholdingTax()));
 
-    totalDeductionsText.setText(String.format("%.2f", payslip.getTotalDeductions()));
-    totalDeductionsText1.setText(String.format("%.2f", payslip.getTotalDeductions()));
+        totalDeductionsText.setText(String.format("%.2f", payslip.getTotalDeductions()));
+        totalDeductionsText1.setText(String.format("%.2f", payslip.getTotalDeductions()));
 
-    // **Final Net Pay**
-    netPayText.setText(String.format("%.2f", payslip.getNetSalary()));
-}
+        // **Final Net Pay**
+        netPayText.setText(String.format("%.2f", payslip.getNetSalary()));
+    }
 
-/**
- * Refreshes the payslip whenever the user changes the month or year.
- */
-private void refreshPayslip() {
-    updatePayslipDetails();
-}
+    /**
+    * Refreshes the payslip whenever the user changes the month or year.
+    */
+    private void refreshPayslip() {
+        updatePayslipDetails();
+    }
 
-/**
- * Adds listeners so that changing the month/year triggers a refresh.
- */
-private void addListeners() {
-    payslipMonthChooser.addPropertyChangeListener("month", evt -> refreshPayslip());
-    jYearChooser.addPropertyChangeListener("year", evt -> refreshPayslip());
-}
+    /**
+    * Adds listeners so that changing the month/year triggers a refresh.
+    */
+    private void addListeners() {
+        payslipMonthChooser.addPropertyChangeListener("month", evt -> refreshPayslip());
+        jYearChooser.addPropertyChangeListener("year", evt -> refreshPayslip());
+    }
 
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
