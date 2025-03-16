@@ -99,30 +99,55 @@ public class Payslip extends Employee {
         overtimePay = 0.0;
 
         List<String[]> otRecords = OvertimeRequest.getAllOvertimeRequests();
+        DateTimeFormatter csvDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // Correct CSV format
+
         for (String[] record : otRecords) {
             if (record.length >= 5 && record[0].equals(String.valueOf(employeeNumber))) {
-                double oh = Double.parseDouble(record[3].trim());
-                double op = Double.parseDouble(record[4].trim());
-                overtimeHours += oh;
-                overtimePay += op;
+                try {
+                    // Parse date directly since it's already in YYYY-MM-DD
+                    LocalDate overtimeDate = LocalDate.parse(record[2].trim(), csvDateFormatter);
+
+                    // Ensure overtime is counted only for the selected month & year
+                    if (overtimeDate.getMonthValue() == month && overtimeDate.getYear() == year) {
+                        double oh = Double.parseDouble(record[3].trim()); // Overtime hours
+                        double op = Double.parseDouble(record[4].trim()); // Overtime pay
+                        overtimeHours += oh;
+                        overtimePay += op;
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error processing overtime for Employee #" + employeeNumber + " on " + record[2] + ": " + e.getMessage());
+                }
             }
         }
     }
 
     public void calculateGrossSalary() {
-        grossSalary = totalWorkedHours * getHourlyRate() + overtimePay;
+        // Ensures correct addition of overtime pay
+        grossSalary = (totalWorkedHours * getHourlyRate()) + overtimePay;
     }
 
     public void calculateDeductions() {
-        calculateSSS();
-        calculatePhilhealth();
-        calculatePagibig();
-        calculateWithholdingTax();
+        if (grossSalary == 0) {
+            sssDeduction = 0;
+            philhealthDeduction = 0;
+            pagibigDeduction = 0;
+            withholdingTax = 0;
+        } else {
+            calculateSSS();
+            calculatePhilhealth();
+            calculatePagibig();
+            calculateWithholdingTax();
+        }
         deductions = sssDeduction + philhealthDeduction + pagibigDeduction + withholdingTax;
     }
 
+
     public void calculateNetSalary() {
-        netSalary = (grossSalary - deductions) + getTotalBenefits();
+        if (grossSalary == 0 && deductions == 0) {
+            netSalary = 0; // Ensures net salary is 0 if there's no gross salary or deductions
+        } else {
+            netSalary = grossSalary - deductions + getTotalBenefits(); // Proper calculation
+        }
     }
 
     private void calculateSSS() {
@@ -139,6 +164,10 @@ public class Payslip extends Employee {
                 return;
             }
         }
+    }
+    
+    public double getComputedBasicSalary() {
+        return totalWorkedHours * getHourlyRate();
     }
 
     private void calculatePhilhealth() {
