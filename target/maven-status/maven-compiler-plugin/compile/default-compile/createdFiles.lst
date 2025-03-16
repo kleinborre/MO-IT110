@@ -64,6 +64,7 @@ jframes\HRManagerAttendance$4.class
 jframes\SystemAdministratorPage$1.class
 jframes\SystemAdministratorUpdateUser$8.class
 jframes\SystemAdministratorCreateUser$18.class
+classes\PayrollManager.class
 jframes\EmployeeProfileInformationUpdateInfo$6.class
 jframes\SystemAdministratorUpdateUser$5.class
 jframes\PayrollManagerPage$3.class
@@ -140,7 +141,6 @@ jframes\SystemAdministratorCreateUser$16.class
 jframes\LoginPage.class
 jframes\EmployeeLeaveRequest$4.class
 jframes\EmployeeOvertime.class
-classes\PayrollCalculator.class
 jframes\SystemAdministratorUpdateUser$17.class
 jframes\EmployeePage$13.class
 jframes\SystemAdministratorCreateUser$12.class

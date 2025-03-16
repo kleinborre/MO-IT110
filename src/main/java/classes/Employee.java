@@ -105,9 +105,9 @@ public class Employee implements CSVHandler {
     public String getUsername() { return username; }
     public String getPassword() { return password; }
     public String getRole() { return role; }
-    public double getTotalBenefits() {
-    return riceSubsidy + phoneAllowance + clothingAllowance;
-}
+    public double getTotalBenefits() { return riceSubsidy + phoneAllowance + clothingAllowance;}
+    
+
 
     // ** Setters (With CSV Update) **
     public void setLastName(String lastName) { this.lastName = lastName; updateCSV(); }

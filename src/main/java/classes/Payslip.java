@@ -1,20 +1,17 @@
 package classes;
 
-import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
-import com.opencsv.exceptions.CsvValidationException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class Payslip extends Employee implements CSVHandler {
+/**
+ * Represents the payslip calculations for a single employee for a given month/year.
+ */
+public class Payslip extends Employee {
+
     private double totalWorkedHours;
     private double overtimeHours;
     private double overtimePay;
@@ -29,126 +26,105 @@ public class Payslip extends Employee implements CSVHandler {
     private int month;
     private int year;
 
-    private static final String ATTENDANCE_FILE = "src/main/java/databases/Attendance Records.csv";
-    private static final String OVERTIME_FILE = "src/main/java/databases/Overtime Requests.csv";
-    private static final String PAYSLIP_FILE = "src/main/java/databases/Payslip Records.csv";
-
     public Payslip(int employeeNumber, int month, int year) {
         super(employeeNumber);
         this.month = month;
         this.year = year;
-        this.totalWorkedHours = 0.0;
-        this.overtimeHours = 0.0;
-        this.overtimePay = 0.0;
-        this.grossSalary = 0.0;
-        this.deductions = 0.0;
-        this.netSalary = 0.0;
-        processAttendance();
-        processOvertime();
-        calculateGrossSalary();
-        calculateDeductions();
-        calculateNetSalary();
+        resetCalculations();
     }
 
-    private void processAttendance() {
-        List<String[]> records = readCSV(ATTENDANCE_FILE);
+    public void updatePayslip(int newMonth, int newYear) {
+        this.month = newMonth;
+        this.year = newYear;
+        resetCalculations();
+    }
+
+    private void resetCalculations() {
+        totalWorkedHours = 0.0;
+        overtimeHours = 0.0;
+        overtimePay = 0.0;
+        grossSalary = 0.0;
+        deductions = 0.0;
+        netSalary = 0.0;
+        sssDeduction = 0.0;
+        philhealthDeduction = 0.0;
+        pagibigDeduction = 0.0;
+        withholdingTax = 0.0;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void processAttendance() {
+        totalWorkedHours = 0.0; 
+        HashSet<LocalDate> processedDays = new HashSet<>();
+
+        List<String[]> records = Attendance.getAllAttendanceRecords();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("H:mm");
 
-        totalWorkedHours = 0.0; // Reset before calculation
-        HashSet<LocalDate> processedDates = new HashSet<>(); // To track unique days
-
-        for (int i = 1; i < records.size(); i++) { // Skip headers
-            String[] record = records.get(i);
-
-            if (record.length >= 6 && record[0].equals(String.valueOf(employeeNumber))) {
+        for (String[] row : records) {
+            if (row.length >= 6 && row[0].trim().equals(String.valueOf(employeeNumber))) {
                 try {
-                    LocalDate date = LocalDate.parse(record[3], dateFormatter);
+                    LocalDate date = LocalDate.parse(row[3].trim(), dateFormatter);
+                    if (date.getMonthValue() == month && date.getYear() == year && !processedDays.contains(date)) {
+                        String loginStr = row[4].trim();
+                        String logoutStr = row[5].trim();
 
-                        // **Ensure we only process each date once**
-                        if (date.getMonthValue() == month && date.getYear() == year && !processedDates.contains(date)) {
-                            String loginStr = record[4].trim();
-                            String logoutStr = record[5].trim();
+                        if (!loginStr.isEmpty() && !logoutStr.isEmpty()) {
+                            LocalTime loginTime = LocalTime.parse(loginStr, timeFormatter);
+                            LocalTime logoutTime = LocalTime.parse(logoutStr, timeFormatter);
 
-                        // **Fix: Skip if login/logout are empty**
-                        if (loginStr.isEmpty() || logoutStr.isEmpty()) {
-                            System.err.println(" Skipping empty login/logout for Employee #" + employeeNumber + " on " + date);
-                            continue;
+                            if (logoutTime.isAfter(loginTime)) {
+                                double hoursWorked = Duration.between(loginTime, logoutTime).toMinutes() / 60.0;
+                                totalWorkedHours += hoursWorked;
+                                processedDays.add(date);
+                            }
                         }
-
-                        // **Fix: Normalize time values to HH:mm format**
-                        String[] loginParts = loginStr.split(":");
-                        String[] logoutParts = logoutStr.split(":");
-
-                        if (loginParts.length < 2 || logoutParts.length < 2) {
-                            System.err.println(" Skipping invalid time format for Employee #" + employeeNumber + " on " + date);
-                            continue;
-                        }
-
-                        String normalizedLogin = String.format("%02d:%s", Integer.parseInt(loginParts[0]), loginParts[1]);
-                        String normalizedLogout = String.format("%02d:%s", Integer.parseInt(logoutParts[0]), logoutParts[1]);
-
-                        LocalTime loginTime = LocalTime.parse(normalizedLogin, timeFormatter);
-                        LocalTime logoutTime = LocalTime.parse(normalizedLogout, timeFormatter);
-
-                        // **Fix: Prevent processing if login & logout times are identical**
-                        if (logoutTime.equals(loginTime)) {
-                            System.err.println(" Skipping invalid time (Same login/logout): " + loginStr + " - " + logoutStr + " for Employee #" + employeeNumber);
-                            continue;
-                        }
-
-                        // **Fix: Prevent negative worked hours (logout before login)**
-                        if (logoutTime.isBefore(loginTime)) {
-                            System.err.println(" Skipping invalid time (Logout before Login): " + loginStr + " - " + logoutStr + " for Employee #" + employeeNumber);
-                            continue;
-                        }
-
-                        double hoursWorked = Duration.between(loginTime, logoutTime).toMinutes() / 60.0;
-                        totalWorkedHours += hoursWorked;
-
-                        // **Track this date to prevent duplicate processing**
-                        processedDates.add(date);
-
-                        System.out.println(" Processed: " + date + " | " + normalizedLogin + " - " + normalizedLogout + " | Hours: " + hoursWorked);
                     }
                 } catch (Exception e) {
-                    System.err.println(" Error processing attendance record for Employee #" + employeeNumber + " | " + record[3]);
-                    e.printStackTrace();
-                    }
+                    System.err.println("Error processing attendance for Employee #" + employeeNumber + ": " + e.getMessage());
                 }
             }
-
-        System.out.println(" Total Worked Hours for Employee #" + employeeNumber + " in " + month + "/" + year + ": " + totalWorkedHours);
+        }
     }
 
+    public void processOvertime() {
+        overtimeHours = 0.0;
+        overtimePay = 0.0;
 
-    //  Process Overtime: Read overtime hours and pay from CSV
-    private void processOvertime() {
-        List<String[]> records = readCSV(OVERTIME_FILE);
-        for (String[] record : records) {
+        List<String[]> otRecords = OvertimeRequest.getAllOvertimeRequests();
+        for (String[] record : otRecords) {
             if (record.length >= 5 && record[0].equals(String.valueOf(employeeNumber))) {
-                try {
-                    overtimeHours += Double.parseDouble(record[3]); // Overtime Hours
-                    overtimePay += Double.parseDouble(record[4]); // Overtime Pay
-                } catch (Exception e) {
-                    System.err.println("Error processing overtime record for Employee #" + employeeNumber);
-                }
+                double oh = Double.parseDouble(record[3].trim());
+                double op = Double.parseDouble(record[4].trim());
+                overtimeHours += oh;
+                overtimePay += op;
             }
         }
     }
 
-    // Calculate Gross Salary
-    private void calculateGrossSalary() {
-        if (year > 2025 || (year == 2025 && month >= 3)) {
-            // Include overtimePay for March 2025 and beyond
-            grossSalary = (totalWorkedHours * getHourlyRate()) + overtimePay;
-        } else {
-            // Exclude overtimePay for months before March 2025
-            grossSalary = totalWorkedHours * getHourlyRate();
-        }
+    public void calculateGrossSalary() {
+        grossSalary = totalWorkedHours * getHourlyRate() + overtimePay;
     }
 
-    //  Calculate SSS Deduction based on Salary Bracket
+    public void calculateDeductions() {
+        calculateSSS();
+        calculatePhilhealth();
+        calculatePagibig();
+        calculateWithholdingTax();
+        deductions = sssDeduction + philhealthDeduction + pagibigDeduction + withholdingTax;
+    }
+
+    public void calculateNetSalary() {
+        netSalary = (grossSalary - deductions) + getTotalBenefits();
+    }
+
     private void calculateSSS() {
         double[][] sssBrackets = {
             {3250, 135}, {3750, 157.50}, {4250, 180}, {4750, 202.50}, {5250, 225},
@@ -160,136 +136,77 @@ public class Payslip extends Employee implements CSVHandler {
         for (double[] bracket : sssBrackets) {
             if (grossSalary <= bracket[0]) {
                 sssDeduction = bracket[1];
-                break;
+                return;
             }
         }
     }
 
-    //  Calculate PhilHealth and Pag-IBIG deductions
-    private void calculatePhilHealthAndPagibig() {
+    private void calculatePhilhealth() {
         philhealthDeduction = Math.min(grossSalary * 0.03 / 2, 900);
+    }
+
+    private void calculatePagibig() {
         pagibigDeduction = Math.min(grossSalary * 0.02, 100);
     }
 
-    //  Calculate Withholding Tax
     private void calculateWithholdingTax() {
         double taxableIncome = grossSalary - (sssDeduction + philhealthDeduction + pagibigDeduction);
-        if (taxableIncome <= 20832) withholdingTax = 0;
-        else if (taxableIncome <= 33333) withholdingTax = (taxableIncome - 20833) * 0.20;
-        else if (taxableIncome <= 66667) withholdingTax = 2500 + (taxableIncome - 33333) * 0.25;
-        else if (taxableIncome <= 166667) withholdingTax = 10833 + (taxableIncome - 66667) * 0.30;
-        else if (taxableIncome <= 666667) withholdingTax = 40833.33 + (taxableIncome - 166667) * 0.32;
-        else withholdingTax = 200833.33 + (taxableIncome - 666667) * 0.35;
+        if (taxableIncome <= 20832) {
+            withholdingTax = 0;
+        } else if (taxableIncome <= 33333) {
+            withholdingTax = (taxableIncome - 20833) * 0.20;
+        } else if (taxableIncome <= 66667) {
+            withholdingTax = 2500 + (taxableIncome - 33333) * 0.25;
+        } else if (taxableIncome <= 166667) {
+            withholdingTax = 10833 + (taxableIncome - 66667) * 0.30;
+        } else if (taxableIncome <= 666667) {
+            withholdingTax = 40833.33 + (taxableIncome - 166667) * 0.32;
+        } else {
+            withholdingTax = 200833.33 + (taxableIncome - 666667) * 0.35;
+        }
     }
 
-    //  Calculate Total Deductions
-    private void calculateDeductions() {
-        calculateSSS();
-        calculatePhilHealthAndPagibig();
-        calculateWithholdingTax();
-        deductions = sssDeduction + philhealthDeduction + pagibigDeduction + withholdingTax;
-    }
-
-    private void calculateNetSalary() {
-        double totalBenefits = getTotalBenefits(); // Get non-taxable benefits
-
-        // Calculate net salary
-        netSalary = (grossSalary - deductions) + totalBenefits; // Add benefits to net pay
-    }
-
-    
-    // Returns the first attendance date for the selected month and year
     public String getStartDate() {
-        List<String[]> records = readCSV(ATTENDANCE_FILE);
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-
-        LocalDate startDate = null;
-
-        for (String[] record : records) {
-            if (record.length >= 6 && record[0].equals(String.valueOf(employeeNumber))) {
-                try {
-                    LocalDate date = LocalDate.parse(record[3], dateFormatter);
-                
-                    // Filter records for the selected month and year
-                    if (date.getMonthValue() == month && date.getYear() == year) {
-                        if (startDate == null || date.isBefore(startDate)) {
-                            startDate = date;
-                        }
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error processing start date for Employee #" + employeeNumber);
-                }
-            }
-        }
-
-        return (startDate != null) ? startDate.format(dateFormatter) : "N/A";
+        return findAttendanceDate(true);
     }
 
-    // Returns the last attendance date for the selected month and year
     public String getEndDate() {
-        List<String[]> records = readCSV(ATTENDANCE_FILE);
+        return findAttendanceDate(false);
+    }
+
+    private String findAttendanceDate(boolean earliest) {
+        List<String[]> records = Attendance.getAllAttendanceRecords();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        LocalDate targetDate = null;
 
-        LocalDate endDate = null;
-
-        for (String[] record : records) {
-            if (record.length >= 6 && record[0].equals(String.valueOf(employeeNumber))) {
+        for (String[] row : records) {
+            if (row.length >= 6 && row[0].trim().equals(String.valueOf(employeeNumber))) {
                 try {
-                    LocalDate date = LocalDate.parse(record[3], dateFormatter);
-                    
-                    // Filter records for the selected month and year
+                    LocalDate date = LocalDate.parse(row[3].trim(), dateFormatter);
                     if (date.getMonthValue() == month && date.getYear() == year) {
-                        if (endDate == null || date.isAfter(endDate)) {
-                            endDate = date;
+                        if (earliest && (targetDate == null || date.isBefore(targetDate))) {
+                            targetDate = date;
+                        } else if (!earliest && (targetDate == null || date.isAfter(targetDate))) {
+                            targetDate = date;
                         }
                     }
                 } catch (Exception e) {
-                    System.err.println("Error processing end date for Employee #" + employeeNumber);
+                    // Ignore parse errors
                 }
             }
         }
-
-        return (endDate != null) ? endDate.format(dateFormatter) : "N/A";
+        return (targetDate != null) ? targetDate.format(dateFormatter) : "No Records";
     }
 
-
-    //  Getter Methods
-    public double getTotalWorkedHours() { return totalWorkedHours; }
-    public double getOvertimeHours() { return overtimeHours; }
-    public double getOvertimePay() { return overtimePay; }
-    public double getGrossSalary() { return grossSalary; }
-    public double getDeductions() { return deductions; }
-    public double getNetSalary() { return netSalary; }
     public double getSssDeduction() { return sssDeduction; }
     public double getPhilhealthDeduction() { return philhealthDeduction; }
     public double getPagibigDeduction() { return pagibigDeduction; }
     public double getWithholdingTax() { return withholdingTax; }
-    public double getTotalDeductions() {return sssDeduction + philhealthDeduction + pagibigDeduction + withholdingTax;}
 
-
-
-    /** CSV Handling */
-    @Override
-    public List<String[]> readCSV(String filePath) {
-        List<String[]> data = new ArrayList<>();
-        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            reader.readNext();
-            String[] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
-                data.add(nextLine);
-            }
-        } catch (IOException | CsvValidationException e) {
-            e.printStackTrace();
-        }
-        return data;
-    }
-
-    @Override
-    public void writeCSV(String filePath, List<String[]> data) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) {
-            writer.writeAll(data);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    public double getTotalWorkedHours() { return totalWorkedHours; }
+    public double getOvertimeHours() { return overtimeHours; }
+    public double getOvertimePay() { return overtimePay; }
+    public double getGrossSalary() { return grossSalary; }
+    public double getNetSalary() { return netSalary; }
+    public double getTotalDeductions() { return deductions; }
 }

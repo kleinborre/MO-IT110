@@ -16,94 +16,106 @@ public class EmployeePayslip extends javax.swing.JFrame {
     private Payslip payslip;
     private Employee employee;
     private String[] employeeData; // Holds authenticated user details
+
     /**
-     * Creates new form EmployeePayslip
+     * Creates new form EmployeePayslip for a specific employee.
      */
     public EmployeePayslip(String[] employeeData) {
-        this.employeeData = employeeData; // Store logged-in employee's data
-        initComponents(); // Initialize UI components
-        
-        int employeeNumber = Integer.parseInt(employeeData[0]); // Get employee number
-        int selectedMonth = payslipMonthChooser.getMonth() + 1;
-        int selectedYear = jYearChooser.getYear();
-
-        this.payslip = new Payslip(employeeNumber, selectedMonth, selectedYear);
-        this.employee = new Employee(employeeNumber);
-        updatePayslipDetails(); // Populate UI fields
-        addListeners(); // Sync date pickers
-    }
-    
-    public EmployeePayslip() {
         this.employeeData = employeeData;
         initComponents();
-    }
-    
-        /**
-     * Updates Payslip Information on the UI
-     */
-    private void updatePayslipDetails() {
-        int selectedMonth = payslipMonthChooser.getMonth() + 1; // Month is 0-based, so add 1
-        int selectedYear = jYearChooser.getYear();
 
-        // Format dates as MM/DD/YYYY
-        String formattedStartDate = String.format("%02d/01/%d", selectedMonth, selectedYear);
-        String formattedEndDate = String.format("%02d/15/%d", selectedMonth, selectedYear);
-
-        startDateText.setText(payslip.getStartDate());
-        endDateText.setText(payslip.getEndDate());
-
-
-        basicSalary.setText(String.format("%.2f", employee.getBasicSalary()));
-        dailyRateText.setText(String.format("%.2f", employee.getHourlyRate()));
-        totalDaysWorked.setText(String.format("%.2f", payslip.getTotalWorkedHours()));
-
-        riceSubsidyText.setText(String.format("%.2f", employee.getRiceSubsidy()));
-        phoneAllowanceText.setText(String.format("%.2f", employee.getPhoneAllowance()));
-        clothingAllowanceText.setText(String.format("%.2f", employee.getClothingAllowance()));
-
-        double totalBenefits = employee.getTotalBenefits();
-        totalBenefitsText.setText(String.format("%.2f", totalBenefits));
-        totalBenefitsText1.setText(String.format("%.2f", totalBenefits)); // Reflect total benefits
-
-        double grossSalary = payslip.getGrossSalary();
-        grossSalaryText.setText(String.format("%.2f", grossSalary));
-        grossSalaryText1.setText(String.format("%.2f", grossSalary)); // Reflect gross salary
-
-        double totalDeductions = payslip.getTotalDeductions();
-        totalDeductionsText.setText(String.format("%.2f", totalDeductions));
-        totalDeductionsText1.setText(String.format("%.2f", totalDeductions)); // Reflect total deductions
-
-        // Overtime Hours Logic: Only show overtime for March 2025
-        double overtimeHours = (selectedMonth == 3 && selectedYear == 2025) ? payslip.getOvertimeHours() : 0;
-        overtimeHoursText.setText(String.format("%.2f", overtimeHours));
-        sssDeductionText.setText(String.format("%.2f", payslip.getSssDeduction()));
-        philhealthDeductionText.setText(String.format("%.2f", payslip.getPhilhealthDeduction()));
-        pagibigDeductionText.setText(String.format("%.2f", payslip.getPagibigDeduction()));
-        witholdingTaxDeductionText.setText(String.format("%.2f", payslip.getWithholdingTax()));
-
-        netPayText.setText(String.format("%.2f", payslip.getNetSalary()));
-    }
-    
-    /**
-     * Refresh Payslip Details when Month/Year is Changed
-     */
-    private void refreshPayslip() {
-        int employeeNumber = Integer.parseInt(employeeData[0]); // Extract employee number
+        // Initialize with the current month/year from the choosers
+        int employeeNumber = Integer.parseInt(employeeData[0]);
         int selectedMonth = payslipMonthChooser.getMonth() + 1;
         int selectedYear = jYearChooser.getYear();
 
+        // Create the Payslip and Employee objects
+        this.employee = new Employee(employeeNumber);
         this.payslip = new Payslip(employeeNumber, selectedMonth, selectedYear);
-        updatePayslipDetails(); // Refresh fields with updated values
+
+        // Fill in the UI fields
+        updatePayslipDetails();
+        addListeners();
+    }
+
+    /**
+     * For GUI Builder testing only (no real data).
+     */
+    public EmployeePayslip() {
+        initComponents();
     }
 
 
     /**
-     * Synchronizes Month and Year Choosers
-     */
-    private void addListeners() {
-        payslipMonthChooser.addPropertyChangeListener(evt -> refreshPayslip());
-        jYearChooser.addPropertyChangeListener(evt -> refreshPayslip());
-    }
+ * Updates the UI text fields with the latest Payslip calculations.
+ */
+private void updatePayslipDetails() {
+    // Pull the current month/year from the UI
+    int selectedMonth = payslipMonthChooser.getMonth() + 1;
+    int selectedYear = jYearChooser.getYear();
+
+    // Update the Payslip with new month and year
+    payslip.updatePayslip(selectedMonth, selectedYear);
+
+    // **Process calculations to reflect in UI**
+    payslip.processAttendance();
+    payslip.processOvertime();
+    payslip.calculateGrossSalary();
+    payslip.calculateDeductions();
+    payslip.calculateNetSalary();
+
+    // **Start/End Date**
+    startDateText.setText(payslip.getStartDate().equals("No Records") ? "No records" : payslip.getStartDate());
+    endDateText.setText(payslip.getEndDate().equals("No Records") ? "No records" : payslip.getEndDate());
+
+    // **Employee Information**
+    basicSalaryText.setText(String.format("%.2f", employee.getBasicSalary()));
+    hourlyRateText.setText(String.format("%.2f", employee.getHourlyRate()));
+
+    // **Worked Hours & Overtime**
+    totalHoursText.setText(String.format("%.2f", payslip.getTotalWorkedHours()));
+    overtimeHoursText.setText(String.format("%.2f", payslip.getOvertimeHours()));
+
+    // **Earnings**
+    grossSalaryText.setText(String.format("%.2f", payslip.getGrossSalary()));
+    grossSalaryText1.setText(String.format("%.2f", payslip.getGrossSalary()));
+
+    // **Benefits**
+    riceSubsidyText.setText(String.format("%.2f", employee.getRiceSubsidy()));
+    phoneAllowanceText.setText(String.format("%.2f", employee.getPhoneAllowance()));
+    clothingAllowanceText.setText(String.format("%.2f", employee.getClothingAllowance()));
+
+    totalBenefitsText.setText(String.format("%.2f", employee.getTotalBenefits()));
+    totalBenefitsText1.setText(String.format("%.2f", employee.getTotalBenefits()));
+
+    // **Deductions**
+    sssDeductionText.setText(String.format("%.2f", payslip.getSssDeduction()));
+    philhealthDeductionText.setText(String.format("%.2f", payslip.getPhilhealthDeduction()));
+    pagibigDeductionText.setText(String.format("%.2f", payslip.getPagibigDeduction()));
+    witholdingTaxDeductionText.setText(String.format("%.2f", payslip.getWithholdingTax()));
+
+    totalDeductionsText.setText(String.format("%.2f", payslip.getTotalDeductions()));
+    totalDeductionsText1.setText(String.format("%.2f", payslip.getTotalDeductions()));
+
+    // **Final Net Pay**
+    netPayText.setText(String.format("%.2f", payslip.getNetSalary()));
+}
+
+/**
+ * Refreshes the payslip whenever the user changes the month or year.
+ */
+private void refreshPayslip() {
+    updatePayslipDetails();
+}
+
+/**
+ * Adds listeners so that changing the month/year triggers a refresh.
+ */
+private void addListeners() {
+    payslipMonthChooser.addPropertyChangeListener("month", evt -> refreshPayslip());
+    jYearChooser.addPropertyChangeListener("year", evt -> refreshPayslip());
+}
+
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -142,9 +154,9 @@ public class EmployeePayslip extends javax.swing.JFrame {
         jLabel28 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         jYearChooser = new com.toedter.calendar.JYearChooser();
-        dailyRateText = new javax.swing.JTextField();
-        basicSalary = new javax.swing.JTextField();
-        totalDaysWorked = new javax.swing.JTextField();
+        hourlyRateText = new javax.swing.JTextField();
+        basicSalaryText = new javax.swing.JTextField();
+        totalHoursText = new javax.swing.JTextField();
         grossSalaryText = new javax.swing.JTextField();
         endDateText = new javax.swing.JTextField();
         overtimeHoursText = new javax.swing.JTextField();
@@ -220,7 +232,7 @@ public class EmployeePayslip extends javax.swing.JFrame {
 
         jLabel12.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel12.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel12.setText("Daily Rate");
+        jLabel12.setText("Hourly Rate");
         getContentPane().add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 280, -1, -1));
 
         jLabel13.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -311,19 +323,19 @@ public class EmployeePayslip extends javax.swing.JFrame {
         jYearChooser.setBackground(new java.awt.Color(204, 204, 204));
         getContentPane().add(jYearChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 150, 70, -1));
 
-        dailyRateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        dailyRateText.addActionListener(new java.awt.event.ActionListener() {
+        hourlyRateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        hourlyRateText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                dailyRateTextActionPerformed(evt);
+                hourlyRateTextActionPerformed(evt);
             }
         });
-        getContentPane().add(dailyRateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 310, 130, -1));
+        getContentPane().add(hourlyRateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 310, 130, -1));
 
-        basicSalary.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        getContentPane().add(basicSalary, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 250, 130, -1));
+        basicSalaryText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(basicSalaryText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 250, 130, -1));
 
-        totalDaysWorked.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        getContentPane().add(totalDaysWorked, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 370, 130, -1));
+        totalHoursText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        getContentPane().add(totalHoursText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 370, 130, -1));
 
         grossSalaryText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         grossSalaryText.addActionListener(new java.awt.event.ActionListener() {
@@ -402,9 +414,9 @@ public class EmployeePayslip extends javax.swing.JFrame {
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 
-    private void dailyRateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dailyRateTextActionPerformed
+    private void hourlyRateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hourlyRateTextActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_dailyRateTextActionPerformed
+    }//GEN-LAST:event_hourlyRateTextActionPerformed
 
     private void startDateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startDateTextActionPerformed
         // TODO add your handling code here:
@@ -452,12 +464,12 @@ public class EmployeePayslip extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private buttons.whiteButton backButton;
     private javax.swing.JLabel background;
-    private javax.swing.JTextField basicSalary;
+    private javax.swing.JTextField basicSalaryText;
     private javax.swing.JTextField clothingAllowanceText;
-    private javax.swing.JTextField dailyRateText;
     private javax.swing.JTextField endDateText;
     private javax.swing.JTextField grossSalaryText;
     private javax.swing.JTextField grossSalaryText1;
+    private javax.swing.JTextField hourlyRateText;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
@@ -496,9 +508,9 @@ public class EmployeePayslip extends javax.swing.JFrame {
     private javax.swing.JTextField startDateText;
     private javax.swing.JTextField totalBenefitsText;
     private javax.swing.JTextField totalBenefitsText1;
-    private javax.swing.JTextField totalDaysWorked;
     private javax.swing.JTextField totalDeductionsText;
     private javax.swing.JTextField totalDeductionsText1;
+    private javax.swing.JTextField totalHoursText;
     private javax.swing.JTextField witholdingTaxDeductionText;
     // End of variables declaration//GEN-END:variables
 }
