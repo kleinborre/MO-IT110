@@ -4,18 +4,56 @@
  */
 package jframes;
 
+import classes.PayrollManager;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
+
 /**
  *
  * @author STUDY MODE
  */
 public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
 
-    /**
-     * Creates new form PayrollManagerMonthlyPayrollSummary
-     */
+    private PayrollManager payrollManager; // Instance-based PayrollManager
+
     public PayrollManagerMonthlyPayrollSummary() {
         initComponents();
+        addListeners();
+        loadPayrollSummary();
     }
+
+    private void addListeners() {
+        payrollSummaryJMonthChooser1.addPropertyChangeListener(evt -> loadPayrollSummary());
+        payrollSummaryYearJChooser.addPropertyChangeListener(evt -> loadPayrollSummary());
+    }
+
+    private void loadPayrollSummary() {
+        int selectedMonth = payrollSummaryJMonthChooser1.getMonth() + 1;
+        int selectedYear = payrollSummaryYearJChooser.getYear();
+
+        // Run payroll processing in a background thread to avoid UI lag
+        new Thread(() -> {
+            try {
+                payrollManager = new PayrollManager(0, selectedMonth, selectedYear);
+                List<String[]> payrollData = payrollManager.processPayrollAttendance();
+
+                DefaultTableModel model = (DefaultTableModel) payrollManagerTable.getModel();
+                model.setRowCount(0);
+
+                for (String[] rowData : payrollData) {
+                    model.addRow(rowData);
+                }
+
+                // Update total salary values
+                totalGrossSalaryText.setText(String.format("%.2f", payrollManager.getTotalGrossSalary()));
+                totalDeductionsText.setText(String.format("%.2f", payrollManager.getTotalDeductions()));
+                totalNetSalaryText.setText(String.format("%.2f", payrollManager.getTotalNetSalary()));
+            } catch (Exception e) {
+                System.err.println("Error loading payroll summary: " + e.getMessage());
+            }
+        }).start(); // Start the thread
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -30,7 +68,16 @@ public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         payrollManagerTable = new javax.swing.JTable();
         jLabel3 = new javax.swing.JLabel();
-        payrollSummaryMonth = new com.toedter.calendar.JMonthChooser();
+        totalNetSalaryText = new javax.swing.JTextField();
+        totalGrossSalaryText = new javax.swing.JTextField();
+        totalDeductionsText = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        payrollSummaryJMonthChooser1 = new com.toedter.calendar.JMonthChooser();
+        payrollSummaryYearJChooser = new com.toedter.calendar.JYearChooser();
+        jLabel6 = new javax.swing.JLabel();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -47,8 +94,6 @@ public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
         });
         getContentPane().add(logoutButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 10, 110, 40));
 
-        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
         payrollManagerTable.setBackground(new java.awt.Color(204, 204, 204));
         payrollManagerTable.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         payrollManagerTable.setForeground(new java.awt.Color(51, 51, 51));
@@ -60,7 +105,7 @@ public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
                 {null, null, null, null, null}
             },
             new String [] {
-                "Employee Number", "Name", "Total Gross Salary", "Total Deductions", "Total Net Salary"
+                "Employee Number", "Name", "Gross Salaries", "Deductions", "Net Salaries"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -73,13 +118,53 @@ public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(payrollManagerTable);
 
-        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 160, 830, 350));
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 160, 820, 260));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel3.setText("Choose Payroll Month");
-        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 120, -1, -1));
-        getContentPane().add(payrollSummaryMonth, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 120, -1, -1));
+        jLabel3.setText("Choose Year:");
+        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 120, -1, -1));
+
+        totalNetSalaryText.setFont(new java.awt.Font("Inter", 0, 24)); // NOI18N
+        getContentPane().add(totalNetSalaryText, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 470, 380, -1));
+
+        totalGrossSalaryText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        getContentPane().add(totalGrossSalaryText, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 470, 170, -1));
+
+        totalDeductionsText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        getContentPane().add(totalDeductionsText, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 470, 170, -1));
+
+        jLabel1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel1.setText("TOTAL NET SALARY");
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 440, 380, -1));
+
+        jLabel2.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel2.setText("TOTAL GROSS SALARY");
+        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 440, -1, -1));
+
+        jLabel4.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel4.setText("TOTAL DEDUCTIONS");
+        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 440, -1, -1));
+
+        jLabel5.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel5.setText("Choose Payroll Month");
+        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 120, -1, -1));
+
+        payrollSummaryJMonthChooser1.setBackground(new java.awt.Color(204, 204, 204));
+        payrollSummaryJMonthChooser1.setForeground(new java.awt.Color(51, 51, 51));
+        getContentPane().add(payrollSummaryJMonthChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 120, -1, -1));
+
+        payrollSummaryYearJChooser.setBackground(new java.awt.Color(204, 204, 204));
+        getContentPane().add(payrollSummaryYearJChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, 80, -1));
+
+        jLabel6.setFont(new java.awt.Font("Inter", 2, 12)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel6.setText("(Select Month and Year to display the Payroll List. There may be a slight delay, so please wait for the result.)");
+        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 420, -1, -1));
 
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Payroll Manager Payroll Summary.png")); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -131,10 +216,19 @@ public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private buttons.whiteButton logoutButton;
     private javax.swing.JTable payrollManagerTable;
-    private com.toedter.calendar.JMonthChooser payrollSummaryMonth;
+    private com.toedter.calendar.JMonthChooser payrollSummaryJMonthChooser1;
+    private com.toedter.calendar.JYearChooser payrollSummaryYearJChooser;
+    private javax.swing.JTextField totalDeductionsText;
+    private javax.swing.JTextField totalGrossSalaryText;
+    private javax.swing.JTextField totalNetSalaryText;
     // End of variables declaration//GEN-END:variables
 }
