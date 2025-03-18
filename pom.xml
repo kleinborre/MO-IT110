@@ -13,9 +13,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>23</maven.compiler.release>
         <exec.mainClass>main.MotorPHOOP</exec.mainClass>
-        <!-- Ensure DPI Awareness to Fix Scaling Issues -->
-        <sun.java2d.dpiAware>true</sun.java2d.dpiAware>
-        <sun.java2d.uiScale>1.0</sun.java2d.uiScale>
     </properties>
 
     <dependencies>
@@ -57,7 +54,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Assembly Plugin (Replaces Shade Plugin) -->
+            <!-- Maven Assembly Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -107,17 +104,13 @@
                 </executions>
             </plugin>
 
-            <!-- Maven Exec Plugin (Run with Fixed DPI Awareness) -->
+            <!-- Maven Exec Plugin -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
                     <mainClass>${exec.mainClass}</mainClass>
-                    <arguments>
-                        <argument>-Dsun.java2d.dpiAware=true</argument>
-                        <argument>-Dsun.java2d.uiScale=1.0</argument>
-                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
