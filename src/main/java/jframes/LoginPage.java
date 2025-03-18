@@ -40,6 +40,7 @@ public class LoginPage extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("MotorPH Payroll System");
+        setLocationByPlatform(true);
         setMaximumSize(new java.awt.Dimension(960, 540));
         setName("loginPage"); // NOI18N
         setResizable(false);
@@ -95,13 +96,15 @@ public class LoginPage extends javax.swing.JFrame {
         errorLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         errorLabel.setForeground(new java.awt.Color(204, 0, 51));
         errorLabel.setToolTipText("");
-        getContentPane().add(errorLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 360, 170, -1));
+        errorLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        getContentPane().add(errorLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 360, 320, 20));
 
-        background.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        background.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Login.png")); // NOI18N
         background.setAlignmentY(0.0F);
         background.setAutoscrolls(true);
         background.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        background.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         background.setIconTextGap(0);
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
