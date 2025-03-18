@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
 
-    private PayrollManager payrollManager; // Instance-based PayrollManager
+    private PayrollManager payrollManager;
 
     public PayrollManagerMonthlyPayrollSummary() {
         initComponents();
@@ -31,27 +31,40 @@ public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
         int selectedMonth = payrollSummaryJMonthChooser1.getMonth() + 1;
         int selectedYear = payrollSummaryYearJChooser.getYear();
 
-        // Run payroll processing in a background thread to avoid UI lag
         new Thread(() -> {
             try {
-                payrollManager = new PayrollManager(0, selectedMonth, selectedYear);
+                payrollManager = new PayrollManager(selectedMonth, selectedYear);
                 List<String[]> payrollData = payrollManager.processPayrollAttendance();
 
                 DefaultTableModel model = (DefaultTableModel) payrollManagerTable.getModel();
                 model.setRowCount(0);
 
+                double totalGrossSalary = 0;
+                double totalDeductions = 0;
+                double totalNetSalary = 0;
+
                 for (String[] rowData : payrollData) {
                     model.addRow(rowData);
+
+                    try {
+                        // Parse values from the table and sum up the totals
+                        totalGrossSalary += Double.parseDouble(rowData[2]);
+                        totalDeductions += Double.parseDouble(rowData[3]);
+                        totalNetSalary += Double.parseDouble(rowData[4]);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing salary data: " + e.getMessage());
+                    }
                 }
 
-                // Update total salary values
-                totalGrossSalaryText.setText(String.format("%.2f", payrollManager.getTotalGrossSalary()));
-                totalDeductionsText.setText(String.format("%.2f", payrollManager.getTotalDeductions()));
-                totalNetSalaryText.setText(String.format("%.2f", payrollManager.getTotalNetSalary()));
+                // Update UI with computed totals
+                totalGrossSalaryText.setText(String.format("%.2f", totalGrossSalary));
+                totalDeductionsText.setText(String.format("%.2f", totalDeductions));
+                totalNetSalaryText.setText(String.format("%.2f", totalNetSalary));
+
             } catch (Exception e) {
                 System.err.println("Error loading payroll summary: " + e.getMessage());
             }
-        }).start(); // Start the thread
+        }).start();
     }
 
 

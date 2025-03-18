@@ -4,13 +4,15 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import javax.swing.JOptionPane;
 
 public class SystemAdministrator extends Employee implements CSVHandler {
 
     private Login login;
-    private static final String FILE_PATH = "src/main/java/databases/Employee Details.csv";
+    private static final String DATABASES_FOLDER = "databases";
+    private static final String FILE_NAME = "Employee Details.csv";
 
     // ** Constructor **
     public SystemAdministrator(int employeeNumber, String username, String password, String role) {
@@ -23,9 +25,13 @@ public class SystemAdministrator extends Employee implements CSVHandler {
         return login.getRole();
     }
 
+    public static File getCSVFile() {
+        return new File("databases/Employee Details.csv");
+    }
+
     // ** Authenticate User (Reuses readCSV Result) **
     public boolean authenticate(String inputUsername, String inputPassword, String selectedRole) {
-        List<String[]> allUsers = readCSV(FILE_PATH);
+        List<String[]> allUsers = readCSV(getCSVFile().getPath());
         
         for (String[] userData : allUsers) {
             if (userData.length >= 22) {
@@ -56,7 +62,7 @@ public class SystemAdministrator extends Employee implements CSVHandler {
 
     // ** Create User (Encapsulated Logic) **
     public void createUser(String[] newUser) {
-        List<String[]> allUsers = readCSV(FILE_PATH);
+        List<String[]> allUsers = readCSV(getCSVFile().getPath());
         
         if (userExists(newUser[0], allUsers)) {
             JOptionPane.showMessageDialog(null, "Employee ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -64,18 +70,18 @@ public class SystemAdministrator extends Employee implements CSVHandler {
         }
 
         allUsers.add(newUser);
-        writeCSV(FILE_PATH, allUsers);
+        writeCSV(getCSVFile().getPath(), allUsers);
         System.out.println("User " + newUser[0] + " created successfully.");
     }
 
     // ** Delete User (Uses Encapsulated Methods) **
     public void deleteUser(String empNumber) {
-        List<String[]> allUsers = readCSV(FILE_PATH);
+        List<String[]> allUsers = readCSV(getCSVFile().getPath());
         int index = findUserIndex(empNumber, allUsers);
 
         if (index != -1) {
             allUsers.remove(index);
-            writeCSV(FILE_PATH, allUsers);
+            writeCSV(getCSVFile().getPath(), allUsers);
             JOptionPane.showMessageDialog(null, "User deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(null, "User not found!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -83,38 +89,27 @@ public class SystemAdministrator extends Employee implements CSVHandler {
     }
 
     // ** Update User (Uses Encapsulated Methods) **
-    public void updateUser(String employeeID, String[] updatedUser) {
-        List<String[]> allUsers = readCSV(FILE_PATH);
-        int index = findUserIndex(employeeID, allUsers);
+    public void updateUser(String employeeNumber, String[] updatedData) {
+        List<String[]> employees = readCSV(Employee.getCSVFile().getPath()); // Read all employees
+        boolean isUpdated = false;
 
-        if (index != -1) {
-            allUsers.set(index, updatedUser); // Update matching row
-            writeCSV(FILE_PATH, allUsers);
-            System.out.println("User " + employeeID + " updated successfully.");
-        } else {
-            System.out.println("Error: Employee ID " + employeeID + " not found!");
-        }
-    }
+        for (int i = 0; i < employees.size(); i++) {
+            String[] empData = employees.get(i);
 
-    // ** Read CSV (Handles Empty File) **
-    @Override
-    public List<String[]> readCSV(String filePath) {
-        List<String[]> usersList = new ArrayList<>();
-
-        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            String[] header = reader.readNext(); // Skip header
-            if (header == null) return usersList; // If file is empty
-
-            String[] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
-                usersList.add(nextLine);
+            // Find the correct employee record by employeeNumber
+            if (empData.length >= 22 && empData[0].equals(employeeNumber)) {
+                employees.set(i, updatedData); // Update the row in the list
+                isUpdated = true;
+                break;
             }
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + filePath);
-        } catch (IOException | CsvValidationException e) {
-            e.printStackTrace();
         }
-        return usersList;
+
+        if (isUpdated) {
+            writeCSV(Employee.getCSVFile().getPath(), employees); // Write updated list back to CSV
+            System.out.println("Employee data updated successfully in CSV.");
+        } else {
+            System.err.println("Employee update failed: Employee not found.");
+        }
     }
 
     // ** Write CSV (Prevents Empty Files) **
@@ -125,7 +120,8 @@ public class SystemAdministrator extends Employee implements CSVHandler {
             return;
         }
 
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) { // "false" ensures overwrite
+        File csvFile = getCSVFile();
+        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, false))) { // "false" ensures overwrite
             String[] header = {
                 "Employee #", "Last Name", "First Name", "Birthday", "Address", "Phone Number",
                 "SSS #", "Philhealth #", "TIN #", "Pag-ibig #", "Status", "Position",
@@ -142,7 +138,20 @@ public class SystemAdministrator extends Employee implements CSVHandler {
 
     // ** Get All Users for Table Display **
     public String[][] getAllUsers() {
-        List<String[]> usersList = readCSV(FILE_PATH);
+        List<String[]> usersList = readCSV(getCSVFile().getPath());
         return usersList.toArray(new String[0][0]);
     }
+    
+    // ** Fetch user data by employee number **
+    public String[] getUserByEmployeeNumber(String employeeNumber) {
+        List<String[]> employees = readCSV(getCSVFile().getPath());
+    
+        for (String[] empData : employees) {
+            if (empData.length >= 22 && empData[0].equals(employeeNumber)) {
+                return empData; // Return the employee's data
+            }
+        }
+        return null; // Not found
+    }
+
 }

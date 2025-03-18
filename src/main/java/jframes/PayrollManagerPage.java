@@ -4,6 +4,12 @@
  */
 package jframes;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import javax.swing.Timer;
+
 /**
  *
  * @author STUDY MODE
@@ -13,8 +19,21 @@ public class PayrollManagerPage extends javax.swing.JFrame {
     /**
      * Creates new form PayrollManagerPage
      */
-    public PayrollManagerPage() {
+    public PayrollManagerPage() {      
+        startRealTimeClock();
         initComponents();
+    }
+    
+    private void startRealTimeClock() {
+        Timer timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                LocalDateTime now = LocalDateTime.now(); 
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); 
+                dateTimeProfileLabel.setText(now.format(formatter)); 
+            }
+        });
+        timer.start();
     }
 
     /**
@@ -29,6 +48,7 @@ public class PayrollManagerPage extends javax.swing.JFrame {
         logoutButton = new buttons.whiteButton();
         jLabel2 = new javax.swing.JLabel();
         profileInformationButton = new buttons.redButton();
+        dateTimeProfileLabel = new javax.swing.JLabel();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -59,6 +79,13 @@ public class PayrollManagerPage extends javax.swing.JFrame {
             }
         });
         getContentPane().add(profileInformationButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 300, 180, 40));
+
+        dateTimeProfileLabel.setFont(new java.awt.Font("Inter", 0, 48)); // NOI18N
+        dateTimeProfileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        dateTimeProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        dateTimeProfileLabel.setText("Date & Time");
+        dateTimeProfileLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        getContentPane().add(dateTimeProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 129, 610, 100));
 
         background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Manager Dashboard.png")); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -116,6 +143,7 @@ public class PayrollManagerPage extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
+    private javax.swing.JLabel dateTimeProfileLabel;
     private javax.swing.JLabel jLabel2;
     private buttons.whiteButton logoutButton;
     private buttons.redButton profileInformationButton;

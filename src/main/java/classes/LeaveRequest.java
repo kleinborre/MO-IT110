@@ -3,9 +3,8 @@ package classes;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +18,9 @@ public class LeaveRequest extends Employee implements CSVHandler {
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
-    
-    private static final String FILE_PATH = "src/main/java/databases/Leave Requests.csv";
+
+    private static final String DATABASES_FOLDER = "databases";
+    private static final String FILE_NAME = "Leave Requests.csv";
 
     /**
      * Constructor for LeaveRequest.
@@ -68,14 +68,51 @@ public class LeaveRequest extends Employee implements CSVHandler {
         this.status = status;
     }
 
+    public static File getCSVFile() {
+        String userDir = System.getProperty("user.dir"); 
+        File csvFile;
+
+        // 1. Check target/databases/ (for NetBeans execution)
+        File targetFile = new File(userDir, "target" + File.separator + DATABASES_FOLDER + File.separator + FILE_NAME);
+        if (targetFile.exists()) {
+            return targetFile;
+        }
+
+        // 2. Check databases/ (for JAR execution)
+        File externalFile = new File(userDir, DATABASES_FOLDER + File.separator + FILE_NAME);
+        if (externalFile.exists()) {
+            return externalFile;
+        }
+
+        // 3. If missing, copy from resources
+        InputStream internalFile = LeaveRequest.class.getClassLoader().getResourceAsStream(DATABASES_FOLDER + "/" + FILE_NAME);
+        if (internalFile != null) {
+            try {
+                File directory = new File(userDir, DATABASES_FOLDER);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+                Files.copy(internalFile, externalFile.toPath());
+                System.out.println("Copied " + FILE_NAME + " from resources to external directory.");
+                return externalFile;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("CSV file not found anywhere: " + FILE_NAME);
+        return null;
+    }
+
     /**
      * Reads all leave requests from the CSV file.
      */
     @Override
     public List<String[]> readCSV(String filePath) {
         List<String[]> leaveRequests = new ArrayList<>();
+        File csvFile = getCSVFile();
 
-        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
             reader.readNext(); // Skip header row
             String[] nextLine;
 
@@ -96,7 +133,9 @@ public class LeaveRequest extends Employee implements CSVHandler {
      */
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) {
+        File csvFile = getCSVFile();
+
+        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, false))) {
             String[] header = {"EmployeeNumber", "Name", "LeaveType", "StartDate", "EndDate", "Status"};
             writer.writeNext(header); // Write header only once
             writer.writeAll(data);    // Write all records
@@ -109,7 +148,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
      * Submits a new leave request and writes it to the CSV file.
      */
     public void submitLeaveRequest() {
-        List<String[]> allRequests = readCSV(FILE_PATH);
+        List<String[]> allRequests = readCSV(getCSVFile().getPath());
 
         // Get employee's full name
         String employeeName = getFullName();
@@ -126,7 +165,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
 
         allRequests.add(newRequest); // Add new request
 
-        writeCSV(FILE_PATH, allRequests); // Overwrite file with updated list
+        writeCSV(getCSVFile().getPath(), allRequests); // Overwrite file with updated list
         System.out.println("Leave request submitted successfully.");
     }
 
@@ -134,7 +173,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
      * Cancels a leave request by removing it from the CSV file.
      */
     public void deleteLeaveRequest() {
-        List<String[]> allRequests = readCSV(FILE_PATH);
+        List<String[]> allRequests = readCSV(getCSVFile().getPath());
         List<String[]> updatedRequests = new ArrayList<>();
         boolean isDeleted = false;
 
@@ -146,7 +185,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
             updatedRequests.add(request);
         }
 
-        writeCSV(FILE_PATH, updatedRequests); // Overwrite file with updated data
+        writeCSV(getCSVFile().getPath(), updatedRequests); // Overwrite file with updated data
 
         if (isDeleted) {
             System.out.println("Leave request cancelled successfully.");
@@ -160,15 +199,15 @@ public class LeaveRequest extends Employee implements CSVHandler {
     */
     public static List<String[]> getAllLeaveRequests() {
         LeaveRequest leaveRequestInstance = new LeaveRequest(0, "", null, null, ""); // Dummy instance
-        return leaveRequestInstance.readCSV(FILE_PATH); // Use instance method
+        return leaveRequestInstance.readCSV(getCSVFile().getPath()); // Use instance method
     }
     
     /**
     * Updates the status of a leave request (Approve/Reject)
     */
     public static void updateLeaveStatus(int employeeNumber, String leaveType, String startDate, String status) {
-        LeaveRequest leaveRequestInstance = new LeaveRequest(0, "", null, null, ""); // Dummy instance to use readCSV & writeCSV
-        List<String[]> allRequests = leaveRequestInstance.readCSV(FILE_PATH); // Use instance method
+        LeaveRequest leaveRequestInstance = new LeaveRequest(0, "", null, null, ""); // Dummy instance
+        List<String[]> allRequests = leaveRequestInstance.readCSV(getCSVFile().getPath());
         boolean updated = false;
 
         for (String[] request : allRequests) {
@@ -184,7 +223,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
         }
 
         if (updated) {
-            leaveRequestInstance.writeCSV(FILE_PATH, allRequests); // Use instance method
+            leaveRequestInstance.writeCSV(getCSVFile().getPath(), allRequests);
             System.out.println("Leave request status updated to: " + status);
         } else {
             System.out.println("No matching leave request found.");

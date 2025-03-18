@@ -3,9 +3,9 @@ package classes;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.io.*;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -16,7 +16,8 @@ public class Attendance extends Employee implements CSVHandler {
     private String login;
     private String logout;
 
-    private static final String FILE_PATH = "src/main/java/databases/Attendance Records.csv";
+    private static final String DATABASE_FOLDER = "databases"; // Updated folder name to match pom.xml
+    private static final String FILE_NAME = "Attendance Records.csv";
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     public Attendance(int employeeNumber, LocalDate date, String login, String logout) {
@@ -36,10 +37,48 @@ public class Attendance extends Employee implements CSVHandler {
     public void setLogin(String login) { this.login = login; }
     public void setLogout(String logout) { this.logout = logout; }
 
+    public static File getCSVFile() {
+        String userDir = System.getProperty("user.dir"); 
+        File csvFile;
+
+        // 1. Check inside target/databases/ (for NetBeans execution)
+        File targetFile = new File(userDir, "target" + File.separator + DATABASE_FOLDER + File.separator + FILE_NAME);
+        if (targetFile.exists()) {
+            return targetFile;
+        }
+
+        // 2. Check inside databases/ (for JAR execution)
+        File externalFile = new File(userDir, DATABASE_FOLDER + File.separator + FILE_NAME);
+        if (externalFile.exists()) {
+            return externalFile;
+        }
+
+        // 3. If not found, try copying from inside JAR
+        InputStream internalFile = Attendance.class.getClassLoader().getResourceAsStream(DATABASE_FOLDER + "/" + FILE_NAME);
+        if (internalFile != null) {
+            try {
+                File directory = new File(userDir, DATABASE_FOLDER);
+                if (!directory.exists()) {
+                    directory.mkdirs(); // Create databases folder only in the current working directory
+                }
+                Files.copy(internalFile, externalFile.toPath());
+                System.out.println("Copied " + FILE_NAME + " from resources to external directory.");
+                return externalFile;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("CSV file not found anywhere: " + FILE_NAME);
+        return null;
+    }
+
     @Override
     public List<String[]> readCSV(String filePath) {
         List<String[]> records = new ArrayList<>();
-        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+        File csvFile = getCSVFile();
+
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
             String[] nextLine;
             reader.readNext(); // Skip header row
             while ((nextLine = reader.readNext()) != null) {
@@ -55,7 +94,9 @@ public class Attendance extends Employee implements CSVHandler {
 
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) {
+        File csvFile = getCSVFile();
+
+        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, false))) {
             String[] header = { "Employee #", "Last Name", "First Name", "Date", "Login Time", "Logout Time" };
             writer.writeNext(header);
             writer.writeAll(data);
@@ -66,7 +107,7 @@ public class Attendance extends Employee implements CSVHandler {
 
     public static List<String[]> getAllAttendanceRecords() {
         Attendance attendanceInstance = new Attendance();
-        return attendanceInstance.readCSV(FILE_PATH);
+        return attendanceInstance.readCSV(getCSVFile().getPath());
     }
 
     public static List<String[]> getEmployeeAttendance(int employeeNumber, int month, int year) {
@@ -90,15 +131,33 @@ public class Attendance extends Employee implements CSVHandler {
     }
 
     public static void appendToCSV(String[] record) {
-        synchronized (Attendance.class) { // Prevents duplicate writes
-            try (CSVWriter writer = new CSVWriter(new FileWriter(FILE_PATH, true))) {
-                writer.writeNext(record);
-                writer.flush(); // Ensure immediate write to disk
-            } catch (IOException e) {
-                e.printStackTrace();
+        synchronized (Attendance.class) { 
+            File csvFile = getCSVFile();
+            List<String[]> allRecords = getAllAttendanceRecords();
+        boolean updated = false;
+        
+        for (String[] row : allRecords) {
+            if (row[0].equals(record[0]) && row[3].equals(record[3]) && row[5].equals("N/A")) { 
+                row[5] = record[5]; // Update the logout time
+                updated = true;
+                break;
             }
         }
+
+        if (!updated) {
+            allRecords.add(record); // If no update was made, add a new entry
+        }
+
+        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, false))) {
+            String[] header = { "Employee #", "Last Name", "First Name", "Date", "Login Time", "Logout Time" };
+            writer.writeNext(header);
+            writer.writeAll(allRecords);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+}
+
     
     public static List<String[]> searchAttendanceRecords(String searchTerm) {
         List<String[]> allRecords = getAllAttendanceRecords();
@@ -106,9 +165,9 @@ public class Attendance extends Employee implements CSVHandler {
 
         for (String[] record : allRecords) {
             if (record.length >= 6) {
-                boolean matches = record[0].equalsIgnoreCase(searchTerm) ||  // Employee Number
-                                record[1].toLowerCase().contains(searchTerm.toLowerCase()) || // Last Name
-                                record[2].toLowerCase().contains(searchTerm.toLowerCase()); // First Name
+                boolean matches = record[0].equalsIgnoreCase(searchTerm) ||  
+                                record[1].toLowerCase().contains(searchTerm.toLowerCase()) || 
+                                record[2].toLowerCase().contains(searchTerm.toLowerCase()); 
 
                 if (matches) {
                     filteredRecords.add(record);

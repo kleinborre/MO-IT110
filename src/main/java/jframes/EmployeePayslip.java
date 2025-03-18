@@ -68,37 +68,37 @@ public class EmployeePayslip extends javax.swing.JFrame {
         startDateText.setText(payslip.getStartDate().equals("No Records") ? "No records" : payslip.getStartDate());
         endDateText.setText(payslip.getEndDate().equals("No Records") ? "No records" : payslip.getEndDate());
 
-        // **Employee Information**
-        basicSalaryText.setText(String.format("%.2f", payslip.getComputedBasicSalary()));
-        hourlyRateText.setText(String.format("%.2f", employee.getHourlyRate()));
+        basicSalaryText.setText(String.format("₱ %.2f", payslip.getComputedBasicSalary()));
+        hourlyRateText.setText(String.format("₱ %.2f", employee.getHourlyRate()));
 
-        // **Worked Hours & Overtime**
+        // Worked Hours & Overtime (No Peso sign needed)
         totalHoursText.setText(String.format("%.2f", payslip.getTotalWorkedHours()));
         overtimeHoursText.setText(String.format("%.2f", payslip.getOvertimeHours()));
 
-        // **Earnings**
-        grossSalaryText.setText(String.format("%.2f", payslip.getGrossSalary()));
-        grossSalaryText1.setText(String.format("%.2f", payslip.getGrossSalary()));
+        // Earnings
+        grossSalaryText.setText(String.format("₱ %.2f", payslip.getGrossSalary()));
+        grossSalaryText1.setText(String.format("₱ %.2f", payslip.getGrossSalary()));
 
-        // **Benefits**
-        riceSubsidyText.setText(String.format("%.2f", employee.getRiceSubsidy()));
-        phoneAllowanceText.setText(String.format("%.2f", employee.getPhoneAllowance()));
-        clothingAllowanceText.setText(String.format("%.2f", employee.getClothingAllowance()));
+        // Benefits
+        riceSubsidyText.setText(String.format("₱ %.2f", employee.getRiceSubsidy()));
+        phoneAllowanceText.setText(String.format("₱ %.2f", employee.getPhoneAllowance()));
+        clothingAllowanceText.setText(String.format("₱%.2f", employee.getClothingAllowance()));
 
-        totalBenefitsText.setText(String.format("%.2f", employee.getTotalBenefits()));
-        totalBenefitsText1.setText(String.format("%.2f", employee.getTotalBenefits()));
+        totalBenefitsText.setText(String.format("₱ %.2f", employee.getTotalBenefits()));
+        totalBenefitsText1.setText(String.format("₱ %.2f", employee.getTotalBenefits()));
 
-        // **Deductions**
-        sssDeductionText.setText(String.format("%.2f", payslip.getSssDeduction()));
-        philhealthDeductionText.setText(String.format("%.2f", payslip.getPhilhealthDeduction()));
-        pagibigDeductionText.setText(String.format("%.2f", payslip.getPagibigDeduction()));
-        witholdingTaxDeductionText.setText(String.format("%.2f", payslip.getWithholdingTax()));
+        // Deductions (No Peso sign, usually deductions are displayed as positive values)
+        sssDeductionText.setText(String.format("₱ %.2f", payslip.getSssDeduction()));
+        philhealthDeductionText.setText(String.format("₱ %.2f", payslip.getPhilhealthDeduction()));
+        pagibigDeductionText.setText(String.format("₱ %.2f", payslip.getPagibigDeduction()));
+        witholdingTaxDeductionText.setText(String.format("₱ %.2f", payslip.getWithholdingTax()));
 
-        totalDeductionsText.setText(String.format("%.2f", payslip.getTotalDeductions()));
-        totalDeductionsText1.setText(String.format("%.2f", payslip.getTotalDeductions()));
+        totalDeductionsText.setText(String.format("₱ %.2f", payslip.getTotalDeductions()));
+        totalDeductionsText1.setText(String.format("₱ %.2f", payslip.getTotalDeductions()));
 
-        // **Final Net Pay**
-        netPayText.setText(String.format("%.2f", payslip.getNetSalary()));
+        // Final Net Pay
+        netPayText.setText(String.format("₱ %.2f", payslip.getNetSalary()));
+
     }
 
     /**

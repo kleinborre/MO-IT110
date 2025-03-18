@@ -111,7 +111,7 @@ public class HRManagerAttendance extends javax.swing.JFrame {
         getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 150, 830, 360));
 
         searchBar.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        getContentPane().add(searchBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 110, 120, 30));
+        getContentPane().add(searchBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 110, 120, 30));
 
         refreshButton.setText("Refresh");
         refreshButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -120,11 +120,11 @@ public class HRManagerAttendance extends javax.swing.JFrame {
                 refreshButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(refreshButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 110, 110, 30));
+        getContentPane().add(refreshButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 110, 110, 30));
 
         jLabel2.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel2.setText("Enter Employee No");
+        jLabel2.setText("Enter Employee No. / Last Name / First Name");
         getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 110, -1, 30));
 
         searchButton1.setText("Search");
@@ -134,7 +134,7 @@ public class HRManagerAttendance extends javax.swing.JFrame {
                 searchButton1ActionPerformed(evt);
             }
         });
-        getContentPane().add(searchButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 110, 110, 30));
+        getContentPane().add(searchButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 110, 110, 30));
 
         jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\HR Manager Attendance Record.png")); // NOI18N
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
