@@ -4,15 +4,10 @@
  */
 package jframes;
 
-import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
-import com.opencsv.exceptions.CsvValidationException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
+import classes.SystemAdministrator;
 import java.util.List;
 import javax.swing.JOptionPane;
+
 
 /**
  *
@@ -20,84 +15,101 @@ import javax.swing.JOptionPane;
  */
 public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
     
-    private String[] employeeData; // Store the logged-in employee's data
-    private static final String FILE_PATH = "src/main/java/databases/Employee Details.csv"; // Path to CSV file
-    /**
-     * Creates new form EmployeeProfileInformationUpdateInfo
-     */
-    
+    private String[] employeeData;
+
     public EmployeeProfileInformationUpdateInfo(String[] employeeData) {
         this.employeeData = employeeData;
         initComponents();
         populateProfileInfo();
     }
-    
+
     public EmployeeProfileInformationUpdateInfo() {
         initComponents();
     }
-    
-        // Method to populate employee information
+
     private void populateProfileInfo() {
         if (employeeData == null || employeeData.length != 22) {
-            System.out.println("Error: Employee data is missing or incorrect.");
+            System.err.println("Error: Employee data is missing or incorrect.");
             return;
         }
 
-        // Populate labels (read-only fields)
-        employeeNumberLabel.setText(employeeData[0]);  
-        fullNameLabel.setText(employeeData[2] + " " + employeeData[1]); 
-        positionLabel.setText(employeeData[11]);  
-        supervisorLabel.setText(employeeData[12]);
-        statusLabel.setText(employeeData[10]);
-        birthdayLabel.setText(employeeData[3]);
-        sssNumberLabel.setText(employeeData[6]);
-        philhealthNumberLabel.setText(employeeData[7]);
-        pagibigNumberLabel.setText(employeeData[8]);
-        tinNumberLabel.setText(employeeData[9]);
-        basicSalaryLabel.setText(employeeData[13]);
-        riceSubsidyLabel.setText(employeeData[14]);
-        phoneAllowanceLabel.setText(employeeData[15]);
-        clothingAllowanceLabel.setText(employeeData[16]);
-        grossSemiMonthlyRateLabel.setText(employeeData[17]);
-        hourlyRateLabel.setText(employeeData[18]);
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        String[] updatedData = admin.getUserByEmployeeNumber(employeeData[0]);
 
-        // Editable fields
-        phoneNumberLabel.setText(employeeData[5]);  // Allow phone number editing
-        addressLabel.setText(employeeData[4]);  // Allow address editing
+        if (updatedData == null) {
+            System.err.println("Error: Employee not found in CSV.");
+            return;
+        }
+
+        // Populate the correct data
+        employeeNumberLabel.setText(updatedData[0]);
+        fullNameLabel.setText(updatedData[2] + " " + updatedData[1]);
+        positionLabel.setText(updatedData[11]);
+        supervisorLabel.setText(updatedData[12]);
+        statusLabel.setText(updatedData[10]);
+        birthdayLabel.setText(updatedData[3]);
+        sssNumberLabel.setText(updatedData[6]);
+        philhealthNumberLabel.setText(updatedData[7]);
+        pagibigNumberLabel.setText(updatedData[8]);
+        tinNumberLabel.setText(updatedData[9]);
+        basicSalaryLabel.setText("₱ " + updatedData[13]);
+        riceSubsidyLabel.setText("₱ " + updatedData[14]);
+        phoneAllowanceLabel.setText("₱ " + updatedData[15]);
+        clothingAllowanceLabel.setText("₱ " + updatedData[16]);
+        grossSemiMonthlyRateLabel.setText("₱ " + updatedData[17]);
+        hourlyRateLabel.setText("₱ " + updatedData[18]);
+
+        // Editable fields (phone and address)
+        phoneNumberLabel.setText(updatedData[5]);
+        addressLabel.setText(updatedData[4]);
     }
-    
-    // 🔹 Method to update CSV file
-    private void updateEmployeeInfoInCSV(String empNumber, String newPhone, String newAddress) {
-        List<String[]> allUsers = new ArrayList<>();
-        boolean found = false;
 
-        try (CSVReader reader = new CSVReader(new FileReader(FILE_PATH))) {
-            String[] headers = reader.readNext(); // Read header row
-            allUsers.add(headers); // Preserve headers
+    private void updateEmployeeInfoInCSV() {
+        String employeeNumber = employeeNumberLabel.getText().trim();
+        String updatedAddress = addressLabel.getText().trim();
+        String updatedPhone = phoneNumberLabel.getText().trim();
 
-            String[] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
-                if (nextLine[0].equals(empNumber)) {  
-                    nextLine[4] = newAddress;  // Update Address
-                    nextLine[5] = newPhone;  // Update Phone Number
-                    found = true;
-                }
-                allUsers.add(nextLine);
-            }
-        } catch (IOException | CsvValidationException e) {
-            e.printStackTrace();
+        if (employeeNumber.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Error: Employee number is missing.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
-        if (found) {
-            try (CSVWriter writer = new CSVWriter(new FileWriter(FILE_PATH))) {
-                writer.writeAll(allUsers);
-            } catch (IOException e) {
-                e.printStackTrace();
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        List<String[]> employees = admin.readCSV(admin.getCSVFile().getPath());
+        boolean updated = false;
+
+        for (int i = 0; i < employees.size(); i++) {
+            String[] empData = employees.get(i);
+            if (empData.length >= 22 && empData[0].equals(employeeNumber)) {
+                empData[4] = updatedAddress;
+                empData[5] = updatedPhone;
+                employees.set(i, empData);
+                updated = true;
+                break;
             }
+        }
+
+        if (updated) {
+            admin.writeCSV(admin.getCSVFile().getPath(), employees);
+            JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            refreshEmployeeData(employeeNumber);
         } else {
-            JOptionPane.showMessageDialog(this, "Employee not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error: Employee not found in CSV.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }   
+    }
+
+    private void refreshEmployeeData(String employeeNumber) {
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        List<String[]> employees = admin.readCSV(admin.getCSVFile().getPath());
+
+        for (String[] empData : employees) {
+            if (empData.length >= 22 && empData[0].equals(employeeNumber)) {
+                addressLabel.setText(empData[4]);
+                phoneNumberLabel.setText(empData[5]);
+                return;
+            }
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -462,7 +474,7 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeProfileInformation(this.employeeData).setVisible(true);
+        new EmployeeProfileInformation(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 
@@ -541,24 +553,9 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
     }//GEN-LAST:event_backButton1ActionPerformed
 
     private void doneButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_doneButtonActionPerformed
-        // Get updated values
-        String updatedPhoneNumber = phoneNumberLabel.getText().trim();
-        String updatedAddress = addressLabel.getText().trim();
-        String employeeNumber = employeeData[0];  // Employee ID is primary key
-
-        // Update CSV
-        updateEmployeeInfoInCSV(employeeNumber, updatedPhoneNumber, updatedAddress);
-
-        // **Update employeeData for real-time reflection**
-        employeeData[5] = updatedPhoneNumber;
-        employeeData[4] = updatedAddress;
-
-        // Show success message
-        JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-        // **Pass updated data back to EmployeeProfileInformation**
+        updateEmployeeInfoInCSV();
         new EmployeeProfileInformation(employeeData).setVisible(true);
-        dispose();  // Close this window       
+        dispose();
     }//GEN-LAST:event_doneButtonActionPerformed
 
     /**

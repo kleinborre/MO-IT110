@@ -3,9 +3,8 @@ package classes;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +18,8 @@ public class OvertimeRequest extends Employee implements CSVHandler {
     private double overtimePay;
     private String status;
 
-    private static final String FILE_PATH = "src/main/java/databases/Overtime Requests.csv";
+    private static final String DATABASES_FOLDER = "databases";
+    private static final String FILE_NAME = "Overtime Requests.csv";
 
     /**
      * Constructor for OvertimeRequest.
@@ -66,14 +66,51 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         this.status = status;
     }
 
+    public static File getCSVFile() {
+        String userDir = System.getProperty("user.dir"); 
+        File csvFile;
+
+        // 1. Check target/databases/ (for NetBeans execution)
+        File targetFile = new File(userDir, "target" + File.separator + DATABASES_FOLDER + File.separator + FILE_NAME);
+        if (targetFile.exists()) {
+            return targetFile;
+        }
+
+        // 2. Check databases/ (for JAR execution)
+        File externalFile = new File(userDir, DATABASES_FOLDER + File.separator + FILE_NAME);
+        if (externalFile.exists()) {
+            return externalFile;
+        }
+
+        // 3. If missing, copy from resources
+        InputStream internalFile = OvertimeRequest.class.getClassLoader().getResourceAsStream(DATABASES_FOLDER + "/" + FILE_NAME);
+        if (internalFile != null) {
+            try {
+                File directory = new File(userDir, DATABASES_FOLDER);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+                Files.copy(internalFile, externalFile.toPath());
+                System.out.println("Copied " + FILE_NAME + " from resources to external directory.");
+                return externalFile;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("CSV file not found anywhere: " + FILE_NAME);
+        return null;
+    }
+
     /** 
      * Reads all overtime requests from the CSV file.
      */
     @Override
     public List<String[]> readCSV(String filePath) {
         List<String[]> overtimeRequests = new ArrayList<>();
+        File csvFile = getCSVFile();
 
-        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
             reader.readNext(); // Skip header row
             String[] nextLine;
 
@@ -94,7 +131,9 @@ public class OvertimeRequest extends Employee implements CSVHandler {
      */
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) {
+        File csvFile = getCSVFile();
+
+        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, false))) {
             String[] header = {"EmployeeNumber", "Name", "Date", "OvertimeHours", "OvertimePay", "Status"};
             writer.writeNext(header); // Write header only once
             writer.writeAll(data);    // Write all records
@@ -103,12 +142,11 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         }
     }
 
-
     /**
      * Submits a new overtime request and writes it to the CSV file.
      */
     public void submitOvertimeRequest() {
-        List<String[]> allRequests = readCSV(FILE_PATH);
+        List<String[]> allRequests = readCSV(getCSVFile().getPath());
         boolean isUpdated = false;
 
         // Get full name of the employee
@@ -138,16 +176,15 @@ public class OvertimeRequest extends Employee implements CSVHandler {
             allRequests.add(newRequest); // Add new request if it doesn’t exist
         }
 
-        writeCSV(FILE_PATH, allRequests); // Overwrite file with updated list
+        writeCSV(getCSVFile().getPath(), allRequests); // Overwrite file with updated list
         System.out.println("Overtime request " + (isUpdated ? "updated" : "submitted") + " successfully.");
     }
-
 
     /**
      * Cancels an overtime request by removing it from the CSV file.
      */
     public void cancelOvertimeRequest() {
-        List<String[]> allRequests = readCSV(FILE_PATH);
+        List<String[]> allRequests = readCSV(getCSVFile().getPath());
         List<String[]> updatedRequests = new ArrayList<>();
         boolean isDeleted = false;
 
@@ -159,7 +196,7 @@ public class OvertimeRequest extends Employee implements CSVHandler {
             updatedRequests.add(request);
         }
 
-        writeCSV(FILE_PATH, updatedRequests); // Overwrite file with updated data
+        writeCSV(getCSVFile().getPath(), updatedRequests); // Overwrite file with updated data
 
         if (isDeleted) {
             System.out.println("Overtime request cancelled successfully.");
@@ -173,7 +210,7 @@ public class OvertimeRequest extends Employee implements CSVHandler {
     */
     public static List<String[]> getAllOvertimeRequests() {
         OvertimeRequest overtimeRequestInstance = new OvertimeRequest(0, "", 0.0, 0.0, ""); // Dummy instance
-        return overtimeRequestInstance.readCSV(FILE_PATH); // Use instance method
+        return overtimeRequestInstance.readCSV(getCSVFile().getPath()); // Use instance method
     }
 
     /**
@@ -181,7 +218,7 @@ public class OvertimeRequest extends Employee implements CSVHandler {
     */
     public static void updateOvertimeStatus(int employeeNumber, String date, String status) {
         OvertimeRequest overtimeRequestInstance = new OvertimeRequest(0, "", 0.0, 0.0, ""); // Dummy instance
-        List<String[]> allRequests = overtimeRequestInstance.readCSV(FILE_PATH); // Use instance method
+        List<String[]> allRequests = overtimeRequestInstance.readCSV(getCSVFile().getPath());
         boolean updated = false;
 
         for (String[] request : allRequests) {
@@ -196,7 +233,7 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         }
 
         if (updated) {
-            overtimeRequestInstance.writeCSV(FILE_PATH, allRequests); // Use instance method
+            overtimeRequestInstance.writeCSV(getCSVFile().getPath(), allRequests);
             System.out.println("Overtime request status updated to: " + status);
         } else {
             System.out.println("No matching overtime request found.");

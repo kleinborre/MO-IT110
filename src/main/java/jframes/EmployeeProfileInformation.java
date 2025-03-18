@@ -4,55 +4,65 @@
  */
 package jframes;
 
+import classes.Employee;
+import classes.SystemAdministrator;
+import java.util.List;
+
 /**
  *
  * @author STUDY MODE
  */
 public class EmployeeProfileInformation extends javax.swing.JFrame {
     
-    private String[] employeeData; // Store the logged-in employee's data
-    /**
-     * Creates new form EmployeeProfileInformation
-     */
+    private String[] employeeData;
+
     public EmployeeProfileInformation(String[] employeeData) {
         this.employeeData = employeeData;
         initComponents();
         populateProfileInfo();
     }
-    
-    public EmployeeProfileInformation(){
+
+    public EmployeeProfileInformation() {
         initComponents();
     }
-    
-    // Method to populate employee information
+
     private void populateProfileInfo() {
         if (employeeData == null || employeeData.length != 22) {
-            System.out.println("Error: Employee data is missing or incorrect.");
+            System.err.println("Error: Employee data is missing or incorrect.");
             return;
         }
 
-        // Update UI with latest data
-        employeeNumberLabel.setText(employeeData[0]);  
-        fullNameLabel.setText(employeeData[2] + " " + employeeData[1]); 
-        positionLabel.setText(employeeData[11]);  
-        supervisorLabel.setText(employeeData[12]);
-        statusLabel.setText(employeeData[10]);
-        birthdayLabel.setText(employeeData[3]);
-        sssNumberLabel.setText(employeeData[6]);
-        philhealthNumberLabel.setText(employeeData[7]);
-        pagibigNumberLabel.setText(employeeData[8]);
-        tinNumberLabel.setText(employeeData[9]);
-        basicSalaryLabel.setText(employeeData[13]);
-        riceSubsidyLabel.setText(employeeData[14]);
-        phoneAllowanceLabel.setText(employeeData[15]);
-        clothingAllowanceLabel.setText(employeeData[16]);
-        grossSemiMonthlyRateLabel.setText(employeeData[17]);
-        hourlyRateLabel.setText(employeeData[18]);
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        String[] updatedData = admin.getUserByEmployeeNumber(employeeData[0]);
 
-        // **Show updated Phone Number & Address**
-        phoneNumberLabel.setText(employeeData[5]);  
-        addressLabel.setText(employeeData[4]);
+        if (updatedData == null) {
+            System.err.println("Error: Employee not found in CSV.");
+            return;
+        }
+
+        // Populate the correct data
+        employeeNumberLabel.setText(updatedData[0]);
+        fullNameLabel.setText(updatedData[2] + " " + updatedData[1]);
+        positionLabel.setText(updatedData[11]);
+        supervisorLabel.setText(updatedData[12]);
+        statusLabel.setText(updatedData[10]);
+        birthdayLabel.setText(updatedData[3]);
+        sssNumberLabel.setText(updatedData[6]);
+        philhealthNumberLabel.setText(updatedData[7]);
+        pagibigNumberLabel.setText(updatedData[8]);
+        tinNumberLabel.setText(updatedData[9]);
+        basicSalaryLabel.setText("₱ " + updatedData[13]);
+        riceSubsidyLabel.setText("₱ " + updatedData[14]);
+        phoneAllowanceLabel.setText("₱ " + updatedData[15]);
+        clothingAllowanceLabel.setText("₱ " + updatedData[16]);
+        grossSemiMonthlyRateLabel.setText("₱ " + updatedData[17]);
+        hourlyRateLabel.setText("₱ " + updatedData[18]);
+
+        // Editable fields (phone and address)
+        phoneNumberLabel.setText(updatedData[5]);
+        addressLabel.setText(updatedData[4]);
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -408,7 +418,7 @@ public class EmployeeProfileInformation extends javax.swing.JFrame {
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeePage(this.employeeData).setVisible(true);
+        new EmployeePage(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 
@@ -482,8 +492,8 @@ public class EmployeeProfileInformation extends javax.swing.JFrame {
 
     private void updateInfoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateInfoButtonActionPerformed
         // TODO add your handling code here:
-        new EmployeeProfileInformationUpdateInfo(this.employeeData).setVisible(true);
-        dispose();
+        new EmployeeProfileInformationUpdateInfo(employeeData).setVisible(true);
+        dispose(); // Close this window
     }//GEN-LAST:event_updateInfoButtonActionPerformed
 
     /**

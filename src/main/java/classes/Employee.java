@@ -4,12 +4,14 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 
 public class Employee implements CSVHandler {
     protected int employeeNumber;
     protected String lastName;
     protected String firstName;
+    protected String birthday;
     protected String address;
     protected String phoneNumber;
     protected String sssNumber;
@@ -29,23 +31,44 @@ public class Employee implements CSVHandler {
     protected String password;
     protected String role;
 
-    private static final String FILE_PATH = "src/main/java/databases/Employee Details.csv";
+    private static final String DATABASES_FOLDER = "databases";
+    private static final String FILE_NAME = "Employee Details.csv";
 
     // ** Default Constructor **
     public Employee() {}
 
-    // ** Constructor that loads data from CSV using Employee Number **
+    // ** Constructor that loads employee data from CSV using Employee Number **
     public Employee(int employeeNumber) {
         this.employeeNumber = employeeNumber;
         loadEmployeeData();
     }
 
-    /**
-     * **Load Employee Data from CSV**
-     * - Finds the employee in CSV and assigns values to attributes.
-     */
+    // ** Retrieve Employee CSV File **
+    public static File getCSVFile() {
+        String userDir = System.getProperty("user.dir");
+        File csvFile = new File(userDir, DATABASES_FOLDER + File.separator + FILE_NAME);
+
+        if (!csvFile.exists()) {
+            InputStream internalFile = Employee.class.getClassLoader().getResourceAsStream(DATABASES_FOLDER + "/" + FILE_NAME);
+            if (internalFile != null) {
+                try {
+                    File directory = new File(userDir, DATABASES_FOLDER);
+                    if (!directory.exists()) {
+                        directory.mkdirs();
+                    }
+                    Files.copy(internalFile, csvFile.toPath());
+                    System.out.println(" Copied " + FILE_NAME + " from resources.");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return csvFile;
+    }
+
+    // ** Load Employee Data from CSV **
     private void loadEmployeeData() {
-        List<String[]> employees = readCSV(FILE_PATH);
+        List<String[]> employees = readCSV(getCSVFile().getPath());
 
         for (String[] data : employees) {
             if (data.length >= 22 && data[0].equals(String.valueOf(employeeNumber))) {
@@ -61,20 +84,19 @@ public class Employee implements CSVHandler {
                     this.status = data[10];
                     this.position = data[11];
                     this.immediateSupervisor = data[12];
-                    
-                    // **Trim and clean all double values**
+
                     this.basicSalary = Double.parseDouble(data[13].trim().replace(",", ""));
                     this.riceSubsidy = Double.parseDouble(data[14].trim().replace(",", ""));
                     this.phoneAllowance = Double.parseDouble(data[15].trim().replace(",", ""));
                     this.clothingAllowance = Double.parseDouble(data[16].trim().replace(",", ""));
                     this.grossSemiMonthlyRate = Double.parseDouble(data[17].trim().replace(",", ""));
                     this.hourlyRate = Double.parseDouble(data[18].trim().replace(",", ""));
-                    
+
                     this.username = data[19];
                     this.password = data[20];
                     this.role = data[21];
                 } catch (NumberFormatException e) {
-                    System.err.println("Error parsing numeric values for Employee #" + employeeNumber);
+                    System.err.println("❌ Error parsing numeric values for Employee #" + employeeNumber);
                     e.printStackTrace();
                 }
                 break;
@@ -105,74 +127,67 @@ public class Employee implements CSVHandler {
     public String getUsername() { return username; }
     public String getPassword() { return password; }
     public String getRole() { return role; }
-    public double getTotalBenefits() { return riceSubsidy + phoneAllowance + clothingAllowance;}
-    
+    public double getTotalBenefits() { return riceSubsidy + phoneAllowance + clothingAllowance; }
+    public String getBirthday() {return birthday;}
 
+    // ** Setters that update CSV **
+    public void setAddress(String address) {
+        this.address = address;
+        updateCSV();
+    }
 
-    // ** Setters (With CSV Update) **
-    public void setLastName(String lastName) { this.lastName = lastName; updateCSV(); }
-    public void setFirstName(String firstName) { this.firstName = firstName; updateCSV(); }
-    public void setAddress(String address) { this.address = address; updateCSV(); }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; updateCSV(); }
-    public void setSssNumber(String sssNumber) { this.sssNumber = sssNumber; updateCSV(); }
-    public void setPhilhealthNumber(String philhealthNumber) { this.philhealthNumber = philhealthNumber; updateCSV(); }
-    public void setPagibigNumber(String pagibigNumber) { this.pagibigNumber = pagibigNumber; updateCSV(); }
-    public void setTinNumber(String tinNumber) { this.tinNumber = tinNumber; updateCSV(); }
-    public void setStatus(String status) { this.status = status; updateCSV(); }
-    public void setPosition(String position) { this.position = position; updateCSV(); }
-    public void setImmediateSupervisor(String immediateSupervisor) { this.immediateSupervisor = immediateSupervisor; updateCSV(); }
-    public void setBasicSalary(double basicSalary) { this.basicSalary = basicSalary; updateCSV(); }
-    public void setRiceSubsidy(double riceSubsidy) { this.riceSubsidy = riceSubsidy; updateCSV(); }
-    public void setPhoneAllowance(double phoneAllowance) { this.phoneAllowance = phoneAllowance; updateCSV(); }
-    public void setClothingAllowance(double clothingAllowance) { this.clothingAllowance = clothingAllowance; updateCSV(); }
-    public void setGrossSemiMonthlyRate(double grossSemiMonthlyRate) { this.grossSemiMonthlyRate = grossSemiMonthlyRate; updateCSV(); }
-    public void setHourlyRate(double hourlyRate) { this.hourlyRate = hourlyRate; updateCSV(); }
-    public void setUsername(String username) { this.username = username; updateCSV(); }
-    public void setPassword(String password) { this.password = password; updateCSV(); }
-    public void setRole(String role) { this.role = role; updateCSV(); }
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+        updateCSV();
+    }
 
-    /**
-     * **Updates Employee Data in CSV File**
-     * - Finds and updates the correct row in the CSV file.
-     */
-    private void updateCSV() {
-        List<String[]> employees = readCSV(FILE_PATH);
+    // ** Update Employee Data in CSV **
+    public void updateEmployeeInfo(String[] updatedData) {
+        List<String[]> employees = readCSV(getCSVFile().getPath()); // Read all employees
+        boolean isUpdated = false;
 
-        for (String[] data : employees) {
-            if (data[0].equals(String.valueOf(employeeNumber))) {
-                data[1] = lastName;
-                data[2] = firstName;
-                data[4] = address;
-                data[5] = phoneNumber;
-                data[6] = sssNumber;
-                data[7] = philhealthNumber;
-                data[8] = pagibigNumber;
-                data[9] = tinNumber;
-                data[10] = status;
-                data[11] = position;
-                data[12] = immediateSupervisor;
-                data[13] = String.valueOf(basicSalary);
-                data[14] = String.valueOf(riceSubsidy);
-                data[15] = String.valueOf(phoneAllowance);
-                data[16] = String.valueOf(clothingAllowance);
-                data[17] = String.valueOf(grossSemiMonthlyRate);
-                data[18] = String.valueOf(hourlyRate);
-                data[19] = username;
-                data[20] = password;
-                data[21] = role;
+        for (int i = 0; i < employees.size(); i++) {
+            String[] empData = employees.get(i);
+
+            // Ensure the correct row is found (by employeeNumber)
+            if (empData.length >= 22 && empData[0].equals(updatedData[0])) {
+                employees.set(i, updatedData); // Update the correct row
+                isUpdated = true;
                 break;
             }
         }
 
-        writeCSV(FILE_PATH, employees);
+        if (isUpdated) {
+            writeCSV(getCSVFile().getPath(), employees); // Write updated data back to CSV
+            System.out.println("Employee data updated successfully in CSV.");
+        } else {
+            System.err.println("Employee update failed: Employee not found.");
+        }
     }
 
-    // CSV Read Method
+    private void updateCSV() {
+        File csvFile = getCSVFile();
+        List<String[]> employees = readCSV(csvFile.getPath());
+
+        for (int i = 0; i < employees.size(); i++) {
+            if (employees.get(i)[0].equals(String.valueOf(employeeNumber))) {
+                employees.get(i)[4] = this.address; // Update Address
+                employees.get(i)[5] = this.phoneNumber; // Update Phone Number
+                break;
+            }
+        }
+
+        // ** Write updated data back to CSV **
+        writeCSV(csvFile.getPath(), employees);
+    }
+
+
+    // ** Read CSV File **
     @Override
     public List<String[]> readCSV(String filePath) {
         List<String[]> employees = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            reader.readNext(); // Skip header
+            reader.readNext();
             String[] nextLine;
             while ((nextLine = reader.readNext()) != null) {
                 if (nextLine.length >= 22) {
@@ -185,13 +200,13 @@ public class Employee implements CSVHandler {
         return employees;
     }
 
-    // CSV Write Method
+    // ** Write to CSV File **
     @Override
     public void writeCSV(String filePath, List<String[]> data) {
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, false))) {
             String[] header = {
                 "Employee #", "Last Name", "First Name", "Birthday", "Address", "Phone Number",
-                "SSS #", "Philhealth #", "TIN #", "Pag-ibig #", "Status", "Position",
+                "SSS #", "Philhealth #", "Pagibig #", "TIN #", "Status", "Position",
                 "Immediate Supervisor", "Basic Salary", "Rice Subsidy", "Phone Allowance",
                 "Clothing Allowance", "Gross Semi-monthly Rate", "Hourly Rate",
                 "Username", "Password", "Role"
@@ -201,5 +216,11 @@ public class Employee implements CSVHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // ** Get All Employees for Table Display **
+    public static List<String[]> getAllEmployees() {
+        Employee empInstance = new Employee();
+        return empInstance.readCSV(getCSVFile().getPath());
     }
 }

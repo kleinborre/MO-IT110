@@ -120,7 +120,7 @@ public class LoginPage extends javax.swing.JFrame {
         String selectedRole = roleBox.getSelectedItem().toString().trim().replaceAll("\\s", "").toLowerCase();
 
         SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
-        List<String[]> users = admin.readCSV("src/main/java/databases/Employee Details.csv");
+        List<String[]> users = admin.readCSV("databases/Employee Details.csv");
 
         // Reset error label before validation
         errorLabel.setText("");
