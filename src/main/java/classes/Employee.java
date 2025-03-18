@@ -27,9 +27,6 @@ public class Employee implements CSVHandler {
     protected double clothingAllowance;
     protected double grossSemiMonthlyRate;
     protected double hourlyRate;
-    protected String username;
-    protected String password;
-    protected String role;
 
     private static final String DATABASES_FOLDER = "databases";
     private static final String FILE_NAME = "Employee Details.csv";
@@ -91,10 +88,6 @@ public class Employee implements CSVHandler {
                     this.clothingAllowance = Double.parseDouble(data[16].trim().replace(",", ""));
                     this.grossSemiMonthlyRate = Double.parseDouble(data[17].trim().replace(",", ""));
                     this.hourlyRate = Double.parseDouble(data[18].trim().replace(",", ""));
-
-                    this.username = data[19];
-                    this.password = data[20];
-                    this.role = data[21];
                 } catch (NumberFormatException e) {
                     System.err.println("❌ Error parsing numeric values for Employee #" + employeeNumber);
                     e.printStackTrace();
@@ -124,9 +117,6 @@ public class Employee implements CSVHandler {
     public double getClothingAllowance() { return clothingAllowance; }
     public double getGrossSemiMonthlyRate() { return grossSemiMonthlyRate; }
     public double getHourlyRate() { return hourlyRate; }
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
-    public String getRole() { return role; }
     public double getTotalBenefits() { return riceSubsidy + phoneAllowance + clothingAllowance; }
     public String getBirthday() {return birthday;}
 
