@@ -164,6 +164,7 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("MotorPH Payroll System");
+        setMaximumSize(new java.awt.Dimension(960, 540));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         backButton.setText("Back");
@@ -464,7 +465,7 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
         });
         getContentPane().add(doneButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 320, 130, -1));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Profile Information.png")); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Profile Information.png"))); // NOI18N
         jLabel1.setToolTipText("");
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 

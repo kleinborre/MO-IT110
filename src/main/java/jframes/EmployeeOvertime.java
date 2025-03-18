@@ -100,6 +100,7 @@ private void overtimeTableMouseClicked(java.awt.event.MouseEvent evt) {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("MotorPH Payroll System");
+        setMaximumSize(new java.awt.Dimension(960, 540));
         setResizable(false);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -147,7 +148,7 @@ private void overtimeTableMouseClicked(java.awt.event.MouseEvent evt) {
         });
         getContentPane().add(requestButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 470, 150, -1));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Overtime Request.png")); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Overtime Request.png"))); // NOI18N
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         pack();

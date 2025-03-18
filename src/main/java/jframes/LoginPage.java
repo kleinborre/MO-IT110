@@ -100,7 +100,7 @@ public class LoginPage extends javax.swing.JFrame {
         getContentPane().add(errorLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 360, 320, 20));
 
         background.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Login.png")); // NOI18N
+        background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Login.png"))); // NOI18N
         background.setAlignmentY(0.0F);
         background.setAutoscrolls(true);
         background.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
