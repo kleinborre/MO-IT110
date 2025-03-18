@@ -21,4 +21,4 @@
 ### **Internal & External Testing Link:**  
 🔗 [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1aCH1qzQfVXXTyw_8ZTWDNwNq-k6L9_K9M-WwkOl83lQ/edit?usp=sharing)
 
-## The Payroll System can be accessed directly via the JAR file after cloning the repository.
+### The Payroll System can be accessed directly via the JAR file after cloning the repository.
