@@ -58,6 +58,7 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("MotorPH Payroll System");
+        setMaximumSize(new java.awt.Dimension(960, 540));
         setResizable(false);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -146,7 +147,7 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         jLabel1.setText("(Clicked the table to update or delete a user.)");
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 470, -1, -1));
 
-        background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Admin Dashboard.png")); // NOI18N
+        background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Admin Dashboard.png"))); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         pack();

@@ -148,7 +148,7 @@
       <Properties>
         <Property name="horizontalAlignment" type="int" value="0"/>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="2" name="C:\Users\STUDY MODE\Documents\NetBeansProjects\MotorPHOOP\src\main\resources\images\Login.png"/>
+          <Image iconType="3" name="/images/Login.png"/>
         </Property>
         <Property name="alignmentY" type="float" value="0.0"/>
         <Property name="autoscrolls" type="boolean" value="true"/>

@@ -95,6 +95,7 @@ public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("MotorPH Payroll System");
+        setMaximumSize(new java.awt.Dimension(960, 540));
         setResizable(false);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -179,7 +180,7 @@ public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
         jLabel6.setText("(Select Month and Year to display the Payroll List. There may be a slight delay, so please wait for the result.)");
         getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 420, -1, -1));
 
-        background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Payroll Manager Payroll Summary.png")); // NOI18N
+        background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Payroll Manager Payroll Summary.png"))); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         pack();

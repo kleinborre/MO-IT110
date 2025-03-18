@@ -315,7 +315,7 @@ public class EmployeePage extends javax.swing.JFrame {
         refreshTableButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         getContentPane().add(refreshTableButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 330, 100, 30));
 
-        background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Employee Dashboard.png")); // NOI18N
+        background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Employee Dashboard.png"))); // NOI18N
         background.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 

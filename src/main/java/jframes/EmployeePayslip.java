@@ -178,6 +178,7 @@ public class EmployeePayslip extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("MotorPH Payroll System");
+        setMaximumSize(new java.awt.Dimension(960, 540));
         setResizable(false);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -400,7 +401,7 @@ public class EmployeePayslip extends javax.swing.JFrame {
         totalDeductionsText1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(totalDeductionsText1, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 370, 130, -1));
 
-        background.setIcon(new javax.swing.ImageIcon("C:\\Users\\STUDY MODE\\Documents\\NetBeansProjects\\MotorPHOOP\\src\\main\\resources\\images\\Payslip Information.png")); // NOI18N
+        background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Payslip Information.png"))); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         pack();
