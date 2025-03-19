@@ -134,7 +134,7 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         File csvFile = getCSVFile();
 
         try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, false))) {
-            String[] header = {"EmployeeNumber", "Name", "Date", "OvertimeHours", "OvertimePay", "Status"};
+            String[] header = {"EmployeeNumber", "Name", "Date", "OvertimeHours", "OvertimePay", "Status", "OvertimeRequestNumber"};
             writer.writeNext(header); // Write header only once
             writer.writeAll(data);    // Write all records
         } catch (IOException e) {
@@ -147,36 +147,43 @@ public class OvertimeRequest extends Employee implements CSVHandler {
      */
     public void submitOvertimeRequest() {
         List<String[]> allRequests = readCSV(getCSVFile().getPath());
-        boolean isUpdated = false;
+
+        // Generate OvertimeRequestNumber
+        int overtimeRequestNumber = generateOvertimeRequestNumber(date);
 
         // Fetch employee full name using Employee class
         Employee employee = new Employee(getEmployeeNumber());
         String fullName = employee.getLastName() + ", " + employee.getFirstName();
 
-        // New request with correct full name
+        // New request with correct full name and OvertimeRequestNumber
         String[] newRequest = {
             String.valueOf(getEmployeeNumber()), 
-            fullName,  // Ensure full name is saved correctly
+            fullName,  
             date, 
             String.valueOf(overtimeHours), 
             String.valueOf(overtimePay), 
-            status
+            status,
+            String.valueOf(overtimeRequestNumber) // Add generated OvertimeRequestNumber
         };
 
-        // Check if the employee already has an overtime request on this date
+        // Check if an existing request with the same OvertimeRequestNumber exists
+        boolean isDuplicate = false;
+        int lastIndex = -1;
+
         for (int i = 0; i < allRequests.size(); i++) {
             String[] request = allRequests.get(i);
-            if (request[0].equals(String.valueOf(getEmployeeNumber())) && request[2].equals(date)) {
-                allRequests.set(i, newRequest); // Update existing request
-                isUpdated = true;
-                break;
+            if (request.length >= 7 && request[6].equals(String.valueOf(overtimeRequestNumber))) {
+                isDuplicate = true;
+                lastIndex = i; // Store the index of the last duplicate
             }
         }
 
-        if (!isUpdated) {
-            allRequests.add(newRequest); // Add new request if it doesn’t exist
+        // If duplicate found, remove the last occurrence before adding a new one
+        if (isDuplicate) {
+            allRequests.remove(lastIndex);
         }
 
+        allRequests.add(newRequest);
         writeCSV(getCSVFile().getPath(), allRequests);
     }
 
@@ -239,5 +246,19 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         } else {
             System.out.println("No matching overtime request found.");
         }
+    }
+    
+    /**
+    * Generates an OvertimeRequestNumber based on the date.
+    * Format: CNYYYYMMMDD (CN is the company number 10).
+    */
+   public static int generateOvertimeRequestNumber(String date) {
+       if (date == null || date.isEmpty()) {
+           throw new IllegalArgumentException("Invalid date for generating OvertimeRequestNumber.");
+       }
+
+       // Remove special characters and format: CNYYYYMMMDD (CN = 10)
+       String cleanedDate = date.replace("-", "");
+       return Integer.parseInt("10" + cleanedDate);
     }
 }
