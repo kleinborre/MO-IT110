@@ -6,7 +6,7 @@
     - `10001` → `employee1`  
     - `10002` → `employee2`  
     - `10003` → `employee3`  
-- **Default Password:** `"password"` (can be changed via admin access).  
+- **Default Password:** `Motorph2025_` (can be changed via admin access).  
 
 ### **Roles & Access**  
 
