@@ -4,8 +4,19 @@
  */
 package jframes;
 
+import classes.Employee;
 import classes.SystemAdministrator;
+import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
@@ -15,13 +26,469 @@ import javax.swing.JTextField;
  */
 public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
-    /**
-     * Creates new form SystemAdministratorCreateUser
-     */
+    // Colors for validation
+    private static final Color ERROR_COLOR = new Color(255, 200, 200);
+    private static final Color OK_COLOR    = Color.WHITE;
+
+    // Constructor (without initComponents block)
     public SystemAdministratorCreateUser() {
-        initComponents();
+        // Normally NetBeans auto-calls initComponents(), but we omit it here
+        initComponents();            // <--- NetBeans typically inserts this
+        setupRealTimeValidation();
+        generateEmployeeNumber();    // auto-generate new employee #
+        // Optionally set combos to -1 so they're unselected
+        roleBox.setSelectedIndex(-1);
+        statusBox.setSelectedIndex(-1);
+        positionBox.setSelectedIndex(-1);
+        supervisorBox.setSelectedIndex(-1);
+        phoneAllowanceBox.setSelectedIndex(-1);
+        clothingAllowanceBox.setSelectedIndex(-1);
     }
 
+    // ---------------- A) Generate Next Employee # from Employee.java ----------------
+    private void generateEmployeeNumber() {
+        // Ensure your Employee class has a static method: getNextEmployeeNumber()
+        String nextNum = Employee.getNextEmployeeNumber();
+        employeeNumberText.setText(nextNum);
+        employeeNumberText.setEditable(false); // So user can't change
+    }
+
+    // ---------------- B) Setup Real-Time Validation on Key Release ----------------
+    private void setupRealTimeValidation() {
+        KeyAdapter adapter = new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                Object src = e.getSource();
+                if      (src == lastNameText)             validateLastName();
+                else if (src == firstNameText)            validateFirstName();
+                else if (src == usernameText)             validateUsername();
+                else if (src == passwordText)             validatePassword();
+                else if (src == addressText)              validateAddress();
+                else if (src == phoneNumberText1)         validatePhoneNumber();
+                else if (src == sssNumberText)            validateSSS();
+                else if (src == philhealthNumberText)     validatePhilhealth();
+                else if (src == tinNumberText)            validateTIN();
+                else if (src == pagIbigText)              validatePagIbig();
+                else if (src == basicSalaryText)          validateBasicSalary();
+                else if (src == grossSemiMonthlyRateText) validateGrossSemi();
+                else if (src == riceSubsidyText)          validateRiceSubsidy();
+                else if (src == hourlyRateText)           validateHourlyRate();
+            }
+        };
+        // Add adapter to each text field
+        lastNameText.addKeyListener(adapter);
+        firstNameText.addKeyListener(adapter);
+        usernameText.addKeyListener(adapter);
+        passwordText.addKeyListener(adapter);
+        addressText.addKeyListener(adapter);
+        phoneNumberText1.addKeyListener(adapter);
+        sssNumberText.addKeyListener(adapter);
+        philhealthNumberText.addKeyListener(adapter);
+        tinNumberText.addKeyListener(adapter);
+        pagIbigText.addKeyListener(adapter);
+        basicSalaryText.addKeyListener(adapter);
+        grossSemiMonthlyRateText.addKeyListener(adapter);
+        riceSubsidyText.addKeyListener(adapter);
+        hourlyRateText.addKeyListener(adapter);
+    }
+
+    // ---------------- C) Validation Methods ----------------
+
+    private void validateLastName() {
+        // letters only, min 2, max 35
+        String text = lastNameText.getText().trim();
+        if (text.matches("^[A-Za-z]{2,35}$")) {
+            lastNameText.setBackground(OK_COLOR);
+        } else {
+            lastNameText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validateFirstName() {
+        // letters only, min 2, max 35
+        String text = firstNameText.getText().trim();
+        if (text.matches("^[A-Za-z]{2,35}$")) {
+            firstNameText.setBackground(OK_COLOR);
+        } else {
+            firstNameText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validateUsername() {
+        String text = usernameText.getText().trim();
+
+        // 1) length 10..20
+        boolean lengthOk = (text.length() >= 10 && text.length() <= 20);
+
+        // 2) not all digits => at least one non-digit
+        boolean notAllDigits = !text.matches("\\d+");
+
+        // 3) no consecutive '.' or '_'
+        boolean noConsecutiveDot = !text.contains("..");
+        boolean noConsecutiveUnderscore = !text.contains("__");
+
+        // 4) only alphanumeric or '.' or '_'
+        boolean validChars = text.matches("^[A-Za-z0-9._]+$");
+
+        if (lengthOk && notAllDigits && noConsecutiveDot && noConsecutiveUnderscore && validChars) {
+            usernameText.setBackground(OK_COLOR);
+        } else {
+            usernameText.setBackground(ERROR_COLOR);
+        }
+    }
+
+
+    private void validatePassword() {
+        // 9-50 chars, must contain letter, digit, '.' or '_'
+        // and only letters, digits, '.' or '_'
+        String text = passwordText.getText().trim();
+        boolean lengthOk = (text.length() >= 9 && text.length() <= 50);
+        boolean hasLetter = text.matches(".*[A-Za-z].*");
+        boolean hasDigit  = text.matches(".*\\d.*");
+        boolean hasSymbol = text.matches(".*[._].*");
+        boolean onlyAllowed = text.matches("^[A-Za-z0-9._]+$");
+        if (lengthOk && hasLetter && hasDigit && hasSymbol && onlyAllowed) {
+            passwordText.setBackground(OK_COLOR);
+        } else {
+            passwordText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validateAddress() {
+        // Alphanumeric + commas + periods + spaces, length 12-100
+        // No double commas or double periods
+        String text = addressText.getText().trim();
+        if (text.length() < 12 || text.length() > 100) {
+            addressText.setBackground(ERROR_COLOR);
+            return;
+        }
+        if (!text.matches("^[A-Za-z0-9,\\.\\s]+$")) {
+            addressText.setBackground(ERROR_COLOR);
+            return;
+        }
+        if (text.contains(",,") || text.contains("..")) {
+            addressText.setBackground(ERROR_COLOR);
+            return;
+        }
+        addressText.setBackground(OK_COLOR);
+    }
+
+    private void validatePhoneNumber() {
+        // Must start with "09" or "639", length 11 or 12, digits only
+        String text = phoneNumberText1.getText().trim();
+        if (!text.matches("\\d+")) {
+            phoneNumberText1.setBackground(ERROR_COLOR);
+            return;
+        }
+        if (!(text.startsWith("09") || text.startsWith("639"))) {
+            phoneNumberText1.setBackground(ERROR_COLOR);
+            return;
+        }
+        if (text.length() < 11 || text.length() > 12) {
+            phoneNumberText1.setBackground(ERROR_COLOR);
+            return;
+        }
+        phoneNumberText1.setBackground(OK_COLOR);
+    }
+
+    private void validateSSS() {
+        // 10 digits
+        String text = sssNumberText.getText().trim();
+        if (text.matches("\\d{10}")) {
+            sssNumberText.setBackground(OK_COLOR);
+        } else {
+            sssNumberText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validatePhilhealth() {
+        // 12 digits
+        String text = philhealthNumberText.getText().trim();
+        if (text.matches("\\d{12}")) {
+            philhealthNumberText.setBackground(OK_COLOR);
+        } else {
+            philhealthNumberText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validateTIN() {
+        // 12 digits
+        String text = tinNumberText.getText().trim();
+        if (text.matches("\\d{12}")) {
+            tinNumberText.setBackground(OK_COLOR);
+        } else {
+            tinNumberText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validatePagIbig() {
+        // 12 digits
+        String text = pagIbigText.getText().trim();
+        if (text.matches("\\d{12}")) {
+            pagIbigText.setBackground(OK_COLOR);
+        } else {
+            pagIbigText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    // Formatter for numerical values with commas
+    private static final DecimalFormat formatter = new DecimalFormat("#,##0");
+
+    private void validateBasicSalary() {
+        String text = basicSalaryText.getText().replace(",", "").trim(); // Remove existing commas before parsing
+        if (text.matches("\\d+")) {
+            String formattedText = formatter.format(Long.parseLong(text)); // Correctly format with commas
+            basicSalaryText.setText(formattedText);
+            basicSalaryText.setBackground(OK_COLOR);
+        } else {
+            basicSalaryText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validateGrossSemi() {
+        String text = grossSemiMonthlyRateText.getText().replace(",", "").trim(); // Remove existing commas before parsing
+        if (text.matches("\\d+")) {
+            String formattedText = formatter.format(Long.parseLong(text)); // Correctly format with commas
+            grossSemiMonthlyRateText.setText(formattedText);
+            grossSemiMonthlyRateText.setBackground(OK_COLOR);
+        } else {
+            grossSemiMonthlyRateText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validateRiceSubsidy() {
+        String text = riceSubsidyText.getText().replace(",", "").trim(); // Remove existing commas before parsing
+        if (text.matches("\\d+") && Integer.parseInt(text) == 1500) {
+            riceSubsidyText.setText("1,500"); // Always set this fixed format
+            riceSubsidyText.setBackground(OK_COLOR);
+        } else {
+            riceSubsidyText.setBackground(ERROR_COLOR);
+        }
+    }
+
+
+    private void validateHourlyRate() {
+        // double only
+        String text = hourlyRateText.getText().trim();
+        if (text.matches("\\d+(\\.\\d+)?")) {
+            hourlyRateText.setBackground(OK_COLOR);
+        } else {
+            hourlyRateText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    // ------------- D) Final "Create" Button Handler -------------
+    public void handleCreateButtonAction() {
+        // Check combos
+        if (!isComboValid()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Some dropdown fields are invalid or unselected.",
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return; // do NOT close
+        }
+        // Check birthday
+        if (!isBirthdayValid()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Must be 18 years old or older.",
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return; // do NOT close
+        }
+        // Check empties
+        if (anyEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Some required fields are empty.",
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return; // do NOT close
+        }
+        // Check if any field is error color
+        if (hasErrorFields()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "One or more fields are invalid. Please correct them.",
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return; // do NOT close
+        }
+
+        // If we reach here => all validations passed => do the creation
+        JOptionPane.showMessageDialog(
+            this,
+            "User created successfully!",
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+        
+        // 4) If we reach here => all validations passed => do the creation
+        // Build or collect the final data for creation:
+        String empNum   = employeeNumberText.getText().trim();
+        String lName    = lastNameText.getText().trim();
+        String fName    = firstNameText.getText().trim();
+        String birthday = new SimpleDateFormat("MM/dd/yyyy").format(birthdayCalendar.getDate());
+        String address  = addressText.getText().trim();
+        String phone    = phoneNumberText1.getText().trim();
+        String sss      = sssNumberText.getText().trim();
+        String phil     = philhealthNumberText.getText().trim();
+        String tin      = tinNumberText.getText().trim();
+        String pagibig  = pagIbigText.getText().trim();
+        String basic    = basicSalaryText.getText().trim();
+        String semi     = grossSemiMonthlyRateText.getText().trim();
+        String rice     = riceSubsidyText.getText().trim();
+        String hourRate = hourlyRateText.getText().trim();
+        String uname    = usernameText.getText().trim();
+        String pword    = passwordText.getText().trim();
+        String rChoice  = roleBox.getSelectedItem().toString().trim();
+        String stat     = statusBox.getSelectedItem().toString().trim();
+        String pos      = positionBox.getSelectedItem().toString().trim();
+        String sup      = supervisorBox.getSelectedItem().toString().trim();
+        String phoneAll = phoneAllowanceBox.getSelectedItem().toString().trim();
+        String clothAll = clothingAllowanceBox.getSelectedItem().toString().trim();
+
+        // Create your 22-column array or however you store data:
+        String[] newUserData = {
+            empNum, 
+            lName,
+            fName,
+            birthday,
+            address,
+            phone,
+            sss,
+            phil,
+            pagibig,
+            tin,
+            stat,
+            pos,
+            sup,
+            basic,
+            rice,
+            phoneAll,
+            clothAll,
+            semi,
+            hourRate,
+            uname,
+            pword,
+            rChoice
+        };
+
+        // Now call your SystemAdministrator to create the user:
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        admin.createUser(newUserData);
+
+        // If creation is successful, show success message and dispose:
+        JOptionPane.showMessageDialog(
+            this,
+            "User created successfully!",
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+
+        // Now we can close
+        new SystemAdministratorPage().setVisible(true);
+        dispose();
+    }
+
+    private boolean isComboValid() {
+        if (roleBox.getSelectedIndex() < 0) return false;
+        if (statusBox.getSelectedIndex() < 0) return false;
+        if (positionBox.getSelectedIndex() < 0) return false;
+        if (supervisorBox.getSelectedIndex() < 0) return false;
+        if (phoneAllowanceBox.getSelectedIndex() < 0) return false;
+        if (clothingAllowanceBox.getSelectedIndex() < 0) return false;
+        return true;
+    }
+
+    private boolean isBirthdayValid() {
+        Date d = birthdayCalendar.getDate();
+        if (d == null) return false; // not selected
+        LocalDate birth = d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate now   = LocalDate.now();
+        return Period.between(birth, now).getYears() >= 18;
+    }
+
+    private boolean anyEmpty() {
+        JTextField[] fields = {
+            employeeNumberText, lastNameText, firstNameText,
+            usernameText, passwordText, addressText, phoneNumberText1,
+            sssNumberText, philhealthNumberText, tinNumberText, pagIbigText,
+            basicSalaryText, grossSemiMonthlyRateText, riceSubsidyText, hourlyRateText
+        };
+        for (JTextField f : fields) {
+            if (f.getText().trim().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasErrorFields() {
+        JTextField[] fields = {
+            lastNameText, firstNameText, usernameText, passwordText,
+            addressText, phoneNumberText1, sssNumberText, philhealthNumberText,
+            tinNumberText, pagIbigText, basicSalaryText,
+            grossSemiMonthlyRateText, riceSubsidyText, hourlyRateText
+        };
+        for (JTextField f : fields) {
+            if (f.getBackground() == ERROR_COLOR) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ------------- E) "Clear" Button Handler -------------
+    public void handleClearButtonAction() {
+        // keep employeeNumberText
+        lastNameText.setText("");
+        lastNameText.setBackground(OK_COLOR);
+        firstNameText.setText("");
+        firstNameText.setBackground(OK_COLOR);
+        usernameText.setText("");
+        usernameText.setBackground(OK_COLOR);
+        passwordText.setText("");
+        passwordText.setBackground(OK_COLOR);
+        addressText.setText("");
+        addressText.setBackground(OK_COLOR);
+        phoneNumberText1.setText("");
+        phoneNumberText1.setBackground(OK_COLOR);
+        sssNumberText.setText("");
+        sssNumberText.setBackground(OK_COLOR);
+        philhealthNumberText.setText("");
+        philhealthNumberText.setBackground(OK_COLOR);
+        tinNumberText.setText("");
+        tinNumberText.setBackground(OK_COLOR);
+        pagIbigText.setText("");
+        pagIbigText.setBackground(OK_COLOR);
+        basicSalaryText.setText("");
+        basicSalaryText.setBackground(OK_COLOR);
+        grossSemiMonthlyRateText.setText("");
+        grossSemiMonthlyRateText.setBackground(OK_COLOR);
+        riceSubsidyText.setText("1500");
+        riceSubsidyText.setBackground(OK_COLOR);
+        hourlyRateText.setText("");
+        hourlyRateText.setBackground(OK_COLOR);
+
+        birthdayCalendar.setDate(null);
+
+        roleBox.setSelectedIndex(-1);
+        statusBox.setSelectedIndex(-1);
+        positionBox.setSelectedIndex(-1);
+        supervisorBox.setSelectedIndex(-1);
+        phoneAllowanceBox.setSelectedIndex(-1);
+        clothingAllowanceBox.setSelectedIndex(-1);
+        
+        
+        
+        
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -107,7 +574,6 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         pagIbigText.setBackground(new java.awt.Color(204, 204, 204));
         pagIbigText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        pagIbigText.setText("N/A");
         pagIbigText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 pagIbigTextActionPerformed(evt);
@@ -131,7 +597,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         phoneAllowanceBox.setBackground(new java.awt.Color(204, 204, 204));
         phoneAllowanceBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        phoneAllowanceBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "2000", "1000", "800", "500" }));
+        phoneAllowanceBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "2,000", "1,000", "800", "500" }));
         getContentPane().add(phoneAllowanceBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 190, 140, -1));
 
         jLabel4.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -191,7 +657,6 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         addressText.setBackground(new java.awt.Color(204, 204, 204));
         addressText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        addressText.setText("N/A");
         addressText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addressTextActionPerformed(evt);
@@ -206,7 +671,6 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         phoneNumberText1.setBackground(new java.awt.Color(204, 204, 204));
         phoneNumberText1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        phoneNumberText1.setText("N/A");
         phoneNumberText1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 phoneNumberText1ActionPerformed(evt);
@@ -221,7 +685,6 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         sssNumberText.setBackground(new java.awt.Color(204, 204, 204));
         sssNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        sssNumberText.setText("N/A");
         sssNumberText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 sssNumberTextActionPerformed(evt);
@@ -236,7 +699,6 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         philhealthNumberText.setBackground(new java.awt.Color(204, 204, 204));
         philhealthNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        philhealthNumberText.setText("N/A");
         philhealthNumberText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 philhealthNumberTextActionPerformed(evt);
@@ -251,7 +713,6 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         tinNumberText.setBackground(new java.awt.Color(204, 204, 204));
         tinNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        tinNumberText.setText("N/A");
         tinNumberText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 tinNumberTextActionPerformed(evt);
@@ -261,7 +722,12 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         roleBox.setBackground(new java.awt.Color(204, 204, 204));
         roleBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        roleBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Employee", "HR Manager", "Payroll Manager", "System Administrator" }));
+        roleBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Employee", "Employee|HRManager", "Employee|PayrollManager", "Employee|SystemAdministrator" }));
+        roleBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                roleBoxActionPerformed(evt);
+            }
+        });
         getContentPane().add(roleBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 240, 140, -1));
 
         jLabel13.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -296,7 +762,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         riceSubsidyText.setBackground(new java.awt.Color(204, 204, 204));
         riceSubsidyText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        riceSubsidyText.setText("1500");
+        riceSubsidyText.setText("1,500");
         riceSubsidyText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 riceSubsidyTextActionPerformed(evt);
@@ -469,52 +935,21 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
         // TODO add your handling code here:
+        handleClearButtonAction();
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void createUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createUserButtonActionPerformed
-    // Format birthday from JCalendar
-    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy"); 
-    String birthday = dateFormat.format(birthdayCalendar.getDate());
-
-    // Collect user input into an array
-    String[] newUser = {
-        employeeNumberText.getText().trim(),
-        lastNameText.getText().trim(),
-        firstNameText.getText().trim(),
-        birthday,
-        addressText.getText().trim(),
-        phoneNumberText1.getText().trim(),
-        sssNumberText.getText().trim(),
-        philhealthNumberText.getText().trim(),
-        tinNumberText.getText().trim(),
-        pagIbigText.getText().trim(),
-        statusBox.getSelectedItem().toString().trim(),
-        positionBox.getSelectedItem().toString().trim(),
-        supervisorBox.getSelectedItem().toString().trim(),
-        basicSalaryText.getText().trim(),
-        riceSubsidyText.getText().trim(),
-        phoneAllowanceBox.getSelectedItem().toString().trim(),
-        clothingAllowanceBox.getSelectedItem().toString().trim(),
-        grossSemiMonthlyRateText.getText().trim(),
-        hourlyRateText.getText().trim(),
-        usernameText.getText().trim(),
-        passwordText.getText().trim(),
-        roleBox.getSelectedItem().toString().trim()
-    };
-
-    // Create an instance of SystemAdministrator and call createUser()
-    SystemAdministrator admin = new SystemAdministrator(0, "", "", ""); 
-    admin.createUser(newUser);  // Now it matches the new method
-
-    // Show confirmation message
-    JOptionPane.showMessageDialog(this, "User created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-    new SystemAdministratorPage().setVisible(true);
-    dispose();
+        // TODO add your handling code here:
+        handleCreateButtonAction(); // Then do not dispose if there's an error
     }//GEN-LAST:event_createUserButtonActionPerformed
 
     private void employeeNumberTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeNumberTextActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_employeeNumberTextActionPerformed
+
+    private void roleBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roleBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_roleBoxActionPerformed
 
     /**
      * @param args the command line arguments

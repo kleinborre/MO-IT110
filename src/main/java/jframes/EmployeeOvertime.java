@@ -19,6 +19,7 @@ public class EmployeeOvertime extends javax.swing.JFrame {
  
     public EmployeeOvertime(String[] employeeData) {
         this.employeeData = employeeData;
+        System.out.println("DEBUG: employeeData[0] => " + employeeData[0]);
         initComponents();
         loadOvertimeRequests();
         

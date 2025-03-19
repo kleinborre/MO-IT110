@@ -5,8 +5,13 @@
 package jframes;
 
 import classes.SystemAdministrator;
-import java.util.List;
+import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 
 /**
@@ -15,18 +20,26 @@ import javax.swing.JOptionPane;
  */
 public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
     
-    private String[] employeeData;
+    private String[] employeeData; // 22 columns (joined)
+    private static final Color ERROR_COLOR = new Color(255, 200, 200); // Light Red
+    private static final Color OK_COLOR = Color.WHITE; // Default
+    private long lastTypedTime = 0;
 
     public EmployeeProfileInformationUpdateInfo(String[] employeeData) {
         this.employeeData = employeeData;
         initComponents();
         populateProfileInfo();
+        setupRealTimeValidation();
     }
 
     public EmployeeProfileInformationUpdateInfo() {
         initComponents();
+        setupRealTimeValidation();
     }
 
+    /**
+     * Fill user details in UI fields.
+     */
     private void populateProfileInfo() {
         if (employeeData == null || employeeData.length != 22) {
             System.err.println("Error: Employee data is missing or incorrect.");
@@ -37,11 +50,11 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
         String[] updatedData = admin.getUserByEmployeeNumber(employeeData[0]);
 
         if (updatedData == null) {
-            System.err.println("Error: Employee not found in CSV.");
+            System.err.println("Error: Employee not found in joined data.");
             return;
         }
 
-        // Populate the correct data
+        // Fill the text fields
         employeeNumberLabel.setText(updatedData[0]);
         fullNameLabel.setText(updatedData[2] + " " + updatedData[1]);
         positionLabel.setText(updatedData[11]);
@@ -59,55 +72,125 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
         grossSemiMonthlyRateLabel.setText("₱ " + updatedData[17]);
         hourlyRateLabel.setText("₱ " + updatedData[18]);
 
-        // Editable fields (phone and address)
         phoneNumberLabel.setText(updatedData[5]);
         addressLabel.setText(updatedData[4]);
     }
 
+    /**
+     * Enable real-time validation for phone number and address.
+     */
+    private void setupRealTimeValidation() {
+        phoneNumberLabel.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                lastTypedTime = System.currentTimeMillis();
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000); // Wait for 1 second after typing stops
+                        if (System.currentTimeMillis() - lastTypedTime >= 1000) {
+                            SwingUtilities.invokeLater(() -> formatAndValidatePhoneNumber());
+                        }
+                    } catch (InterruptedException ignored) {}
+                }).start();
+            }
+        });
+
+        addressLabel.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { validateAddress(); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { validateAddress(); }
+            @Override
+            public void changedUpdate(DocumentEvent e) { validateAddress(); }
+        });
+    }
+
+    /**
+     * Formats and Validates Phone Number when user stops typing
+     */
+    private void formatAndValidatePhoneNumber() {
+        String text = phoneNumberLabel.getText().replaceAll("[^0-9]", ""); // Remove non-digits
+
+        // Remove prefix '639' or '09' but keep last 9 digits
+        if (text.startsWith("639") && text.length() == 12) {
+            text = text.substring(3); // Remove '639' and keep the last 9 digits
+        } else if (text.startsWith("09") && text.length() == 11) {
+            text = text.substring(2); // Remove '09' and keep the last 9 digits
+        }
+
+        // Ensure exactly 9 digits remain
+        if (text.length() != 9) {
+            phoneNumberLabel.setBackground(ERROR_COLOR);
+            return;
+        }
+
+        // Apply 3-3-3 format
+        phoneNumberLabel.setBackground(OK_COLOR);
+        phoneNumberLabel.setText(text.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3"));
+    }
+
+    /**
+     * Validate Address (must be 12-100 characters, no ".." or ",,")
+     */
+    private void validateAddress() {
+        String text = addressLabel.getText().trim();
+
+        if (text.length() < 12 || text.length() > 100 || text.contains(",,") || text.contains("..")) {
+            addressLabel.setBackground(ERROR_COLOR);
+        } else {
+            addressLabel.setBackground(OK_COLOR);
+        }
+    }
+
+    /**
+     * Save updated info to CSV (Only updates Phone & Address)
+     */
+/**
+ * Save updated info (Only updates Phone & Address) and ensures one success dialog.
+ */
     private void updateEmployeeInfoInCSV() {
-        String employeeNumber = employeeNumberLabel.getText().trim();
-        String updatedAddress = addressLabel.getText().trim();
+        String empNumber    = employeeNumberLabel.getText().trim();
+        String updatedAddr  = addressLabel.getText().trim();
         String updatedPhone = phoneNumberLabel.getText().trim();
 
-        if (employeeNumber.isEmpty()) {
+        if (empNumber.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Error: Employee number is missing.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
-        List<String[]> employees = admin.readCSV(admin.getCSVFile().getPath());
-        boolean updated = false;
-
-        for (int i = 0; i < employees.size(); i++) {
-            String[] empData = employees.get(i);
-            if (empData.length >= 22 && empData[0].equals(employeeNumber)) {
-                empData[4] = updatedAddress;
-                empData[5] = updatedPhone;
-                employees.set(i, empData);
-                updated = true;
-                break;
-            }
+        // Ensure validation passed
+        if (phoneNumberLabel.getBackground() == ERROR_COLOR || addressLabel.getBackground() == ERROR_COLOR) {
+            JOptionPane.showMessageDialog(this, "Please correct the highlighted errors.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
-        if (updated) {
-            admin.writeCSV(admin.getCSVFile().getPath(), employees);
-            JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            refreshEmployeeData(employeeNumber);
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        String[] existing = admin.getUserByEmployeeNumber(empNumber);
+        if (existing == null) {
+            JOptionPane.showMessageDialog(this, "Employee not found in system!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Determine what was updated
+        boolean phoneUpdated = !existing[5].equals(updatedPhone);
+        boolean addressUpdated = !existing[4].equals(updatedAddr);
+
+        // Update only if there's a change
+        if (phoneUpdated || addressUpdated) {
+            existing[4] = updatedAddr;
+            existing[5] = updatedPhone;
+            admin.updateUser(empNumber, existing);
+
+            // Show a single success dialog
+            if (phoneUpdated && addressUpdated) {
+                JOptionPane.showMessageDialog(this, "Phone Number and Address updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else if (phoneUpdated) {
+                JOptionPane.showMessageDialog(this, "Phone Number updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Address updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Error: Employee not found in CSV.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void refreshEmployeeData(String employeeNumber) {
-        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
-        List<String[]> employees = admin.readCSV(admin.getCSVFile().getPath());
-
-        for (String[] empData : employees) {
-            if (empData.length >= 22 && empData[0].equals(employeeNumber)) {
-                addressLabel.setText(empData[4]);
-                phoneNumberLabel.setText(empData[5]);
-                return;
-            }
+            JOptionPane.showMessageDialog(this, "No changes detected.", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 

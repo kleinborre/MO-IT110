@@ -21,20 +21,19 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         loadUserData(); // Load CSV data into userAccountTable
     }
     
-    private void loadUserData() {
+    void loadUserData() {
         SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
-        String[][] userData = admin.getAllUsers(); // Get CSV data
+        String[][] userData = admin.getAllUsers(); // 22-column joined data
 
-        // Define column headers (must match CSV structure)
+        // The table header matches 22 columns
         String[] columnHeaders = {
             "Employee #", "Last Name", "First Name", "Birthday", "Address", "Phone Number",
-            "SSS #", "Philhealth #", "TIN #", "Pag-ibig #", "Status", "Position",
+            "SSS #", "Philhealth #", "Pag-ibig #", "TIN #", "Status", "Position",
             "Immediate Supervisor", "Basic Salary", "Rice Subsidy", "Phone Allowance",
             "Clothing Allowance", "Gross Semi-monthly Rate", "Hourly Rate",
             "Username", "Password", "Role"
         };
 
-        // Set data to JTable
         DefaultTableModel model = new DefaultTableModel(userData, columnHeaders);
         userAccountTable.setModel(model);
     }
@@ -167,31 +166,20 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
     }//GEN-LAST:event_createButtonActionPerformed
 
     private void userAccountTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_userAccountTableMouseClicked
-        int row = userAccountTable.getSelectedRow(); // Get selected row index
-
+        int row = userAccountTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "No row selected!", "Error", JOptionPane.ERROR_MESSAGE);
-            return; // Stop if no row is selected
-        }
-
-        int columnCount = userAccountTable.getColumnCount();
-    
-        // Ensure column count matches expected number of fields
-        if (columnCount != 22) {
-            JOptionPane.showMessageDialog(this, "Column count mismatch! Expected 22, got: " + columnCount, "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        String[] selectedUser = new String[columnCount];
-
-        for (int i = 0; i < columnCount; i++) {
+        String[] selectedUser = new String[userAccountTable.getColumnCount()];
+        for (int i = 0; i < selectedUser.length; i++) {
             Object cellValue = userAccountTable.getValueAt(row, i);
-            selectedUser[i] = (cellValue != null) ? cellValue.toString() : ""; // Prevent null values
+            selectedUser[i] = (cellValue != null) ? cellValue.toString() : "";
         }
 
-        String empNumber = selectedUser[0]; // Employee ID
+        String empNumber = selectedUser[0];
 
-        // Show confirmation dialog for Update or Delete
         int choice = JOptionPane.showOptionDialog(
             this,
             "Do you want to UPDATE or DELETE this user?",
@@ -199,19 +187,32 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
             JOptionPane.YES_NO_CANCEL_OPTION,
             JOptionPane.QUESTION_MESSAGE,
             null,
-            new String[]{"Update", "Delete", "Cancel"}, 
+            new String[]{"Update", "Delete", "Cancel"},
             "Update"
         );
 
         if (choice == 0) { // Update
-            new SystemAdministratorUpdateUser(selectedUser).setVisible(true);
-            dispose();
-        } else if (choice == 1) { // Delete
-            SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
-            admin.deleteUser(empNumber);
+            SystemAdministratorUpdateUser updateUserFrame = new SystemAdministratorUpdateUser(selectedUser);
+            updateUserFrame.setVisible(true);
 
-            // Refresh the table after deleting
-            loadUserData();
+            // Dispose the current window when the update form is opened
+            this.dispose(); 
+
+            // Wait for the update form to close, then refresh the table
+            updateUserFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                    new SystemAdministratorPage().setVisible(true); // Reopen the main admin page after update
+                }
+            });
+
+        } else if (choice == 1) { // Delete
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this user?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+                admin.deleteUser(empNumber);
+                loadUserData(); // Refresh table after deletion
+            }
         }
     }//GEN-LAST:event_userAccountTableMouseClicked
 

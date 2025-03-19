@@ -1,5 +1,6 @@
 package jframes;
 
+import classes.HRManager;
 import classes.LeaveRequest;
 import classes.OvertimeRequest;
 import javax.swing.table.DefaultTableModel;
@@ -26,7 +27,7 @@ public class HRManagerPage extends javax.swing.JFrame {
      */
     private void loadLeaveRequests() {
         DefaultTableModel model = (DefaultTableModel) hrManagerLeaveTable.getModel();
-        model.setRowCount(0); // Clear existing rows
+        model.setRowCount(0);
 
         List<String[]> leaveRequests = LeaveRequest.getAllLeaveRequests();
         for (String[] request : leaveRequests) {
@@ -40,13 +41,10 @@ public class HRManagerPage extends javax.swing.JFrame {
             });
         }
     }
-    
-    /**
-     * Loads all Overtime Requests into hrManagerOvertimeTable.
-     */
+
     private void loadOvertimeRequests() {
         DefaultTableModel model = (DefaultTableModel) hrManagerOvertimeTable.getModel();
-        model.setRowCount(0); // Clear existing rows
+        model.setRowCount(0);
 
         List<String[]> overtimeRequests = OvertimeRequest.getAllOvertimeRequests();
         for (String[] request : overtimeRequests) {
@@ -242,7 +240,6 @@ public class HRManagerPage extends javax.swing.JFrame {
     }//GEN-LAST:event_logoutButtonActionPerformed
 
     private void approveOvertimeRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_approveOvertimeRequestButtonActionPerformed
-        // TODO add your handling code here:
         int row = hrManagerOvertimeTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "Please select an overtime request to approve.");
@@ -252,15 +249,13 @@ public class HRManagerPage extends javax.swing.JFrame {
         int employeeNumber = Integer.parseInt(hrManagerOvertimeTable.getValueAt(row, 0).toString());
         String date = hrManagerOvertimeTable.getValueAt(row, 2).toString();
 
-        // Update status in CSV
-        OvertimeRequest.updateOvertimeStatus(employeeNumber, date, "Approved");
+        HRManager.approveOvertimeRequest(employeeNumber, date);
 
         JOptionPane.showMessageDialog(this, "Overtime request approved.");
-        loadOvertimeRequests(); // Refresh table        
+        loadOvertimeRequests();
     }//GEN-LAST:event_approveOvertimeRequestButtonActionPerformed
 
     private void rejectOvertimeRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rejectOvertimeRequestButtonActionPerformed
-        // TODO add your handling code here:
         int row = hrManagerOvertimeTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "Please select an overtime request to reject.");
@@ -270,15 +265,13 @@ public class HRManagerPage extends javax.swing.JFrame {
         int employeeNumber = Integer.parseInt(hrManagerOvertimeTable.getValueAt(row, 0).toString());
         String date = hrManagerOvertimeTable.getValueAt(row, 2).toString();
 
-        // Update status in CSV
-        OvertimeRequest.updateOvertimeStatus(employeeNumber, date, "Rejected");
+        HRManager.rejectOvertimeRequest(employeeNumber, date);
 
         JOptionPane.showMessageDialog(this, "Overtime request rejected.");
-        loadOvertimeRequests(); // Refresh table
+        loadOvertimeRequests();
     }//GEN-LAST:event_rejectOvertimeRequestButtonActionPerformed
 
     private void approveLeaveRequestButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_approveLeaveRequestButton1ActionPerformed
-        // TODO add your handling code here:
         int row = hrManagerLeaveTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "Please select a leave request to approve.");
@@ -289,15 +282,13 @@ public class HRManagerPage extends javax.swing.JFrame {
         String leaveType = hrManagerLeaveTable.getValueAt(row, 2).toString();
         String startDate = hrManagerLeaveTable.getValueAt(row, 3).toString();
 
-        // Update status in CSV
-        LeaveRequest.updateLeaveStatus(employeeNumber, leaveType, startDate, "Approved");
+        HRManager.approveLeaveRequest(employeeNumber, leaveType, startDate);
 
         JOptionPane.showMessageDialog(this, "Leave request approved.");
-        loadLeaveRequests(); // Refresh table
+        loadLeaveRequests();
     }//GEN-LAST:event_approveLeaveRequestButton1ActionPerformed
 
     private void rejectLeaveRequestButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rejectLeaveRequestButton1ActionPerformed
-        // TODO add your handling code here:
         int row = hrManagerLeaveTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "Please select a leave request to reject.");
@@ -308,11 +299,10 @@ public class HRManagerPage extends javax.swing.JFrame {
         String leaveType = hrManagerLeaveTable.getValueAt(row, 2).toString();
         String startDate = hrManagerLeaveTable.getValueAt(row, 3).toString();
 
-        // Update status in CSV
-        LeaveRequest.updateLeaveStatus(employeeNumber, leaveType, startDate, "Rejected");
+        HRManager.rejectLeaveRequest(employeeNumber, leaveType, startDate);
 
         JOptionPane.showMessageDialog(this, "Leave request rejected.");
-        loadLeaveRequests(); // Refresh table
+        loadLeaveRequests();
     }//GEN-LAST:event_rejectLeaveRequestButton1ActionPerformed
 
     private void employeeAttendanceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeAttendanceButtonActionPerformed

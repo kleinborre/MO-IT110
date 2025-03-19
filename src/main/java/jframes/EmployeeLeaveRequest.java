@@ -6,9 +6,12 @@ package jframes;
 
 import classes.LeaveRequest;
 import com.toedter.calendar.JDateChooser;
+import java.io.File;
 import javax.swing.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 /**
  *
  * @author STUDY MODE
@@ -17,54 +20,121 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
     
     private String[] employeeData;
     private LeaveRequest existingRequest = null;
-    private static final String FILE_PATH = "src/main/java/databases/Leave Requests.csv";
 
-    /**
-     * Creates new form EmployeeLeaveRequest
-     */
     public EmployeeLeaveRequest(String[] employeeData) {
         this.employeeData = employeeData;
         initComponents();
+        setupRealTimeValidation();
     }
-    
+
     public EmployeeLeaveRequest() {
         initComponents();
+        setupRealTimeValidation();
     }
-    
+
     public EmployeeLeaveRequest(String[] employeeData, LeaveRequest existingRequest) {
         this.employeeData = employeeData;
         this.existingRequest = existingRequest;
         initComponents();
+        setupRealTimeValidation();
         populateExistingRequest();
     }
-    
-    /**
-    * If updating, populate fields with existing request data.
-    */
+
     private void populateExistingRequest() {
         if (existingRequest != null) {
             leaveTypeCombo.setSelectedItem(existingRequest.getLeaveType());
-
-            // Convert date string to LocalDate and set it in JDateChooser
             startDateChooser.setDate(java.util.Date.from(
                 existingRequest.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant())
             );
-
             endDateChooser.setDate(java.util.Date.from(
                 existingRequest.getEndDate().atStartOfDay(ZoneId.systemDefault()).toInstant())
             );
         }
     }
-    
-    /**
-     * Converts JDateChooser to LocalDate.
-     */
+
+    private void setupRealTimeValidation() {
+        endDateChooser.setEnabled(false);
+        
+        startDateChooser.getDateEditor().addPropertyChangeListener("date", evt -> {
+            validateStartDate();
+            if (startDateChooser.getDate() != null) {
+                endDateChooser.setEnabled(true);
+            } else {
+                endDateChooser.setEnabled(false);
+            }
+        });
+
+        endDateChooser.getDateEditor().addPropertyChangeListener("date", evt -> validateEndDate());
+    }
+
     private LocalDate convertToLocalDate(JDateChooser dateChooser) {
         if (dateChooser.getDate() != null) {
             return dateChooser.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         }
         return null;
-    }  
+    }
+
+    /**
+     * Validates Start Date.
+     */
+    private void validateStartDate() {
+        LocalDate today = LocalDate.now();
+        LocalDate selectedDate = convertToLocalDate(startDateChooser);
+
+        if (selectedDate == null) return;
+
+        String leaveType = leaveTypeCombo.getSelectedItem().toString();
+        LocalDate oneYearFromToday = today.plusYears(1);
+        LocalDate twoYearsFromToday = today.plusYears(2);
+
+        if (!selectedDate.isAfter(today)) {
+            JOptionPane.showMessageDialog(this, "Cannot choose past or current dates for leave.", "Error", JOptionPane.ERROR_MESSAGE);
+            startDateChooser.setDate(null);
+        } else if (selectedDate.isAfter(oneYearFromToday) && !leaveType.equals("Vacation")) {
+            JOptionPane.showMessageDialog(this, "Cannot choose leave 1 year in advance unless it’s Vacation Leave.", "Error", JOptionPane.ERROR_MESSAGE);
+            startDateChooser.setDate(null);
+        } else if (selectedDate.isAfter(twoYearsFromToday)) {
+            JOptionPane.showMessageDialog(this, "Cannot choose leave more than 2 years in advance.", "Error", JOptionPane.ERROR_MESSAGE);
+            startDateChooser.setDate(null);
+        }
+    }
+
+    /**
+     * Validates End Date.
+     */
+    private void validateEndDate() {
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = convertToLocalDate(startDateChooser);
+        LocalDate endDate = convertToLocalDate(endDateChooser);
+
+        if (endDate == null || startDate == null) return;
+
+        String leaveType = leaveTypeCombo.getSelectedItem().toString();
+        LocalDate oneYearFromStart = startDate.plusYears(1);
+        LocalDate twoYearsFromStart = startDate.plusYears(2);
+        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+
+        if (!endDate.isAfter(today)) {
+            JOptionPane.showMessageDialog(this, "Cannot choose past or current dates for leave.", "Error", JOptionPane.ERROR_MESSAGE);
+            endDateChooser.setDate(null);
+        } else if (endDate.isBefore(startDate)) {
+            JOptionPane.showMessageDialog(this, "End date cannot be before start date.", "Error", JOptionPane.ERROR_MESSAGE);
+            endDateChooser.setDate(null);
+        } else if (endDate.isAfter(oneYearFromStart) && !leaveType.equals("Vacation")) {
+            JOptionPane.showMessageDialog(this, "Cannot choose leave more than 1 year in advance unless it's Vacation Leave.", "Error", JOptionPane.ERROR_MESSAGE);
+            endDateChooser.setDate(null);
+        } else if (endDate.isAfter(twoYearsFromStart)) {
+            JOptionPane.showMessageDialog(this, "Cannot choose leave more than 2 years in advance.", "Error", JOptionPane.ERROR_MESSAGE);
+            endDateChooser.setDate(null);
+        } else if (leaveType.equals("Vacation") && daysBetween > 21) {
+            JOptionPane.showMessageDialog(this, "Vacation Leave cannot be more than 3 weeks apart.", "Error", JOptionPane.ERROR_MESSAGE);
+            endDateChooser.setDate(null);
+        } else if (leaveType.equals("Sick") && daysBetween > 60) {
+            JOptionPane.showMessageDialog(this, "Sick Leave cannot be more than 2 months apart.", "Error", JOptionPane.ERROR_MESSAGE);
+            endDateChooser.setDate(null);
+        }
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -165,33 +235,26 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
         LocalDate endDate = convertToLocalDate(endDateChooser);
 
         if (leaveType.equals("----") || startDate == null || endDate == null) {
-            JOptionPane.showMessageDialog(this, "Please fill all fields before submitting.");
+            JOptionPane.showMessageDialog(this, "Please fill all fields before submitting.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
         if (endDate.isBefore(startDate)) {
-            JOptionPane.showMessageDialog(this, "End date cannot be before start date.");
+            JOptionPane.showMessageDialog(this, "End date cannot be before start date.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         int employeeNumber = Integer.parseInt(employeeData[0]);
+        LeaveRequest leaveRequest = new LeaveRequest(employeeNumber, leaveType, startDate, endDate, "Pending");
 
-        if (existingRequest == null) { // New request
-            LeaveRequest leaveRequest = new LeaveRequest(employeeNumber, leaveType, startDate, endDate, "Pending");
-            leaveRequest.submitLeaveRequest();
-            JOptionPane.showMessageDialog(this, "Leave request submitted successfully.");
-        } else { // Update request
-            existingRequest.deleteLeaveRequest(); // Remove old request
-            existingRequest.setLeaveType(leaveType);
-            existingRequest.setStartDate(startDate);
-            existingRequest.setEndDate(endDate);
-            existingRequest.setStatus("Pending");
-            existingRequest.submitLeaveRequest();
-            JOptionPane.showMessageDialog(this, "Leave request updated successfully.");
-        }
+        // Save to CSV
+        leaveRequest.submitLeaveRequest();
 
-        EmployeeLeave employeeLeavePage = new EmployeeLeave(employeeData);
-        employeeLeavePage.refreshTable();
-        employeeLeavePage.setVisible(true);
+        // Confirmation Message
+        JOptionPane.showMessageDialog(this, "Leave request submitted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+        // Redirect to EmployeeLeave
+        new EmployeeLeave(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_submitButtonActionPerformed
 

@@ -8,32 +8,35 @@ import classes.Employee;
 import classes.OvertimeRequest;
 import javax.swing.JOptionPane;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
  * @author STUDY MODE
  */
 public class EmployeeOvertimeRequest extends javax.swing.JFrame {
-    
     private String[] employeeData;
     private double overtimeHours;
     private double overtimePay;
     private String status;
     private String date;
-    
+
     // Constructor for new overtime request
     public EmployeeOvertimeRequest(String[] employeeData) {
         this.employeeData = employeeData;
         initComponents();
+        setupRealTimeValidation();
     }
-    
+
     // Default constructor (avoid errors)
     public EmployeeOvertimeRequest() {
         this.employeeData = null;
         initComponents();
+        setupRealTimeValidation();
     }
-    
+
     // Constructor for updating an overtime request
     public EmployeeOvertimeRequest(String[] employeeData, String date, double overtimeHours, double overtimePay, String status) {
         this.employeeData = employeeData;
@@ -43,6 +46,7 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
         this.status = status;
 
         initComponents();
+        setupRealTimeValidation();
 
         // Set overtime hours
         overtimejSpinner.setValue(overtimeHours);
@@ -58,16 +62,80 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
         }
     }
 
-    
-    public EmployeeOvertimeRequest(String[] employeeData, double overtimeHours, double overtimePay, String status) {
-        this.employeeData = employeeData;
-        initComponents();
-        overtimejSpinner.setValue(overtimeHours);
+    private void setupRealTimeValidation() {
+        // Validate DateChooser on property change (when date is selected)
+        chooseDatejDateChooser.getDateEditor().addPropertyChangeListener("date", evt -> validateDate());
+
+        // Validate Spinner for Overtime Hours in real-time
+        overtimejSpinner.addChangeListener(e -> validateOvertimeHours());
     }
-    
-    // Method to preload overtime hours when updating a request
-    private void preloadOvertimeRequest() {
-        overtimejSpinner.setValue(overtimeHours); 
+
+    private void validateDate() {
+        Date selectedDate = chooseDatejDateChooser.getDate();
+        if (selectedDate == null) return;
+
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+        
+        Calendar selectedCal = Calendar.getInstance();
+        selectedCal.setTime(selectedDate);
+
+        Calendar oneYearAhead = Calendar.getInstance();
+        oneYearAhead.add(Calendar.YEAR, 1);
+
+        // If selected date is in the past
+        if (selectedCal.before(today)) {
+            JOptionPane.showMessageDialog(this, "Cannot book past dates.", "Error", JOptionPane.ERROR_MESSAGE);
+            chooseDatejDateChooser.setDate(null);
+            return;
+        }
+
+        // If selected date is more than 1 year ahead
+        if (selectedCal.after(oneYearAhead)) {
+            JOptionPane.showMessageDialog(this, "Cannot book 1 year in advance.", "Error", JOptionPane.ERROR_MESSAGE);
+            chooseDatejDateChooser.setDate(null);
+            return;
+        }
+
+        // If selected today but past 4 PM, force tomorrow
+        int currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        if (selectedCal.equals(today) && currentHour >= 16) {
+            JOptionPane.showMessageDialog(this, "Past 4 PM already, book overtime for tomorrow.", "Error", JOptionPane.ERROR_MESSAGE);
+            today.add(Calendar.DATE, 1);
+            chooseDatejDateChooser.setDate(today.getTime());
+        }
+
+        // Check if overtime is already booked for this date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = dateFormat.format(selectedDate);
+        if (isOvertimeAlreadyBooked(formattedDate)) {
+            JOptionPane.showMessageDialog(this, "Cannot book overtime. Already booked for this date.", "Error", JOptionPane.ERROR_MESSAGE);
+            chooseDatejDateChooser.setDate(null);
+        }
+    }
+
+    private boolean isOvertimeAlreadyBooked(String selectedDate) {
+        List<String[]> allRequests = OvertimeRequest.getAllOvertimeRequests();
+
+        for (String[] request : allRequests) {
+            if (request.length >= 3 &&
+                request[0].equals(employeeData[0]) &&  // Match Employee Number
+                request[1].equals(selectedDate)) { // Match Date
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void validateOvertimeHours() {
+        Number value = (Number) overtimejSpinner.getValue();
+        if (value.doubleValue() == 0) {
+            JOptionPane.showMessageDialog(this, "Cannot book time hour 0.", "Error", JOptionPane.ERROR_MESSAGE);
+            overtimejSpinner.setValue(1);
+        }
     }
 
     /**
@@ -159,33 +227,43 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     }//GEN-LAST:event_backButton1ActionPerformed
 
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
-        // TODO add your handling code here:      
-        Employee employee = new Employee(Integer.parseInt(employeeData[0])); 
-        double hourlyRate = employee.getHourlyRate();
-
-        Number value = (Number) overtimejSpinner.getValue();
-        double overtimeHours = value.doubleValue(); 
-
-        double overtimePay = overtimeHours * hourlyRate;
-        String status = "Pending";
-
-        // Extract the selected date from jDateChooser
-        Date selectedDate = chooseDatejDateChooser.getDate();
-    
-        if (selectedDate == null) {
-            JOptionPane.showMessageDialog(this, "Please select a date.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (employeeData == null || employeeData.length == 0 || employeeData[0] == null) {
+            JOptionPane.showMessageDialog(this, "Error: Employee data is missing.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Convert Date to String format (YYYY-MM-DD)
+        int employeeNumber = Integer.parseInt(employeeData[0]);
+        Employee employee = new Employee(employeeNumber);
+        double hourlyRate = employee.getHourlyRate();
+
+        Number value = (Number) overtimejSpinner.getValue();
+        double overtimeHours = value.doubleValue();
+        double overtimePay = overtimeHours * hourlyRate;
+        String status = "Pending";
+
+        // Extract the selected date
+        Date selectedDate = chooseDatejDateChooser.getDate();
+        if (selectedDate == null) {
+            JOptionPane.showMessageDialog(this, "Please select a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String date = dateFormat.format(selectedDate);
 
-        OvertimeRequest request = new OvertimeRequest(Integer.parseInt(employeeData[0]), date, overtimeHours, overtimePay, status);
+        // Check if already booked
+        if (isOvertimeAlreadyBooked(date)) {
+            JOptionPane.showMessageDialog(this, "Cannot book overtime. Already booked for this date.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Create OvertimeRequest object
+        OvertimeRequest request = new OvertimeRequest(employeeNumber, date, overtimeHours, overtimePay, status);
         request.submitOvertimeRequest();
 
-        JOptionPane.showMessageDialog(this, "Overtime request submitted successfully!");
+        JOptionPane.showMessageDialog(this, "Overtime request submitted successfully.");
 
+        // Redirect to EmployeeOvertime page
         new EmployeeOvertime(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_submitButtonActionPerformed

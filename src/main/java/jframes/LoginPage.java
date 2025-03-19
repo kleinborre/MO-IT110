@@ -5,6 +5,7 @@
 package jframes;
 
 import classes.SystemAdministrator;
+import classes.UserAccount;
 import java.util.List;
 import javax.swing.JOptionPane;
 
@@ -120,17 +121,13 @@ public class LoginPage extends javax.swing.JFrame {
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         String inputUsername = usernameText.getText().trim();
         String inputPassword = new String(passwordText.getPassword()).trim();
-        String selectedRole = roleBox.getSelectedItem().toString().trim().replaceAll("\\s", "").toLowerCase();
+        String selectedRole  = roleBox.getSelectedItem().toString().trim().replaceAll("\\s", "").toLowerCase();
 
-        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
-        List<String[]> users = admin.readCSV("databases/Employee Details.csv");
+        errorLabel.setText(""); // Clear previous errors
 
-        // Reset error label before validation
-        errorLabel.setText("");
-
-        // Input validation
+        // Basic validation
         if (inputUsername.isEmpty()) {
-            errorLabel.setText("Username is required!");
+            errorLabel.setText("Username/Employee Number is required!");
             return;
         }
         if (inputPassword.isEmpty()) {
@@ -138,52 +135,53 @@ public class LoginPage extends javax.swing.JFrame {
             return;
         }
 
-        // Search for the user in the CSV data
-        String[] userData = findUser(users, inputUsername);
-        if (userData == null) {
-            errorLabel.setText("Username/Employee Number not found!");
+        // 1) Authenticate with User Accounts.csv
+        boolean authenticated = UserAccount.authenticate(inputUsername, inputPassword, selectedRole);
+        if (!authenticated) {
+            errorLabel.setText("Invalid credentials or role!");
             return;
         }
 
-        // Validate password
-        String storedPassword = userData[20].trim();
-        if (!storedPassword.equals(inputPassword)) {
-            errorLabel.setText("Incorrect password!");
-            return;
-        }
+        // 2) If credentials are valid, find the 22-column "joined" user row
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        String[][] allUsers = admin.getAllUsers(); // This method returns 22 columns per row
+        String[] matchedUser = null;
 
-        // Validate role
-        String[] storedRoles = userData[21].trim().toLowerCase().split("\\|");
-        if (!isRoleValid(storedRoles, selectedRole)) {
-            errorLabel.setText("Incorrect role selection!");
-            return;
-        }
+        for (String[] row : allUsers) {
+            // row[0] => employeeNumber
+            // row[19] => username
+            // row[20] => password
+            // row[21] => role(s)
 
-        // Open the corresponding page based on role
-        openUserDashboard(selectedRole, userData);
-    }
+            boolean matchesIDOrUsername =
+                row[0].equalsIgnoreCase(inputUsername)  // typed employee number
+                || row[19].equalsIgnoreCase(inputUsername); // typed username
 
-    // ** Helper Method: Find User in CSV Data **
-    private String[] findUser(List<String[]> users, String usernameOrEmpNumber) {
-        for (String[] user : users) {
-            if (user.length >= 22 && (user[0].equals(usernameOrEmpNumber) || user[19].equals(usernameOrEmpNumber))) {
-                return user; // Found user
+            boolean matchesPassword = row[20].equals(inputPassword);
+
+            if (matchesIDOrUsername && matchesPassword) {
+                // 3) Check if the role is valid in row[21]
+                String[] storedRoles = row[21].toLowerCase().split("\\|");
+                for (String r : storedRoles) {
+                    if (r.equals(selectedRole)) {
+                        matchedUser = row;
+                        break;
+                    }
+                }
             }
+            if (matchedUser != null) break;
         }
-        return null; // User not found
+
+        // 4) If we never found a matching row, show error
+        if (matchedUser == null) {
+            errorLabel.setText("Could not locate user record!");
+            return;
+        }
+
+        // 5) Otherwise, open the correct dashboard
+        openUserDashboard(selectedRole, matchedUser);
     }
 
-    // ** Helper Method: Validate Role **
-    private boolean isRoleValid(String[] storedRoles, String selectedRole) {
-        for (String role : storedRoles) {
-            if (role.equals(selectedRole)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // ** Helper Method: Open User Dashboard **
     private void openUserDashboard(String role, String[] userData) {
         switch (role) {
             case "employee":
@@ -202,7 +200,7 @@ public class LoginPage extends javax.swing.JFrame {
                 errorLabel.setText("Invalid role selected!");
                 return;
         }
-        dispose(); // Close login window after success
+        dispose(); // Close login window
     }//GEN-LAST:event_loginButtonActionPerformed
 
     private void roleBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roleBoxActionPerformed
