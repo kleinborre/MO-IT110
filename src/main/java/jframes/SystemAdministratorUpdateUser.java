@@ -5,6 +5,7 @@
 package jframes;
 
 import classes.SystemAdministrator;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,34 +17,37 @@ import javax.swing.JOptionPane;
  */
 public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
-    /**
-     * Creates new form SystemAdministratorUpdateUser
-     */
+    private String[] selectedUser; // 22 columns
 
-    private String[] selectedUser;
+    // Decimal Formatter for numeric values with commas
+    private static final DecimalFormat formatter = new DecimalFormat("#,##0");
 
     public SystemAdministratorUpdateUser(String[] selectedUser) {
         this.selectedUser = selectedUser;
         initComponents();
         populateFields(selectedUser);
     }
-    
+
+    /**
+     * Populates fields with existing user data.
+     */
     private void populateFields(String[] userData) {
-        if (userData == null || userData.length != 22) { // Ensure correct array size
-            System.out.println("Error: Incorrect user data length. Expected 22, got " + (userData != null ? userData.length : 0));
+        if (userData == null || userData.length != 22) {
+            System.out.println("Error: userData must be 22 columns, got " + (userData != null ? userData.length : 0));
             return;
         }
 
-        employeeNumberText.setText(userData[0]);
+        employeeNumberText.setText(userData[0]); // Employee Number (Non-Editable)
+        employeeNumberText.setEditable(false);
         lastNameText.setText(userData[1]);
         firstNameText.setText(userData[2]);
 
-        // Convert date format for JCalendar
+        // Parse and set birthday
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
             Date date = dateFormat.parse(userData[3]);
             birthdayCalendar.setDate(date);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -51,22 +55,36 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         phoneNumberText1.setText(userData[5]);
         sssNumberText.setText(userData[6]);
         philhealthNumberText1.setText(userData[7]);
-        tinNumberText1.setText(userData[8]);
-        pagIbigText.setText(userData[9]);
+        tinNumberText1.setText(userData[9]);
+        pagIbigText.setText(userData[8]);
         statusBox.setSelectedItem(userData[10]);
         positionBox.setSelectedItem(userData[11]);
         supervisorBox.setSelectedItem(userData[12]);
-        basicSalaryText.setText(userData[13]);
-        riceSubsidyText.setText(userData[14]);
-        phoneAllowanceBox.setSelectedItem(userData[15]);
-        clothingAllowanceBox.setSelectedItem(userData[16]);
-        grossSemiMonthlyRateText.setText(userData[17]);
-        hourlyRateText.setText(userData[18]);
+
+        // Properly format numeric values with commas
+        basicSalaryText.setText(formatNumber(userData[13]));
+        riceSubsidyText.setText(formatNumber(userData[14]));
+        phoneAllowanceBox.setSelectedItem(formatNumber(userData[15]));
+        clothingAllowanceBox.setSelectedItem(formatNumber(userData[16]));
+        grossSemiMonthlyRateText.setText(formatNumber(userData[17]));
+        hourlyRateText.setText(formatNumber(userData[18]));
+
         usernameText.setText(userData[19]);
         passwordText.setText(userData[20]);
         roleBox.setSelectedItem(userData[21]);
     }
 
+    /**
+     * Formats a numeric value with commas.
+     */
+    private String formatNumber(String number) {
+        try {
+            return formatter.format(Long.parseLong(number.replace(",", "").trim()));
+        } catch (NumberFormatException e) {
+            return number; // If invalid, return original string
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -175,8 +193,8 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         roleBox.setBackground(new java.awt.Color(204, 204, 204));
         roleBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        roleBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Employee", "HR Manager", "Payroll Manager", "System Administrator" }));
-        getContentPane().add(roleBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 240, 140, -1));
+        roleBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Employee", "Employee|HRManager", "Employee|PayrollManager", "Employee|SystemAdministrator" }));
+        getContentPane().add(roleBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 240, 180, -1));
 
         jLabel5.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(102, 102, 102));
@@ -451,9 +469,7 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
-        // TODO add your handling code here:
-        new SystemAdministratorPage().setVisible(true);
-        dispose();
+        this.dispose(); 
     }//GEN-LAST:event_backButtonActionPerformed
 
     private void usernameTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usernameTextActionPerformed
@@ -510,44 +526,114 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
         // TODO add your handling code here:
+        // Keep employee number
+        lastNameText.setText("");
+        firstNameText.setText("");
+        addressText.setText("");
+        phoneNumberText1.setText("");
+        sssNumberText.setText("");
+        philhealthNumberText1.setText("");
+        tinNumberText1.setText("");
+        pagIbigText.setText("");
+        basicSalaryText.setText("");
+        riceSubsidyText.setText("1,500"); // Default value
+        grossSemiMonthlyRateText.setText("");
+        hourlyRateText.setText("");
+        usernameText.setText("");
+        passwordText.setText("");
+
+        // Reset calendar to null (forces user to reselect birthday)
+        birthdayCalendar.setDate(null);
+
+        // Reset combo boxes to default
+        roleBox.setSelectedIndex(-1);
+        statusBox.setSelectedIndex(-1);
+        positionBox.setSelectedIndex(-1);
+        supervisorBox.setSelectedIndex(-1);
+        phoneAllowanceBox.setSelectedIndex(-1);
+        clothingAllowanceBox.setSelectedIndex(-1);
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void UpdateUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateUserButtonActionPerformed
-        // TODO add your handling code here:
+        // Validate required fields
+        if (anyEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields must be filled!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
         String birthday = dateFormat.format(birthdayCalendar.getDate());
 
-        String[] updatedUser = {
-            employeeNumberText.getText().trim(),
+        // Build updated user data array (22 fields)
+        String[] updatedUser = new String[22];
+        updatedUser[0]  = employeeNumberText.getText().trim();
+        updatedUser[1]  = lastNameText.getText().trim();
+        updatedUser[2]  = firstNameText.getText().trim();
+        updatedUser[3]  = birthday;
+        updatedUser[4]  = addressText.getText().trim();
+        updatedUser[5]  = phoneNumberText1.getText().trim();
+        updatedUser[6]  = sssNumberText.getText().trim();
+        updatedUser[7]  = philhealthNumberText1.getText().trim();
+        updatedUser[8]  = pagIbigText.getText().trim();
+        updatedUser[9]  = tinNumberText1.getText().trim();
+        updatedUser[10] = statusBox.getSelectedItem().toString().trim();
+        updatedUser[11] = positionBox.getSelectedItem().toString().trim();
+        updatedUser[12] = supervisorBox.getSelectedItem().toString().trim();
+        updatedUser[13] = basicSalaryText.getText().replace(",", "").trim();
+        updatedUser[14] = riceSubsidyText.getText().replace(",", "").trim();
+        updatedUser[15] = phoneAllowanceBox.getSelectedItem().toString().replace(",", "").trim();
+        updatedUser[16] = clothingAllowanceBox.getSelectedItem().toString().replace(",", "").trim();
+        updatedUser[17] = grossSemiMonthlyRateText.getText().replace(",", "").trim();
+        updatedUser[18] = hourlyRateText.getText().replace(",", "").trim();
+        updatedUser[19] = usernameText.getText().trim();
+        updatedUser[20] = passwordText.getText().trim();
+        updatedUser[21] = roleBox.getSelectedItem().toString().trim();
+
+        // Call SystemAdministrator logic to update the user
+        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+        admin.updateUser(updatedUser[0], updatedUser);
+
+        JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+        // Refresh the existing SystemAdministratorPage instead of creating a new one
+        for (java.awt.Window window : java.awt.Window.getWindows()) {
+            if (window instanceof SystemAdministratorPage) {
+                ((SystemAdministratorPage) window).loadUserData(); // Refresh data
+                window.setVisible(true);
+                break;
+            }
+        }
+
+        this.dispose(); // Close the current update window
+    }
+
+    /**
+     * Checks if any required field is empty.
+     */
+    private boolean anyEmpty() {
+        String[] fields = {
             lastNameText.getText().trim(),
             firstNameText.getText().trim(),
-            birthday,
             addressText.getText().trim(),
             phoneNumberText1.getText().trim(),
             sssNumberText.getText().trim(),
             philhealthNumberText1.getText().trim(),
             tinNumberText1.getText().trim(),
             pagIbigText.getText().trim(),
-            statusBox.getSelectedItem().toString().trim(),
-            positionBox.getSelectedItem().toString().trim(),
-            supervisorBox.getSelectedItem().toString().trim(),
             basicSalaryText.getText().trim(),
             riceSubsidyText.getText().trim(),
-            phoneAllowanceBox.getSelectedItem().toString().trim(),
-            clothingAllowanceBox.getSelectedItem().toString().trim(),
             grossSemiMonthlyRateText.getText().trim(),
             hourlyRateText.getText().trim(),
             usernameText.getText().trim(),
-            passwordText.getText().trim(),
-            roleBox.getSelectedItem().toString().trim()
+            passwordText.getText().trim()
         };
 
-        SystemAdministrator admin = new SystemAdministrator(0, "", "", ""); 
-        admin.updateUser(employeeNumberText.getText().trim(), updatedUser);
-
-        JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-        new SystemAdministratorPage().setVisible(true);
-        dispose(); // Close window after update
+        for (String field : fields) {
+            if (field.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }//GEN-LAST:event_UpdateUserButtonActionPerformed
 
     private void hourlyRateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hourlyRateTextActionPerformed

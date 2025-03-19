@@ -34,6 +34,10 @@ public class LeaveRequest extends Employee implements CSVHandler {
         this.status = status;
     }
 
+    public LeaveRequest() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     /** Getters */
     public String getLeaveType() {
         return leaveType;
@@ -150,13 +154,14 @@ public class LeaveRequest extends Employee implements CSVHandler {
     public void submitLeaveRequest() {
         List<String[]> allRequests = readCSV(getCSVFile().getPath());
 
-        // Get employee's full name
-        String employeeName = getFullName();
+        // Ensure full name is retrieved before saving
+        Employee employee = new Employee(getEmployeeNumber());
+        String fullName = employee.getLastName() + ", " + employee.getFirstName();
 
-        // Create new leave request entry
+        // Create a new leave request entry with the correct name
         String[] newRequest = {
             String.valueOf(getEmployeeNumber()), 
-            employeeName, 
+            fullName, // Ensure name is correctly saved
             leaveType, 
             startDate.toString(), 
             endDate.toString(), 
@@ -164,7 +169,6 @@ public class LeaveRequest extends Employee implements CSVHandler {
         };
 
         allRequests.add(newRequest); // Add new request
-
         writeCSV(getCSVFile().getPath(), allRequests); // Overwrite file with updated list
         System.out.println("Leave request submitted successfully.");
     }
@@ -178,7 +182,9 @@ public class LeaveRequest extends Employee implements CSVHandler {
         boolean isDeleted = false;
 
         for (String[] request : allRequests) {
-            if (request[0].equals(String.valueOf(getEmployeeNumber())) && request[2].equals(leaveType) && request[3].equals(startDate.toString())) {
+            if (request[0].equals(String.valueOf(getEmployeeNumber())) && 
+                request[2].equals(leaveType) && 
+                request[3].equals(startDate.toString())) {
                 isDeleted = true; // Found and removed this request
                 continue;
             }
@@ -193,6 +199,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
             System.out.println("No matching leave request found.");
         }
     }
+
     
     /**
     * Retrieves all leave requests for HR Manager to review.
@@ -215,7 +222,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
                 request[0].equals(String.valueOf(employeeNumber)) &&
                 request[2].equals(leaveType) &&
                 request[3].equals(startDate)) {
-            
+
                 request[5] = status; // Update Status
                 updated = true;
                 break;
@@ -228,5 +235,22 @@ public class LeaveRequest extends Employee implements CSVHandler {
         } else {
             System.out.println("No matching leave request found.");
         }
+    }
+    
+     /**
+     * Converts LeaveRequest object to CSV row format.
+     */
+    public String[] toCSVArray() {
+        Employee employee = new Employee(getEmployeeNumber());
+        String fullName = employee.getLastName() + ", " + employee.getFirstName();
+
+        return new String[]{
+            String.valueOf(getEmployeeNumber()),
+            fullName,
+            leaveType,
+            startDate.toString(),
+            endDate.toString(),
+            status
+        };
     }
 }

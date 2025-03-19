@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class EmployeeProfileInformation extends javax.swing.JFrame {
     
-    private String[] employeeData;
+    private String[] employeeData; // This is the 22-column array: [0..18 => Employee, 19..21 => Credentials]
 
     public EmployeeProfileInformation(String[] employeeData) {
         this.employeeData = employeeData;
@@ -32,17 +32,19 @@ public class EmployeeProfileInformation extends javax.swing.JFrame {
             return;
         }
 
+        // We can load the "joined" row from SystemAdministrator if we want the latest
         SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
         String[] updatedData = admin.getUserByEmployeeNumber(employeeData[0]);
-
         if (updatedData == null) {
-            System.err.println("Error: Employee not found in CSV.");
+            System.err.println("Error: Employee not found in joined data.");
             return;
         }
 
-        // Populate the correct data
+        // updatedData has 22 columns (0..18 => Employee, 19..21 => user credentials)
+        // Fill the fields
+        // indexes => 0: Employee #, 1: Last Name, 2: First Name, 3: Birthday, 4: Address, 5: Phone ...
         employeeNumberLabel.setText(updatedData[0]);
-        fullNameLabel.setText(updatedData[2] + " " + updatedData[1]);
+        fullNameLabel.setText(updatedData[2] + " " + updatedData[1]); // First + Last
         positionLabel.setText(updatedData[11]);
         supervisorLabel.setText(updatedData[12]);
         statusLabel.setText(updatedData[10]);
@@ -58,7 +60,7 @@ public class EmployeeProfileInformation extends javax.swing.JFrame {
         grossSemiMonthlyRateLabel.setText("₱ " + updatedData[17]);
         hourlyRateLabel.setText("₱ " + updatedData[18]);
 
-        // Editable fields (phone and address)
+        // Editable fields (phone & address)
         phoneNumberLabel.setText(updatedData[5]);
         addressLabel.setText(updatedData[4]);
     }

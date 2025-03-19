@@ -149,20 +149,21 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         List<String[]> allRequests = readCSV(getCSVFile().getPath());
         boolean isUpdated = false;
 
-        // Get full name of the employee
-        String fullName = getFullName(); 
+        // Fetch employee full name using Employee class
+        Employee employee = new Employee(getEmployeeNumber());
+        String fullName = employee.getLastName() + ", " + employee.getFirstName();
 
-        // Create new overtime request entry with full name at index 1
+        // New request with correct full name
         String[] newRequest = {
             String.valueOf(getEmployeeNumber()), 
-            fullName,  // Insert full name here
+            fullName,  // Ensure full name is saved correctly
             date, 
             String.valueOf(overtimeHours), 
             String.valueOf(overtimePay), 
             status
         };
 
-        // Check if a request for the same employee on the same date exists (update instead of duplicate)
+        // Check if the employee already has an overtime request on this date
         for (int i = 0; i < allRequests.size(); i++) {
             String[] request = allRequests.get(i);
             if (request[0].equals(String.valueOf(getEmployeeNumber())) && request[2].equals(date)) {
@@ -171,14 +172,14 @@ public class OvertimeRequest extends Employee implements CSVHandler {
                 break;
             }
         }
-        
+
         if (!isUpdated) {
             allRequests.add(newRequest); // Add new request if it doesn’t exist
         }
 
-        writeCSV(getCSVFile().getPath(), allRequests); // Overwrite file with updated list
-        System.out.println("Overtime request " + (isUpdated ? "updated" : "submitted") + " successfully.");
+        writeCSV(getCSVFile().getPath(), allRequests);
     }
+
 
     /**
      * Cancels an overtime request by removing it from the CSV file.
