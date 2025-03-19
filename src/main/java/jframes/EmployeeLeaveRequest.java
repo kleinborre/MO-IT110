@@ -247,13 +247,8 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
         int employeeNumber = Integer.parseInt(employeeData[0]);
         LeaveRequest leaveRequest = new LeaveRequest(employeeNumber, leaveType, startDate, endDate, "Pending");
 
-        // Save to CSV
-        leaveRequest.submitLeaveRequest();
+        leaveRequest.submitLeaveRequest(); // Calls validation and CSV writing
 
-        // Confirmation Message
-        JOptionPane.showMessageDialog(this, "Leave request submitted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-        // Redirect to EmployeeLeave
         new EmployeeLeave(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_submitButtonActionPerformed

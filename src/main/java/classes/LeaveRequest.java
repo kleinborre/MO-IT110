@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  * LeaveRequest class that manages employee leave requests and handles CSV operations.
@@ -140,7 +141,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
         File csvFile = getCSVFile();
 
         try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile, false))) {
-            String[] header = {"EmployeeNumber", "Name", "LeaveType", "StartDate", "EndDate", "Status"};
+            String[] header = {"EmployeeNumber", "Name", "LeaveType", "StartDate", "EndDate", "Status", "OvertimeRequestNumber"};
             writer.writeNext(header); // Write header only once
             writer.writeAll(data);    // Write all records
         } catch (IOException e) {
@@ -153,25 +154,53 @@ public class LeaveRequest extends Employee implements CSVHandler {
      */
     public void submitLeaveRequest() {
         List<String[]> allRequests = readCSV(getCSVFile().getPath());
+        String leaveRequestNumber = generateLeaveRequestNumber(); // Generate ID
 
-        // Ensure full name is retrieved before saving
         Employee employee = new Employee(getEmployeeNumber());
         String fullName = employee.getLastName() + ", " + employee.getFirstName();
 
-        // Create a new leave request entry with the correct name
+        // Create a new leave request row
         String[] newRequest = {
-            String.valueOf(getEmployeeNumber()), 
-            fullName, // Ensure name is correctly saved
-            leaveType, 
-            startDate.toString(), 
-            endDate.toString(), 
-            status
+            String.valueOf(getEmployeeNumber()),
+            fullName,
+            leaveType,
+            startDate.toString(),
+            endDate.toString(),
+            status,
+            leaveRequestNumber // Include ID
         };
 
-        allRequests.add(newRequest); // Add new request
-        writeCSV(getCSVFile().getPath(), allRequests); // Overwrite file with updated list
-        System.out.println("Leave request submitted successfully.");
+        // Check if leave request already exists
+        boolean exists = false;
+        List<String[]> updatedRequests = new ArrayList<>();
+
+        for (String[] request : allRequests) {
+            if (request.length >= 7) { // Ensure correct length
+                String existingNumber = request[6].trim(); // Get stored LeaveRequestNumber
+                LocalDate existingStart = LocalDate.parse(request[3].trim()); // Parse StartDate
+                LocalDate existingEnd = LocalDate.parse(request[4].trim()); // Parse EndDate
+
+                // Check for exact duplicate or overlapping range
+                if (existingNumber.equals(leaveRequestNumber) ||
+                    (startDate.isBefore(existingEnd) && endDate.isAfter(existingStart))) {
+                    exists = true; // Conflict detected
+                    continue; // Skip this request (delete in real-time)
+                }
+            }
+            updatedRequests.add(request); // Keep valid requests
+        }
+
+        if (exists) {
+            JOptionPane.showMessageDialog(null, "Cannot submit. Leave request conflicts with existing leave.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Add new request and save
+        updatedRequests.add(newRequest);
+        writeCSV(getCSVFile().getPath(), updatedRequests);
+        JOptionPane.showMessageDialog(null, "Leave request submitted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
+
 
     /**
      * Cancels a leave request by removing it from the CSV file.
@@ -243,6 +272,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
     public String[] toCSVArray() {
         Employee employee = new Employee(getEmployeeNumber());
         String fullName = employee.getLastName() + ", " + employee.getFirstName();
+        String leaveRequestNumber = generateLeaveRequestNumber(); // Generate ID
 
         return new String[]{
             String.valueOf(getEmployeeNumber()),
@@ -250,7 +280,18 @@ public class LeaveRequest extends Employee implements CSVHandler {
             leaveType,
             startDate.toString(),
             endDate.toString(),
-            status
+            status,
+            leaveRequestNumber // New Index (Index 6)
         };
     }
+    
+    public String generateLeaveRequestNumber() {
+        String companyNumber = "20"; // Static company number
+        String start = startDate.toString().replaceAll("[^0-9]", ""); // YYYYMMDD
+        String end = endDate.toString().replaceAll("[^0-9]", "").substring(4); // MMDD (last 4 digits)
+
+        return companyNumber + start + end; // Format: 20YYYYMMDDMMDD
+    }
+
+    
 }
