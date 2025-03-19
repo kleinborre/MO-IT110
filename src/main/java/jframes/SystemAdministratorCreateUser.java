@@ -14,9 +14,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
@@ -65,9 +63,9 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
                 else if (src == passwordText)             validatePassword();
                 else if (src == addressText)              validateAddress();
                 else if (src == phoneNumberText1)         validatePhoneNumber();
-                else if (src == sssNumberText)            validateSSS();
+                else if (src == sssNumberText)            formatSSSNumber(); //validateSSS();
                 else if (src == philhealthNumberText)     validatePhilhealth();
-                else if (src == tinNumberText)            validateTIN();
+                else if (src == tinNumberText)            formatTINNumber(); //validateTIN();
                 else if (src == pagIbigText)              validatePagIbig();
                 else if (src == basicSalaryText)          validateBasicSalary();
                 else if (src == grossSemiMonthlyRateText) validateGrossSemi();
@@ -174,30 +172,45 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     }
 
     private void validatePhoneNumber() {
-        // Must start with "09" or "639", length 11 or 12, digits only
-        String text = phoneNumberText1.getText().trim();
-        if (!text.matches("\\d+")) {
-            phoneNumberText1.setBackground(ERROR_COLOR);
-            return;
-        }
-        if (!(text.startsWith("09") || text.startsWith("639"))) {
-            phoneNumberText1.setBackground(ERROR_COLOR);
-            return;
-        }
-        if (text.length() < 11 || text.length() > 12) {
-            phoneNumberText1.setBackground(ERROR_COLOR);
-            return;
-        }
-        phoneNumberText1.setBackground(OK_COLOR);
-    }
+        String text = phoneNumberText1.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
 
-    private void validateSSS() {
-        // 10 digits
-        String text = sssNumberText.getText().trim();
-        if (text.matches("\\d{10}")) {
-            sssNumberText.setBackground(OK_COLOR);
+        if (text.length() > 11) {
+            text = text.substring(0, 11); // Ensure max length
+        }
+
+        if (text.matches("^09\\d{9}$") || text.matches("^639\\d{9}$")) {
+            phoneNumberText1.setBackground(OK_COLOR);
         } else {
-            sssNumberText.setBackground(ERROR_COLOR);
+            phoneNumberText1.setBackground(ERROR_COLOR);
+        }
+
+        // Apply formatting 09XX-XXX-XXXX or 639XX-XXX-XXXX
+        if (text.length() >= 11) {
+            phoneNumberText1.setText(text.replaceAll("(\\d{4})(\\d{3})(\\d{4})", "$1-$2-$3"));
+        }
+    }
+    
+    private void formatSSSNumber() {
+        String text = sssNumberText.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
+
+        if (text.length() > 10) {
+            text = text.substring(0, 10); // Ensure max length
+        }
+
+        if (text.length() == 10) {
+            sssNumberText.setText(text.replaceAll("(\\d{2})(\\d{7})(\\d{1})", "$1-$2-$3"));
+        }
+    }
+    
+    private void formatTINNumber() {
+        String text = tinNumberText.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
+
+        if (text.length() > 12) {
+            text = text.substring(0, 12); // Ensure max length
+        }
+
+        if (text.length() == 12) {
+            tinNumberText.setText(text.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3-$4"));
         }
     }
 
@@ -208,16 +221,6 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
             philhealthNumberText.setBackground(OK_COLOR);
         } else {
             philhealthNumberText.setBackground(ERROR_COLOR);
-        }
-    }
-
-    private void validateTIN() {
-        // 12 digits
-        String text = tinNumberText.getText().trim();
-        if (text.matches("\\d{12}")) {
-            tinNumberText.setBackground(OK_COLOR);
-        } else {
-            tinNumberText.setBackground(ERROR_COLOR);
         }
     }
 
@@ -446,49 +449,44 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
     // ------------- E) "Clear" Button Handler -------------
     public void handleClearButtonAction() {
-        // keep employeeNumberText
+        // Reset text fields
         lastNameText.setText("");
-        lastNameText.setBackground(OK_COLOR);
         firstNameText.setText("");
-        firstNameText.setBackground(OK_COLOR);
-        usernameText.setText("");
-        usernameText.setBackground(OK_COLOR);
-        passwordText.setText("");
-        passwordText.setBackground(OK_COLOR);
         addressText.setText("");
-        addressText.setBackground(OK_COLOR);
         phoneNumberText1.setText("");
-        phoneNumberText1.setBackground(OK_COLOR);
         sssNumberText.setText("");
-        sssNumberText.setBackground(OK_COLOR);
         philhealthNumberText.setText("");
-        philhealthNumberText.setBackground(OK_COLOR);
         tinNumberText.setText("");
-        tinNumberText.setBackground(OK_COLOR);
         pagIbigText.setText("");
-        pagIbigText.setBackground(OK_COLOR);
         basicSalaryText.setText("");
-        basicSalaryText.setBackground(OK_COLOR);
+        riceSubsidyText.setText("1,500"); // Default value
         grossSemiMonthlyRateText.setText("");
-        grossSemiMonthlyRateText.setBackground(OK_COLOR);
-        riceSubsidyText.setText("1500");
-        riceSubsidyText.setBackground(OK_COLOR);
         hourlyRateText.setText("");
-        hourlyRateText.setBackground(OK_COLOR);
+        usernameText.setText("");
+        passwordText.setText("");
+        birthdayCalendar.setDate(new Date()); // Sets to today's date
 
-        birthdayCalendar.setDate(null);
-
+        // Reset dropdown selections
         roleBox.setSelectedIndex(-1);
         statusBox.setSelectedIndex(-1);
         positionBox.setSelectedIndex(-1);
         supervisorBox.setSelectedIndex(-1);
         phoneAllowanceBox.setSelectedIndex(-1);
         clothingAllowanceBox.setSelectedIndex(-1);
-        
-        
-        
-        
+
+        // Reset background colors (Validation Reset)
+            JTextField[] fields = {
+            lastNameText, firstNameText, usernameText, passwordText, 
+            addressText, phoneNumberText1, sssNumberText, philhealthNumberText,
+            tinNumberText, pagIbigText, basicSalaryText, grossSemiMonthlyRateText, 
+            riceSubsidyText, hourlyRateText
+        };
+
+        for (JTextField field : fields) {
+            field.setBackground(Color.WHITE); // Reset to default white
+        }
     }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

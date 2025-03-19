@@ -166,7 +166,7 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
     }//GEN-LAST:event_createButtonActionPerformed
 
     private void userAccountTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_userAccountTableMouseClicked
-        int row = userAccountTable.getSelectedRow();
+    int row = userAccountTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "No row selected!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -180,14 +180,15 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
 
         String empNumber = selectedUser[0];
 
+        // Removed "Cancel" button
         int choice = JOptionPane.showOptionDialog(
             this,
             "Do you want to UPDATE or DELETE this user?",
             "User Action",
-            JOptionPane.YES_NO_CANCEL_OPTION,
+            JOptionPane.YES_NO_OPTION,  // Only "YES" (Update) and "NO" (Delete)
             JOptionPane.QUESTION_MESSAGE,
             null,
-            new String[]{"Update", "Delete", "Cancel"},
+            new String[]{"Update", "Delete"}, // Removed "Cancel"
             "Update"
         );
 
