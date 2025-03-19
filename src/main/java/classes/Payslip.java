@@ -123,12 +123,12 @@ public class Payslip extends Employee {
                 }
             }
         }
-    }
+    } 
 
     public void calculateGrossSalary() {
         // Ensures correct addition of overtime pay
         grossSalary = (totalWorkedHours * getHourlyRate()) + overtimePay;
-    }
+    } 
 
     public void calculateDeductions() {
         if (grossSalary == 0) {
