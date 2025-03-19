@@ -102,17 +102,21 @@ public class Payslip extends Employee {
         DateTimeFormatter csvDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // Correct CSV format
 
         for (String[] record : otRecords) {
-            if (record.length >= 5 && record[0].equals(String.valueOf(employeeNumber))) {
+            if (record.length >= 6 && record[0].equals(String.valueOf(employeeNumber))) {
                 try {
-                    // Parse date directly since it's already in YYYY-MM-DD
                     LocalDate overtimeDate = LocalDate.parse(record[2].trim(), csvDateFormatter);
 
                     // Ensure overtime is counted only for the selected month & year
                     if (overtimeDate.getMonthValue() == month && overtimeDate.getYear() == year) {
                         double oh = Double.parseDouble(record[3].trim()); // Overtime hours
                         double op = Double.parseDouble(record[4].trim()); // Overtime pay
-                        overtimeHours += oh;
-                        overtimePay += op;
+                        String status = record[5].trim().replace("\"", ""); // Remove "" if exists
+
+                        // Only add to the payslip if the status is "Approved"
+                        if (status.equalsIgnoreCase("Approved")) {
+                            overtimeHours += oh;
+                            overtimePay += op;
+                        }
                     }
                 } catch (Exception e) {
                     System.err.println("Error processing overtime for Employee #" + employeeNumber + " on " + record[2] + ": " + e.getMessage());
