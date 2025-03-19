@@ -102,28 +102,38 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
 
         // If selected today but past 4 PM, force tomorrow
         int currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-        if (selectedCal.equals(today) && currentHour >= 16) {
+        if (isSameDay(selectedCal, today) && currentHour >= 16) {
             JOptionPane.showMessageDialog(this, "Past 4 PM already, book overtime for tomorrow.", "Error", JOptionPane.ERROR_MESSAGE);
             today.add(Calendar.DATE, 1);
             chooseDatejDateChooser.setDate(today.getTime());
         }
 
-        // Check if overtime is already booked for this date
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String formattedDate = dateFormat.format(selectedDate);
-        if (isOvertimeAlreadyBooked(formattedDate)) {
-            JOptionPane.showMessageDialog(this, "Cannot book overtime. Already booked for this date.", "Error", JOptionPane.ERROR_MESSAGE);
-            chooseDatejDateChooser.setDate(null);
+            // Check if overtime is already booked for this date
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String formattedDate = dateFormat.format(selectedDate);
+            if (isOvertimeAlreadyBooked(formattedDate)) {
+                JOptionPane.showMessageDialog(this, "Cannot book overtime. Already booked for this date.", "Error", JOptionPane.ERROR_MESSAGE);
+                chooseDatejDateChooser.setDate(null);
+            }
         }
+    
+    private boolean isSameDay(Calendar cal1, Calendar cal2) {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+           cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+           cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH);
     }
+
 
     private boolean isOvertimeAlreadyBooked(String selectedDate) {
         List<String[]> allRequests = OvertimeRequest.getAllOvertimeRequests();
 
+        // Generate OvertimeRequestNumber for the selected date
+        int generatedOvertimeRequestNumber = OvertimeRequest.generateOvertimeRequestNumber(selectedDate);
+
         for (String[] request : allRequests) {
-            if (request.length >= 3 &&
+            if (request.length >= 7 &&
                 request[0].equals(employeeData[0]) &&  // Match Employee Number
-                request[1].equals(selectedDate)) { // Match Date
+                request[6].equals(String.valueOf(generatedOvertimeRequestNumber))) { // Match OvertimeRequestNumber
                 return true;
             }
         }
@@ -195,7 +205,7 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
         getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 190, -1, -1));
 
         overtimejSpinner.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        overtimejSpinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, 4, 1));
+        overtimejSpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, 4, 1));
         getContentPane().add(overtimejSpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 330, 130, -1));
 
         jLabel4.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
@@ -227,45 +237,56 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     }//GEN-LAST:event_backButton1ActionPerformed
 
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
-        if (employeeData == null || employeeData.length == 0 || employeeData[0] == null) {
-            JOptionPane.showMessageDialog(this, "Error: Employee data is missing.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+    if (employeeData == null || employeeData.length == 0 || employeeData[0] == null) {
+        JOptionPane.showMessageDialog(this, "Error: Employee data is missing.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
-        int employeeNumber = Integer.parseInt(employeeData[0]);
-        Employee employee = new Employee(employeeNumber);
-        double hourlyRate = employee.getHourlyRate();
+    int employeeNumber = Integer.parseInt(employeeData[0]);
+    Employee employee = new Employee(employeeNumber);
+    double hourlyRate = employee.getHourlyRate();
 
-        Number value = (Number) overtimejSpinner.getValue();
-        double overtimeHours = value.doubleValue();
-        double overtimePay = overtimeHours * hourlyRate;
-        String status = "Pending";
+    Number value = (Number) overtimejSpinner.getValue();
+    double overtimeHours = value.doubleValue();
+    
+    // Validate that overtime hours cannot be 0
+    if (overtimeHours == 0) {
+        JOptionPane.showMessageDialog(this, "Overtime hours cannot be 0. Please select at least 1 hour.", "Error", JOptionPane.ERROR_MESSAGE);
+        overtimejSpinner.setValue(1); // Reset to minimum valid value
+        return;
+    }
 
-        // Extract the selected date
-        Date selectedDate = chooseDatejDateChooser.getDate();
-        if (selectedDate == null) {
-            JOptionPane.showMessageDialog(this, "Please select a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+    double overtimePay = overtimeHours * hourlyRate;
+    String status = "Pending";
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String date = dateFormat.format(selectedDate);
+    // Extract the selected date
+    Date selectedDate = chooseDatejDateChooser.getDate();
+    if (selectedDate == null) {
+        JOptionPane.showMessageDialog(this, "Please select a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
-        // Check if already booked
-        if (isOvertimeAlreadyBooked(date)) {
-            JOptionPane.showMessageDialog(this, "Cannot book overtime. Already booked for this date.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    String date = dateFormat.format(selectedDate);
 
-        // Create OvertimeRequest object
-        OvertimeRequest request = new OvertimeRequest(employeeNumber, date, overtimeHours, overtimePay, status);
-        request.submitOvertimeRequest();
+    // Generate OvertimeRequestNumber
+    int overtimeRequestNumber = OvertimeRequest.generateOvertimeRequestNumber(date);
 
-        JOptionPane.showMessageDialog(this, "Overtime request submitted successfully.");
+    // Check if already booked
+    if (isOvertimeAlreadyBooked(date)) {
+        JOptionPane.showMessageDialog(this, "Cannot book overtime. Already booked for this date.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
-        // Redirect to EmployeeOvertime page
-        new EmployeeOvertime(employeeData).setVisible(true);
-        dispose();
+    // Create OvertimeRequest object
+    OvertimeRequest request = new OvertimeRequest(employeeNumber, date, overtimeHours, overtimePay, status);
+    request.submitOvertimeRequest();
+
+    JOptionPane.showMessageDialog(this, "Overtime request submitted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+    // Redirect to EmployeeOvertime page
+    new EmployeeOvertime(employeeData).setVisible(true);
+    dispose();
     }//GEN-LAST:event_submitButtonActionPerformed
 
     /**
