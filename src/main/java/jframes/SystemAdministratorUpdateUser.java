@@ -5,11 +5,15 @@
 package jframes;
 
 import classes.SystemAdministrator;
+import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 /**
  *
@@ -18,31 +22,30 @@ import javax.swing.JOptionPane;
 public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
     private String[] selectedUser; // 22 columns
-
-    // Decimal Formatter for numeric values with commas
     private static final DecimalFormat formatter = new DecimalFormat("#,##0");
+
+    // Validation Colors
+    private static final Color ERROR_COLOR = new Color(255, 200, 200);
+    private static final Color OK_COLOR = Color.WHITE;
 
     public SystemAdministratorUpdateUser(String[] selectedUser) {
         this.selectedUser = selectedUser;
         initComponents();
         populateFields(selectedUser);
+        setupRealTimeValidation();
     }
 
-    /**
-     * Populates fields with existing user data.
-     */
     private void populateFields(String[] userData) {
         if (userData == null || userData.length != 22) {
             System.out.println("Error: userData must be 22 columns, got " + (userData != null ? userData.length : 0));
             return;
         }
 
-        employeeNumberText.setText(userData[0]); // Employee Number (Non-Editable)
+        employeeNumberText.setText(userData[0]);
         employeeNumberText.setEditable(false);
         lastNameText.setText(userData[1]);
         firstNameText.setText(userData[2]);
 
-        // Parse and set birthday
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
             Date date = dateFormat.parse(userData[3]);
@@ -60,28 +63,149 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         statusBox.setSelectedItem(userData[10]);
         positionBox.setSelectedItem(userData[11]);
         supervisorBox.setSelectedItem(userData[12]);
-
-        // Properly format numeric values with commas
         basicSalaryText.setText(formatNumber(userData[13]));
         riceSubsidyText.setText(formatNumber(userData[14]));
         phoneAllowanceBox.setSelectedItem(formatNumber(userData[15]));
         clothingAllowanceBox.setSelectedItem(formatNumber(userData[16]));
         grossSemiMonthlyRateText.setText(formatNumber(userData[17]));
         hourlyRateText.setText(formatNumber(userData[18]));
-
         usernameText.setText(userData[19]);
         passwordText.setText(userData[20]);
         roleBox.setSelectedItem(userData[21]);
     }
 
-    /**
-     * Formats a numeric value with commas.
-     */
     private String formatNumber(String number) {
         try {
             return formatter.format(Long.parseLong(number.replace(",", "").trim()));
         } catch (NumberFormatException e) {
-            return number; // If invalid, return original string
+            return number;
+        }
+    }
+
+    private void setupRealTimeValidation() {
+        KeyAdapter adapter = new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                Object src = e.getSource();
+                if (src == lastNameText) validateTextField(lastNameText, "^[A-Za-z]{2,35}$");
+                else if (src == firstNameText) validateTextField(firstNameText, "^[A-Za-z]{2,35}$");
+                else if (src == usernameText) validateUsername();
+                else if (src == passwordText) validatePassword();
+                else if (src == addressText) validateAddress();
+                else if (src == phoneNumberText1) validatePhoneNumber();
+                else if (src == sssNumberText) formatSSSNumber();
+                else if (src == tinNumberText1) formatTINNumber();
+                else if (src == philhealthNumberText1) validatePhilhealth();
+                else if (src == pagIbigText) validatePagIbig();
+                else if (src == basicSalaryText) validateNumber(basicSalaryText);
+                else if (src == grossSemiMonthlyRateText) validateNumber(grossSemiMonthlyRateText);
+                else if (src == riceSubsidyText) validateRiceSubsidy();
+                else if (src == hourlyRateText) validateNumber(hourlyRateText);
+            }
+        };
+
+        lastNameText.addKeyListener(adapter);
+        firstNameText.addKeyListener(adapter);
+        usernameText.addKeyListener(adapter);
+        passwordText.addKeyListener(adapter);
+        addressText.addKeyListener(adapter);
+        phoneNumberText1.addKeyListener(adapter);
+        sssNumberText.addKeyListener(adapter);
+        tinNumberText1.addKeyListener(adapter);
+        philhealthNumberText1.addKeyListener(adapter);
+        pagIbigText.addKeyListener(adapter);
+        basicSalaryText.addKeyListener(adapter);
+        grossSemiMonthlyRateText.addKeyListener(adapter);
+        riceSubsidyText.addKeyListener(adapter);
+        hourlyRateText.addKeyListener(adapter);
+    }
+
+    private void validateTextField(JTextField field, String regex) {
+        if (field.getText().trim().matches(regex)) {
+            field.setBackground(OK_COLOR);
+        } else {
+            field.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validateUsername() {
+        String text = usernameText.getText().trim();
+        boolean valid = text.length() >= 10 && text.length() <= 20 && !text.matches("\\d+") && !text.contains("..") &&
+                !text.contains("__") && text.matches("^[A-Za-z0-9._]+$");
+
+        usernameText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    private void validatePassword() {
+        String text = passwordText.getText().trim();
+        boolean valid = text.length() >= 9 && text.length() <= 50 && text.matches(".*[A-Za-z].*") &&
+                text.matches(".*\\d.*") && text.matches(".*[._].*") && text.matches("^[A-Za-z0-9._]+$");
+
+        passwordText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    private void validateAddress() {
+        String text = addressText.getText().trim();
+        boolean valid = text.length() >= 12 && text.length() <= 100 &&
+                text.matches("^[A-Za-z0-9,\\.\\s]+$") &&
+                !text.contains(",,") && !text.contains("..");
+
+        addressText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    private void validatePhoneNumber() {
+        String text = phoneNumberText1.getText().replaceAll("[^0-9]", "");
+        boolean valid = text.matches("^09\\d{9}$") || text.matches("^639\\d{9}$");
+
+        phoneNumberText1.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+        if (valid) phoneNumberText1.setText(text.replaceAll("(\\d{4})(\\d{3})(\\d{4})", "$1-$2-$3"));
+    }
+
+    private void formatSSSNumber() {
+        String text = sssNumberText.getText().replaceAll("[^0-9]", "");
+        boolean valid = text.length() == 10;
+        sssNumberText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+        if (valid) sssNumberText.setText(text.replaceAll("(\\d{2})(\\d{7})(\\d{1})", "$1-$2-$3"));
+    }
+
+    private void formatTINNumber() {
+        String text = tinNumberText1.getText().replaceAll("[^0-9]", "");
+        boolean valid = text.length() == 12;
+        tinNumberText1.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+        if (valid) tinNumberText1.setText(text.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3-$4"));
+    }
+
+    private void validatePhilhealth() {
+        boolean valid = philhealthNumberText1.getText().trim().matches("\\d{12}");
+        philhealthNumberText1.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    private void validatePagIbig() {
+        boolean valid = pagIbigText.getText().trim().matches("\\d{12}");
+        pagIbigText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    private void validateNumber(JTextField field) {
+        boolean valid = field.getText().trim().matches("\\d+");
+        field.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    private void validateRiceSubsidy() {
+        boolean valid = riceSubsidyText.getText().trim().equals("1500");
+        riceSubsidyText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+    }
+    
+    // Helper Method: Reset Field Colors After Clearing
+    private void resetValidationColors() {
+        JTextField[] fields = {
+            lastNameText, firstNameText, usernameText, passwordText, 
+            addressText, phoneNumberText1, sssNumberText, philhealthNumberText1,
+            tinNumberText1, pagIbigText, basicSalaryText, grossSemiMonthlyRateText, 
+            riceSubsidyText, hourlyRateText
+        };
+
+        for (JTextField field : fields) {
+            field.setBackground(Color.WHITE); // Reset to default white
         }
     }
     
@@ -525,33 +649,33 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_grossSemiMonthlyRateTextActionPerformed
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
-        // TODO add your handling code here:
-        // Keep employee number
-        lastNameText.setText("");
-        firstNameText.setText("");
-        addressText.setText("");
-        phoneNumberText1.setText("");
-        sssNumberText.setText("");
-        philhealthNumberText1.setText("");
-        tinNumberText1.setText("");
-        pagIbigText.setText("");
-        basicSalaryText.setText("");
-        riceSubsidyText.setText("1,500"); // Default value
-        grossSemiMonthlyRateText.setText("");
-        hourlyRateText.setText("");
-        usernameText.setText("");
-        passwordText.setText("");
+    // Reset text fields
+    lastNameText.setText("");
+    firstNameText.setText("");
+    addressText.setText("");
+    phoneNumberText1.setText("");
+    sssNumberText.setText("");
+    philhealthNumberText1.setText("");
+    tinNumberText1.setText("");
+    pagIbigText.setText("");
+    basicSalaryText.setText("");
+    riceSubsidyText.setText("1,500"); // Default value
+    grossSemiMonthlyRateText.setText("");
+    hourlyRateText.setText("");
+    usernameText.setText("");
+    passwordText.setText("");
+    birthdayCalendar.setDate(new Date()); // Sets to today's date
 
-        // Reset calendar to null (forces user to reselect birthday)
-        birthdayCalendar.setDate(null);
+    // Reset dropdown selections
+    roleBox.setSelectedIndex(-1);
+    statusBox.setSelectedIndex(-1);
+    positionBox.setSelectedIndex(-1);
+    supervisorBox.setSelectedIndex(-1);
+    phoneAllowanceBox.setSelectedIndex(-1);
+    clothingAllowanceBox.setSelectedIndex(-1);
 
-        // Reset combo boxes to default
-        roleBox.setSelectedIndex(-1);
-        statusBox.setSelectedIndex(-1);
-        positionBox.setSelectedIndex(-1);
-        supervisorBox.setSelectedIndex(-1);
-        phoneAllowanceBox.setSelectedIndex(-1);
-        clothingAllowanceBox.setSelectedIndex(-1);
+    // Reset background colors (Validation Reset)
+    resetValidationColors();
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void UpdateUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateUserButtonActionPerformed

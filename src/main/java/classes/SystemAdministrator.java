@@ -19,7 +19,7 @@ public class SystemAdministrator extends Employee {
         }
 
     public SystemAdministrator() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet.");
     }
         // ** CREATE USER **
         // newUserData has 22 columns in the UI:
