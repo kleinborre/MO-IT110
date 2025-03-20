@@ -245,12 +245,23 @@ public class EmployeeLeaveRequest extends javax.swing.JFrame {
         }
 
         int employeeNumber = Integer.parseInt(employeeData[0]);
-        LeaveRequest leaveRequest = new LeaveRequest(employeeNumber, leaveType, startDate, endDate, "Pending");
 
-        leaveRequest.submitLeaveRequest(); // Calls validation and CSV writing
+        if (existingRequest != null) {
+            // **Regenerate the new LeaveRequestNumber and update the request**
+            String oldLeaveRequestNumber = existingRequest.generateLeaveRequestNumber(existingRequest.getStartDate(), existingRequest.getEndDate());
+            boolean success = existingRequest.updateLeaveRequest(oldLeaveRequestNumber, startDate, endDate, leaveType);
 
-        new EmployeeLeave(employeeData).setVisible(true);
-        dispose();
+            if (success) {
+                new EmployeeLeave(employeeData).setVisible(true);
+                dispose();
+            }
+        } else {
+            // **Submit a new leave request**
+            LeaveRequest newLeaveRequest = new LeaveRequest(employeeNumber, leaveType, startDate, endDate, "Pending");
+            newLeaveRequest.submitLeaveRequest();
+            new EmployeeLeave(employeeData).setVisible(true);
+            dispose();
+        }
     }//GEN-LAST:event_submitButtonActionPerformed
 
     /**
