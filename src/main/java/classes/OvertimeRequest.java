@@ -5,8 +5,10 @@ import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
 import java.io.*;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  * OvertimeRequest class that manages overtime requests and handles CSV operations.
@@ -261,4 +263,58 @@ public class OvertimeRequest extends Employee implements CSVHandler {
        String cleanedDate = date.replace("-", "");
        return Integer.parseInt("10" + cleanedDate);
     }
+   
+    // Overloaded Method (Used for updates)
+    public static int generateOvertimeRequestNumber(LocalDate newDate) {
+        if (newDate == null) {
+            throw new IllegalArgumentException("Invalid date for generating OvertimeRequestNumber.");
+        }
+
+        // Convert LocalDate to String (YYYY-MM-DD format)
+        String formattedDate = newDate.toString().replace("-", "");
+        return Integer.parseInt("10" + formattedDate);
+    }
+
+    public boolean updateOvertimeRequest(String oldOvertimeRequestNumber, LocalDate newDate, double newHours, double newPay) {
+        List<String[]> allRequests = readCSV(getCSVFile().getPath());
+        List<String[]> updatedRequests = new ArrayList<>();
+        boolean updated = false;
+        int newOvertimeRequestNumber = generateOvertimeRequestNumber(newDate);
+
+        for (String[] request : allRequests) {
+            if (request.length >= 7 && request[6].equals(oldOvertimeRequestNumber) && request[0].equals(String.valueOf(getEmployeeNumber()))) {
+                boolean conflict = false;
+                for (String[] otherRequest : allRequests) {
+                    if (otherRequest.length >= 7 && 
+                        !otherRequest[6].equals(oldOvertimeRequestNumber) && 
+                        otherRequest[0].equals(String.valueOf(getEmployeeNumber())) && 
+                        LocalDate.parse(otherRequest[2]).equals(newDate)) {
+
+                        conflict = true;
+                        break;
+                    }
+                }
+
+                if (conflict) {
+                    JOptionPane.showMessageDialog(null, "Cannot update. New overtime request conflicts with another of your own.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+
+                request[2] = newDate.toString();
+                request[3] = String.valueOf(newHours);
+                request[4] = String.valueOf(newPay);
+                request[6] = String.valueOf(newOvertimeRequestNumber);
+                updated = true;
+            }
+            updatedRequests.add(request);
+        }
+
+        if (updated) {
+            writeCSV(getCSVFile().getPath(), updatedRequests);
+            return true;
+        } else {
+            JOptionPane.showMessageDialog(null, "No matching overtime request found for update.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    } 
 }

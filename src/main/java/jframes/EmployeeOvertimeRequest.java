@@ -8,6 +8,7 @@ import classes.Employee;
 import classes.OvertimeRequest;
 import javax.swing.JOptionPane;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -126,19 +127,22 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
 
     private boolean isOvertimeAlreadyBooked(String selectedDate) {
         List<String[]> allRequests = OvertimeRequest.getAllOvertimeRequests();
-
-        // Generate OvertimeRequestNumber for the selected date
         int generatedOvertimeRequestNumber = OvertimeRequest.generateOvertimeRequestNumber(selectedDate);
 
         for (String[] request : allRequests) {
             if (request.length >= 7 &&
-                request[0].equals(employeeData[0]) &&  // Match Employee Number
-                request[6].equals(String.valueOf(generatedOvertimeRequestNumber))) { // Match OvertimeRequestNumber
+                request[0].equals(employeeData[0]) && 
+                request[6].equals(String.valueOf(generatedOvertimeRequestNumber))) { 
+
+                if (this.status != null && this.date.equals(selectedDate)) {
+                    continue; // Ignore if it's the same request being updated
+                }
                 return true;
             }
         }
         return false;
     }
+
 
     private void validateOvertimeHours() {
         Number value = (Number) overtimejSpinner.getValue();
@@ -237,56 +241,62 @@ public class EmployeeOvertimeRequest extends javax.swing.JFrame {
     }//GEN-LAST:event_backButton1ActionPerformed
 
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
-    if (employeeData == null || employeeData.length == 0 || employeeData[0] == null) {
-        JOptionPane.showMessageDialog(this, "Error: Employee data is missing.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
+        if (employeeData == null || employeeData.length == 0 || employeeData[0] == null) {
+            JOptionPane.showMessageDialog(this, "Employee data is missing.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-    int employeeNumber = Integer.parseInt(employeeData[0]);
-    Employee employee = new Employee(employeeNumber);
-    double hourlyRate = employee.getHourlyRate();
+        int employeeNumber = Integer.parseInt(employeeData[0]);
+        Employee employee = new Employee(employeeNumber);
+        double hourlyRate = employee.getHourlyRate();
 
-    Number value = (Number) overtimejSpinner.getValue();
-    double overtimeHours = value.doubleValue();
-    
-    // Validate that overtime hours cannot be 0
-    if (overtimeHours == 0) {
-        JOptionPane.showMessageDialog(this, "Overtime hours cannot be 0. Please select at least 1 hour.", "Error", JOptionPane.ERROR_MESSAGE);
-        overtimejSpinner.setValue(1); // Reset to minimum valid value
-        return;
-    }
+        Number value = (Number) overtimejSpinner.getValue();
+        double overtimeHours = value.doubleValue();
+        if (overtimeHours == 0) {
+            overtimejSpinner.setValue(1);
+            return;
+        }
 
-    double overtimePay = overtimeHours * hourlyRate;
-    String status = "Pending";
+        double overtimePay = overtimeHours * hourlyRate;
+        String status = "Pending";
 
-    // Extract the selected date
-    Date selectedDate = chooseDatejDateChooser.getDate();
-    if (selectedDate == null) {
-        JOptionPane.showMessageDialog(this, "Please select a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
+        Date selectedDate = chooseDatejDateChooser.getDate();
+        if (selectedDate == null) {
+            JOptionPane.showMessageDialog(this, "Select a valid date.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    String date = dateFormat.format(selectedDate);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String date = dateFormat.format(selectedDate);
+        LocalDate localDate = LocalDate.parse(date);
 
-    // Generate OvertimeRequestNumber
-    int overtimeRequestNumber = OvertimeRequest.generateOvertimeRequestNumber(date);
+        OvertimeRequest request = new OvertimeRequest(employeeNumber, date, overtimeHours, overtimePay, status);
+        boolean actionSuccess = false;
 
-    // Check if already booked
-    if (isOvertimeAlreadyBooked(date)) {
-        JOptionPane.showMessageDialog(this, "Cannot book overtime. Already booked for this date.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
+        if (this.status != null) { // Updating an existing request
+            int oldOvertimeRequestNumber = OvertimeRequest.generateOvertimeRequestNumber(this.date);
 
-    // Create OvertimeRequest object
-    OvertimeRequest request = new OvertimeRequest(employeeNumber, date, overtimeHours, overtimePay, status);
-    request.submitOvertimeRequest();
+            if (this.date.equals(date) || !isOvertimeAlreadyBooked(date)) {
+                actionSuccess = request.updateOvertimeRequest(String.valueOf(oldOvertimeRequestNumber), localDate, overtimeHours, overtimePay);
+            } else {
+                JOptionPane.showMessageDialog(this, "Overtime already booked for this date.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } else { // New request
+            if (!isOvertimeAlreadyBooked(date)) {
+                request.submitOvertimeRequest();
+                actionSuccess = true;
+            } else {
+                JOptionPane.showMessageDialog(this, "Overtime already booked for this date.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
 
-    JOptionPane.showMessageDialog(this, "Overtime request submitted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-    // Redirect to EmployeeOvertime page
-    new EmployeeOvertime(employeeData).setVisible(true);
-    dispose();
+        if (actionSuccess) {
+            JOptionPane.showMessageDialog(this, "Overtime request successfully processed.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            new EmployeeOvertime(employeeData).setVisible(true);
+            dispose();
+        }
     }//GEN-LAST:event_submitButtonActionPerformed
 
     /**
