@@ -348,7 +348,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
 
         if (updated) {
             writeCSV(getCSVFile().getPath(), updatedRequests);
-            JOptionPane.showMessageDialog(null, "Leave request updated successfully! Your LeaveRequestNumber has been regenerated.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Leave request updated successfully!.", "Success", JOptionPane.INFORMATION_MESSAGE);
             return true;
         } else {
             JOptionPane.showMessageDialog(null, "No matching leave request found for update.", "Error", JOptionPane.ERROR_MESSAGE);
