@@ -285,6 +285,7 @@ public class LeaveRequest extends Employee implements CSVHandler {
         };
     }
     
+    // Old method
     public String generateLeaveRequestNumber() {
         String companyNumber = "20"; // Static company number
         String start = startDate.toString().replaceAll("[^0-9]", ""); // YYYYMMDD
@@ -292,6 +293,67 @@ public class LeaveRequest extends Employee implements CSVHandler {
 
         return companyNumber + start + end; // Format: 20YYYYMMDDMMDD
     }
+    
+    // New method
+    public String generateLeaveRequestNumber(LocalDate start, LocalDate end) {
+        String companyNumber = "20"; // Static company number
+        String startFormatted = start.toString().replaceAll("[^0-9]", ""); // YYYYMMDD
+        String endFormatted = end.toString().replaceAll("[^0-9]", "").substring(4); // MMDD (last 4 digits)
 
+        return companyNumber + startFormatted + endFormatted; // Format: 20YYYYMMDDMMDD
+    }
+   
+    public boolean updateLeaveRequest(String oldLeaveRequestNumber, LocalDate newStartDate, LocalDate newEndDate, String newLeaveType) {
+        List<String[]> allRequests = readCSV(getCSVFile().getPath());
+        List<String[]> updatedRequests = new ArrayList<>();
+        boolean updated = false;
+        String newLeaveRequestNumber = generateLeaveRequestNumber(newStartDate, newEndDate); // Generate new ID
+
+        for (String[] request : allRequests) {
+            if (request.length >= 7 && request[6].equals(oldLeaveRequestNumber) && request[0].equals(String.valueOf(getEmployeeNumber()))) {
+                // The leave request to update has been found
+
+                // Check for conflicts with other leave requests of the same employee (ignore current request)
+                boolean conflict = false;
+                for (String[] otherRequest : allRequests) {
+                    if (otherRequest.length >= 7 && 
+                        !otherRequest[6].equals(oldLeaveRequestNumber) && // Ignore current request
+                        otherRequest[0].equals(String.valueOf(getEmployeeNumber()))) { // Same employee only
+
+                        LocalDate otherStart = LocalDate.parse(otherRequest[3]);
+                        LocalDate otherEnd = LocalDate.parse(otherRequest[4]);
+
+                        // Check if new dates overlap with another request
+                        if (newStartDate.isBefore(otherEnd) && newEndDate.isAfter(otherStart)) {
+                            conflict = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (conflict) {
+                    JOptionPane.showMessageDialog(null, "Cannot update. New leave request conflicts with another of your own.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+
+                // Update the request with new values and new LeaveRequestNumber
+                request[2] = newLeaveType;
+                request[3] = newStartDate.toString();
+                request[4] = newEndDate.toString();
+                request[6] = newLeaveRequestNumber; // **Update the LeaveRequestNumber**
+                updated = true;
+            }
+            updatedRequests.add(request);
+        }
+
+        if (updated) {
+            writeCSV(getCSVFile().getPath(), updatedRequests);
+            JOptionPane.showMessageDialog(null, "Leave request updated successfully! Your LeaveRequestNumber has been regenerated.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            return true;
+        } else {
+            JOptionPane.showMessageDialog(null, "No matching leave request found for update.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
     
 }

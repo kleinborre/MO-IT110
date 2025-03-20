@@ -111,22 +111,21 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
     private void formatAndValidatePhoneNumber() {
         String text = phoneNumberLabel.getText().replaceAll("[^0-9]", ""); // Remove non-digits
 
-        // Remove prefix '639' or '09' but keep last 9 digits
-        if (text.startsWith("639") && text.length() == 12) {
-            text = text.substring(3); // Remove '639' and keep the last 9 digits
-        } else if (text.startsWith("09") && text.length() == 11) {
-            text = text.substring(2); // Remove '09' and keep the last 9 digits
+        // If number starts with "09" and has 11 digits, trim to last 9
+        if (text.startsWith("09") && text.length() == 11) {
+            text = text.substring(2); // Remove "09"
+        } else if (text.startsWith("639") && text.length() == 12) {
+            text = text.substring(3); // Remove "639"
         }
 
-        // Ensure exactly 9 digits remain
-        if (text.length() != 9) {
-            phoneNumberLabel.setBackground(ERROR_COLOR);
-            return;
+        // Ensure exactly 9 digits remain, then apply XXX-XXX-XXX format
+        if (text.length() == 9) {
+            text = text.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            phoneNumberLabel.setText(text);
         }
 
-        // Apply 3-3-3 format
-        phoneNumberLabel.setBackground(OK_COLOR);
-        phoneNumberLabel.setText(text.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3"));
+        // Validate formatted number
+        isPhoneNumberValid(phoneNumberLabel.getText());
     }
 
     /**
@@ -149,18 +148,28 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
  * Save updated info (Only updates Phone & Address) and ensures one success dialog.
  */
     private void updateEmployeeInfoInCSV() {
-        String empNumber    = employeeNumberLabel.getText().trim();
-        String updatedAddr  = addressLabel.getText().trim();
-        String updatedPhone = phoneNumberLabel.getText().trim();
+        String empNumber = employeeNumberLabel.getText().trim();
+        String originalInput = phoneNumberLabel.getText().trim(); // Store raw user input
+        String updatedAddr = addressLabel.getText().trim();
 
         if (empNumber.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Error: Employee number is missing.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Ensure validation passed
-        if (phoneNumberLabel.getBackground() == ERROR_COLOR || addressLabel.getBackground() == ERROR_COLOR) {
-            JOptionPane.showMessageDialog(this, "Please correct the highlighted errors.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+        // **Detect if the input had illegal characters before formatting**
+        boolean hadIllegalChars = !originalInput.matches("^[0-9\\-]+$"); // Allow only digits and '-'
+
+        // **Force formatting & validate**
+        formatAndValidatePhoneNumber();
+        String updatedPhone = phoneNumberLabel.getText().trim(); // Get corrected version
+        boolean isValid = isPhoneNumberValid(updatedPhone);
+
+        // **Detect if auto-correction occurred**
+        boolean wasCorrected = hadIllegalChars || !originalInput.equals(updatedPhone);
+
+        if (!isValid) {
+            JOptionPane.showMessageDialog(this, "Invalid phone number format! Please correct it before saving.", "Validation Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -171,28 +180,59 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
             return;
         }
 
-        // Determine what was updated
-        boolean phoneUpdated = !existing[5].equals(updatedPhone);
+        // **Ensure auto-corrections are treated as actual changes**
+        boolean phoneUpdated = !existing[5].equals(updatedPhone) || wasCorrected;
         boolean addressUpdated = !existing[4].equals(updatedAddr);
 
-        // Update only if there's a change
-        if (phoneUpdated || addressUpdated) {
-            existing[4] = updatedAddr;
-            existing[5] = updatedPhone;
-            admin.updateUser(empNumber, existing);
+        if (!phoneUpdated && !addressUpdated) {
+            JOptionPane.showMessageDialog(
+                this, 
+                "No changes detected or input was auto-corrected.", 
+                "Info", 
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            return;
+        }
 
-            // Show a single success dialog
-            if (phoneUpdated && addressUpdated) {
-                JOptionPane.showMessageDialog(this, "Phone Number and Address updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } else if (phoneUpdated) {
-                JOptionPane.showMessageDialog(this, "Phone Number updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Address updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            }
+        // **Update CSV Data**
+        existing[4] = updatedAddr;
+        existing[5] = updatedPhone;
+        admin.updateUser(empNumber, existing);
+
+        // **Show correct message**
+        if (wasCorrected) {
+            JOptionPane.showMessageDialog(this, "Phone Number was automatically corrected and updated successfully.", "Auto-Corrected & Saved", JOptionPane.INFORMATION_MESSAGE);
+        } else if (phoneUpdated && addressUpdated) {
+            JOptionPane.showMessageDialog(this, "Phone Number and Address updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else if (phoneUpdated) {
+            JOptionPane.showMessageDialog(this, "Phone Number updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(this, "No changes detected.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Address updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+    
+    // Supporting method of phone number validation
+    private boolean isPhoneNumberValid(String text) {
+        // Remove all non-numeric characters (keeps only digits)
+        String cleanedText = text.replaceAll("[^0-9]", ""); 
+
+        // Check if the cleaned number is valid (09XXXXXXXXX or 639XXXXXXXXX)
+        if (cleanedText.matches("^09\\d{9}$") || cleanedText.matches("^639\\d{9}$")) {
+            phoneNumberLabel.setBackground(OK_COLOR);
+            return true;
+        }
+
+        // Check if the formatted number follows the pattern XXX-XXX-XXX
+        if (text.matches("^\\d{3}-\\d{3}-\\d{3}$")) {
+            phoneNumberLabel.setBackground(OK_COLOR);
+            return true;
+        }
+
+        // Invalid format
+        phoneNumberLabel.setBackground(ERROR_COLOR);
+        return false;
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -637,6 +677,16 @@ public class EmployeeProfileInformationUpdateInfo extends javax.swing.JFrame {
     }//GEN-LAST:event_backButton1ActionPerformed
 
     private void doneButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_doneButtonActionPerformed
+        // **Force formatting before validation**
+        formatAndValidatePhoneNumber();
+
+        // **Check if it's valid**
+        if (!isPhoneNumberValid(phoneNumberLabel.getText())) {
+            JOptionPane.showMessageDialog(this, "Invalid phone number format! Please correct it before saving.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return; // Stop saving process
+        }
+
+        // If valid, proceed with saving
         updateEmployeeInfoInCSV();
         new EmployeeProfileInformation(employeeData).setVisible(true);
         dispose();
