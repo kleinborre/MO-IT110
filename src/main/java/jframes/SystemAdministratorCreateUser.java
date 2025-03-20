@@ -63,9 +63,9 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
                 else if (src == passwordText)             validatePassword();
                 else if (src == addressText)              validateAddress();
                 else if (src == phoneNumberText1)         validatePhoneNumber();
-                else if (src == sssNumberText)            formatSSSNumber(); //validateSSS();
+                else if (src == sssNumberText)            formatSSSNumber();
                 else if (src == philhealthNumberText)     validatePhilhealth();
-                else if (src == tinNumberText)            formatTINNumber(); //validateTIN();
+                else if (src == tinNumberText)            formatTINNumber();
                 else if (src == pagIbigText)              validatePagIbig();
                 else if (src == basicSalaryText)          validateBasicSalary();
                 else if (src == grossSemiMonthlyRateText) validateGrossSemi();
@@ -172,66 +172,99 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     }
 
     private void validatePhoneNumber() {
-        String text = phoneNumberText1.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
+        String text = phoneNumberText1.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
 
-        if (text.length() > 11) {
-            text = text.substring(0, 11); // Ensure max length
+        if (text.length() > 12) {
+            text = text.substring(0, 12); // Trim to max valid length
         }
 
-        if (text.matches("^09\\d{9}$") || text.matches("^639\\d{9}$")) {
-            phoneNumberText1.setBackground(OK_COLOR);
-        } else {
-            phoneNumberText1.setBackground(ERROR_COLOR);
+        boolean isValid = false;
+        String formatted = text;
+
+        if (text.startsWith("639") && text.length() == 12) {
+            formatted = text.substring(3); // Remove "639"
+            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            isValid = true;
+        } else if (text.startsWith("09") && text.length() == 11) {
+            formatted = text.substring(2); // Remove "09"
+            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            isValid = true;
+        } else if (text.length() == 9) {
+            formatted = text.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            isValid = true;
+        } 
+
+        // Check for invalid lengths
+        if (text.length() < 8 || text.length() == 10 || text.length() > 12) {
+            isValid = false;
         }
 
-        // Apply formatting 09XX-XXX-XXXX or 639XX-XXX-XXXX
-        if (text.length() >= 11) {
-            phoneNumberText1.setText(text.replaceAll("(\\d{4})(\\d{3})(\\d{4})", "$1-$2-$3"));
-        }
+        phoneNumberText1.setText(formatted); // Set formatted text in input field
+        phoneNumberText1.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
     
     private void formatSSSNumber() {
-        String text = sssNumberText.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
+        String text = sssNumberText.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
 
         if (text.length() > 10) {
-            text = text.substring(0, 10); // Ensure max length
+            text = text.substring(0, 10); // Trim to max valid length
         }
 
+        boolean isValid = false;
+        String formatted = text;
+
         if (text.length() == 10) {
-            sssNumberText.setText(text.replaceAll("(\\d{2})(\\d{7})(\\d{1})", "$1-$2-$3"));
+            formatted = text.replaceAll("(\\d{2})(\\d{7})(\\d{1})", "$1-$2-$3");
+            isValid = true;
         }
+
+        sssNumberText.setText(formatted);
+        sssNumberText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
     
     private void formatTINNumber() {
-        String text = tinNumberText.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
+        String text = tinNumberText.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
 
         if (text.length() > 12) {
-            text = text.substring(0, 12); // Ensure max length
+            text = text.substring(0, 12); // Trim to max valid length
         }
 
+        boolean isValid = false;
+        String formatted = text;
+
         if (text.length() == 12) {
-            tinNumberText.setText(text.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3-$4"));
+            formatted = text.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3-$4");
+            isValid = true;
         }
+
+        tinNumberText.setText(formatted);
+        tinNumberText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
 
     private void validatePhilhealth() {
-        // 12 digits
-        String text = philhealthNumberText.getText().trim();
-        if (text.matches("\\d{12}")) {
-            philhealthNumberText.setBackground(OK_COLOR);
-        } else {
-            philhealthNumberText.setBackground(ERROR_COLOR);
+        String text = philhealthNumberText.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
+
+        if (text.length() > 12) {
+            text = text.substring(0, 12); // Trim to max valid length
         }
+
+        boolean isValid = text.matches("\\d{12}"); // Must be exactly 12 digits
+
+        philhealthNumberText.setText(text);
+        philhealthNumberText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
 
     private void validatePagIbig() {
-        // 12 digits
-        String text = pagIbigText.getText().trim();
-        if (text.matches("\\d{12}")) {
-            pagIbigText.setBackground(OK_COLOR);
-        } else {
-            pagIbigText.setBackground(ERROR_COLOR);
+        String text = pagIbigText.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
+
+        if (text.length() > 12) {
+            text = text.substring(0, 12); // Limit to 12 digits
         }
+
+        boolean isValid = text.matches("\\d{12}"); // Must be exactly 12 digits
+
+        pagIbigText.setText(text);
+        pagIbigText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
 
     // Formatter for numerical values with commas

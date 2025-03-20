@@ -9,7 +9,6 @@ import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JOptionPane;
@@ -154,35 +153,105 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     }
 
     private void validatePhoneNumber() {
-        String text = phoneNumberText1.getText().replaceAll("[^0-9]", "");
-        boolean valid = text.matches("^09\\d{9}$") || text.matches("^639\\d{9}$");
+        String text = phoneNumberText1.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
 
-        phoneNumberText1.setBackground(valid ? OK_COLOR : ERROR_COLOR);
-        if (valid) phoneNumberText1.setText(text.replaceAll("(\\d{4})(\\d{3})(\\d{4})", "$1-$2-$3"));
+        if (text.length() > 12) {
+            text = text.substring(0, 12); // Trim to max valid length
+        }
+
+        boolean isValid = false;
+        String formatted = text;
+
+        if (text.startsWith("639") && text.length() == 12) {
+            formatted = text.substring(3); // Remove "639"
+            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            isValid = true;
+        } else if (text.startsWith("09") && text.length() == 11) {
+            formatted = text.substring(2); // Remove "09"
+            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            isValid = true;
+        } else if (text.length() == 9) {
+            formatted = text.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            isValid = true;
+        } 
+
+        // Check for invalid lengths
+        if (text.length() < 8 || text.length() == 10 || text.length() > 12) {
+            isValid = false;
+        }
+
+        phoneNumberText1.setText(formatted); // Set formatted text in input field
+        phoneNumberText1.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
 
     private void formatSSSNumber() {
-        String text = sssNumberText.getText().replaceAll("[^0-9]", "");
-        boolean valid = text.length() == 10;
+        String text = sssNumberText.getText().replaceAll("[^0-9-]", ""); // Remove letters & invalid characters
+
+        // Remove excessive dashes
+        text = text.replaceAll("--+", "-").replaceAll("^-|-$", "");
+
+        // Enforce correct length
+        if (text.replaceAll("-", "").length() > 10) {
+            text = text.substring(0, text.length() - 1);
+        }
+
+        boolean valid = text.replaceAll("-", "").length() == 10;
         sssNumberText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
-        if (valid) sssNumberText.setText(text.replaceAll("(\\d{2})(\\d{7})(\\d{1})", "$1-$2-$3"));
+
+        // Auto-format if digits match required length
+        if (valid) {
+            sssNumberText.setText(text.replaceAll("(\\d{2})(\\d{7})(\\d{1})", "$1-$2-$3"));
+        } else {
+            sssNumberText.setText(text);
+        }
     }
 
     private void formatTINNumber() {
-        String text = tinNumberText1.getText().replaceAll("[^0-9]", "");
-        boolean valid = text.length() == 12;
+        String text = tinNumberText1.getText().replaceAll("[^0-9-]", ""); // Remove letters & invalid characters
+
+        // Remove excessive dashes
+        text = text.replaceAll("--+", "-").replaceAll("^-|-$", "");
+
+        // Enforce correct length
+        if (text.replaceAll("-", "").length() > 12) {
+            text = text.substring(0, text.length() - 1);
+        }
+
+        boolean valid = text.replaceAll("-", "").length() == 12;
         tinNumberText1.setBackground(valid ? OK_COLOR : ERROR_COLOR);
-        if (valid) tinNumberText1.setText(text.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3-$4"));
+
+        // Auto-format if digits match required length
+        if (valid) {
+            tinNumberText1.setText(text.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3-$4"));
+        } else {
+            tinNumberText1.setText(text);
+        }
     }
 
     private void validatePhilhealth() {
-        boolean valid = philhealthNumberText1.getText().trim().matches("\\d{12}");
-        philhealthNumberText1.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+        String text = philhealthNumberText1.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
+
+        if (text.length() > 12) {
+            text = text.substring(0, 12); // Trim to max valid length
+        }
+
+        boolean isValid = text.matches("\\d{12}"); // Must be exactly 12 digits
+
+        philhealthNumberText1.setText(text);
+        philhealthNumberText1.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
 
     private void validatePagIbig() {
-        boolean valid = pagIbigText.getText().trim().matches("\\d{12}");
-        pagIbigText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+        String text = pagIbigText.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
+
+        if (text.length() > 12) {
+            text = text.substring(0, 12); // Limit to 12 digits
+        }
+
+        boolean isValid = text.matches("\\d{12}"); // Must be exactly 12 digits
+
+        pagIbigText.setText(text);
+        pagIbigText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
 
     private void validateNumber(JTextField field) {
