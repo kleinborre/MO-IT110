@@ -23,9 +23,9 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     private String[] selectedUser; // 22 columns
     private static final DecimalFormat formatter = new DecimalFormat("#,##0");
 
-    // Validation Colors
+    // Validation Colors (still used for local references, but real checks are in SystemAdministrator)
     private static final Color ERROR_COLOR = new Color(255, 200, 200);
-    private static final Color OK_COLOR = Color.WHITE;
+    private static final Color OK_COLOR    = Color.WHITE;
 
     public SystemAdministratorUpdateUser(String[] selectedUser) {
         this.selectedUser = selectedUser;
@@ -34,9 +34,13 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         setupRealTimeValidation();
     }
 
+    /**
+     * Fill the form fields with the user data.
+     */
     private void populateFields(String[] userData) {
         if (userData == null || userData.length != 22) {
-            System.out.println("Error: userData must be 22 columns, got " + (userData != null ? userData.length : 0));
+            System.out.println("Error: userData must be 22 columns, got " 
+                               + (userData != null ? userData.length : 0));
             return;
         }
 
@@ -62,44 +66,68 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         statusBox.setSelectedItem(userData[10]);
         positionBox.setSelectedItem(userData[11]);
         supervisorBox.setSelectedItem(userData[12]);
+
         basicSalaryText.setText(formatNumber(userData[13]));
         riceSubsidyText.setText(formatNumber(userData[14]));
         phoneAllowanceBox.setSelectedItem(formatNumber(userData[15]));
         clothingAllowanceBox.setSelectedItem(formatNumber(userData[16]));
         grossSemiMonthlyRateText.setText(formatNumber(userData[17]));
         hourlyRateText.setText(formatNumber(userData[18]));
+
         usernameText.setText(userData[19]);
         passwordText.setText(userData[20]);
         roleBox.setSelectedItem(userData[21]);
     }
 
+    /**
+     * Utility for formatting numeric strings with commas.
+     */
     private String formatNumber(String number) {
         try {
             return formatter.format(Long.parseLong(number.replace(",", "").trim()));
         } catch (NumberFormatException e) {
-            return number;
+            return number; // If not purely numeric, just return as-is
         }
     }
 
+    /**
+     * Sets up real-time validation by attaching a KeyAdapter 
+     * that calls the static methods in SystemAdministrator.
+     */
     private void setupRealTimeValidation() {
         KeyAdapter adapter = new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 Object src = e.getSource();
-                if (src == lastNameText) validateLastName();
-                else if (src == firstNameText) validateFirstName();
-                else if (src == usernameText) validateUsername();
-                else if (src == passwordText) validatePassword();
-                else if (src == addressText) validateAddress();
-                else if (src == phoneNumberText1) validatePhoneNumber();
-                else if (src == sssNumberText) validateSSSNumber();
-                else if (src == tinNumberText1) validateTINNumber();
-                else if (src == philhealthNumberText1) validatePhilhealth();
-                else if (src == pagIbigText) validatePagIbig();
-                else if (src == basicSalaryText) validateBasicSalary();
-                else if (src == grossSemiMonthlyRateText) validateGrossSemi();
-                else if (src == riceSubsidyText) validateRiceSubsidy();
-                else if (src == hourlyRateText) validateHourlyRate();
+
+                if      (src == lastNameText) 
+                    SystemAdministrator.validateLastName(lastNameText);
+                else if (src == firstNameText) 
+                    SystemAdministrator.validateFirstName(firstNameText);
+                else if (src == usernameText) 
+                    SystemAdministrator.validateUsername(usernameText);
+                else if (src == passwordText) 
+                    SystemAdministrator.validatePassword(passwordText);
+                else if (src == addressText) 
+                    SystemAdministrator.validateAddress(addressText);
+                else if (src == phoneNumberText1) 
+                    SystemAdministrator.validatePhoneNumber(phoneNumberText1);
+                else if (src == sssNumberText) 
+                    SystemAdministrator.validateSSSNumber(sssNumberText);
+                else if (src == tinNumberText1) 
+                    SystemAdministrator.validateTINNumber(tinNumberText1);
+                else if (src == philhealthNumberText1) 
+                    SystemAdministrator.validatePhilhealth(philhealthNumberText1);
+                else if (src == pagIbigText) 
+                    SystemAdministrator.validatePagIbig(pagIbigText);
+                else if (src == basicSalaryText) 
+                    SystemAdministrator.validateBasicSalary(basicSalaryText);
+                else if (src == grossSemiMonthlyRateText) 
+                    SystemAdministrator.validateGrossSemi(grossSemiMonthlyRateText);
+                else if (src == riceSubsidyText) 
+                    SystemAdministrator.validateRiceSubsidy(riceSubsidyText);
+                else if (src == hourlyRateText) 
+                    SystemAdministrator.validateHourlyRate(hourlyRateText);
             }
         };
 
@@ -118,253 +146,10 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         riceSubsidyText.addKeyListener(adapter);
         hourlyRateText.addKeyListener(adapter);
     }
-
-    private void validateLastName() {
-        String text = lastNameText.getText().replaceAll("[^A-Za-z]", ""); // Remove all non-alphabet characters
-
-        // Set error if max length is reached
-        boolean isTooLong = text.length() > 20;
-        if (isTooLong) {
-            text = text.substring(0, 20); // Trim to max valid length
-        }
-
-        boolean isValid = text.length() >= 2 && text.length() <= 20;
-        lastNameText.setText(text);
-        lastNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
-    }
-
-    private void validateFirstName() {
-        String text = firstNameText.getText().replaceAll("[^A-Za-z]", ""); // Remove all non-alphabet characters
-
-        // Set error if max length is reached
-        boolean isTooLong = text.length() > 35;
-        if (isTooLong) {
-            text = text.substring(0, 35); // Trim to max valid length
-        }
-
-        boolean isValid = text.length() >= 2 && text.length() <= 35;
-        firstNameText.setText(text);
-        firstNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
-    }
-
-    private void validateUsername() {
-        String text = usernameText.getText().trim();
-
-        // Enforce real-time length limit
-        boolean isTooLong = text.length() > 20;
-        if (isTooLong) {
-            text = text.substring(0, 20); // Trim to max valid length
-        }
-
-        // 1) length 10..20
-        boolean lengthOk = (text.length() >= 10 && text.length() <= 20);
-
-        // 2) not all digits => at least one non-digit
-        boolean notAllDigits = !text.matches("\\d+");
-
-        // 3) no consecutive '.' or '_'
-        boolean noConsecutiveDot = !text.contains("..");
-        boolean noConsecutiveUnderscore = !text.contains("__");
-
-        // 4) only alphanumeric or '.' or '_'
-        boolean validChars = text.matches("^[A-Za-z0-9._]+$");
-
-        usernameText.setText(text);
-        usernameText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && notAllDigits && noConsecutiveDot && noConsecutiveUnderscore && validChars ? OK_COLOR : ERROR_COLOR));
-    }
-
-    private void validatePassword() {
-        String text = passwordText.getText().trim();
-
-        // Enforce real-time length limit
-        boolean isTooLong = text.length() > 50;
-        if (isTooLong) {
-            text = text.substring(0, 50); // Trim to max valid length
-        }
-
-        // 1) length 9..50
-        boolean lengthOk = (text.length() >= 9 && text.length() <= 50);
-
-        // 2) must contain at least one letter, one digit, and one symbol ('.' or '_')
-        boolean hasLetter = text.matches(".*[A-Za-z].*");
-        boolean hasDigit = text.matches(".*\\d.*");
-        boolean hasSymbol = text.matches(".*[._].*");
-
-        // 3) only allows letters, digits, '.' and '_'
-        boolean onlyAllowed = text.matches("^[A-Za-z0-9._]+$");
-
-        passwordText.setText(text);
-        passwordText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && hasLetter && hasDigit && hasSymbol && onlyAllowed ? OK_COLOR : ERROR_COLOR));
-    }
-
-    private void validateAddress() {
-        String text = addressText.getText().trim();
-
-        // Enforce real-time length limit
-        boolean isTooLong = text.length() > 100;
-        if (isTooLong) {
-            text = text.substring(0, 100); // Trim to max valid length
-        }
-
-        // 1) length 12..100
-        boolean lengthOk = text.length() >= 12 && text.length() <= 100;
-
-        // 2) Only allows alphanumeric, commas, periods, and spaces
-        boolean validChars = text.matches("^[A-Za-z0-9,\\.\\s]+$");
-
-        // 3) No double commas or double periods
-        boolean noDoubleCommaOrDot = !text.contains(",,") && !text.contains("..");
-
-        addressText.setText(text);
-        addressText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && validChars && noDoubleCommaOrDot ? OK_COLOR : ERROR_COLOR));
-    }
-
-    private void validatePhoneNumber() {
-        String text = phoneNumberText1.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
-
-        if (text.length() > 12) {
-            text = text.substring(0, 12); // Trim to max valid length
-        }
-
-        boolean isValid = false;
-        String formatted = text;
-
-        if (text.startsWith("639") && text.length() == 12) {
-            formatted = text.substring(3); // Remove "639"
-            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
-            isValid = true;
-        } else if (text.startsWith("09") && text.length() == 11) {
-            formatted = text.substring(2); // Remove "09"
-            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
-            isValid = true;
-        } else if (text.length() == 9) {
-            formatted = text.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
-            isValid = true;
-        } 
-
-        // Check for invalid lengths
-        if (text.length() < 8 || text.length() == 10 || text.length() > 12) {
-            isValid = false;
-        }
-
-        phoneNumberText1.setText(formatted); // Set formatted text in input field
-        phoneNumberText1.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
-    }
-
-    private void validateSSSNumber() {
-        String text = sssNumberText.getText().replaceAll("[^0-9-]", ""); // Remove letters & invalid characters
-
-        // Remove excessive dashes
-        text = text.replaceAll("--+", "-").replaceAll("^-|-$", "");
-
-        // Enforce correct length
-        if (text.replaceAll("-", "").length() > 10) {
-            text = text.substring(0, text.length() - 1);
-        }
-
-        boolean valid = text.replaceAll("-", "").length() == 10;
-        sssNumberText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
-
-        // Auto-format if digits match required length
-        if (valid) {
-            sssNumberText.setText(text.replaceAll("(\\d{2})(\\d{7})(\\d{1})", "$1-$2-$3"));
-        } else {
-            sssNumberText.setText(text);
-        }
-    }
-
-    private void validateTINNumber() {
-        String text = tinNumberText1.getText().replaceAll("[^0-9-]", ""); // Remove letters & invalid characters
-
-        // Remove excessive dashes
-        text = text.replaceAll("--+", "-").replaceAll("^-|-$", "");
-
-        // Enforce correct length
-        if (text.replaceAll("-", "").length() > 12) {
-            text = text.substring(0, text.length() - 1);
-        }
-
-        boolean valid = text.replaceAll("-", "").length() == 12;
-        tinNumberText1.setBackground(valid ? OK_COLOR : ERROR_COLOR);
-
-        // Auto-format if digits match required length
-        if (valid) {
-            tinNumberText1.setText(text.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3-$4"));
-        } else {
-            tinNumberText1.setText(text);
-        }
-    }
-
-    private void validatePhilhealth() {
-        String text = philhealthNumberText1.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
-
-        if (text.length() > 12) {
-            text = text.substring(0, 12); // Trim to max valid length
-        }
-
-        boolean isValid = text.matches("\\d{12}"); // Must be exactly 12 digits
-
-        philhealthNumberText1.setText(text);
-        philhealthNumberText1.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
-    }
-
-    private void validatePagIbig() {
-        String text = pagIbigText.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
-
-        if (text.length() > 12) {
-            text = text.substring(0, 12); // Limit to 12 digits
-        }
-
-        boolean isValid = text.matches("\\d{12}"); // Must be exactly 12 digits
-
-        pagIbigText.setText(text);
-        pagIbigText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
-    }
-
-    private void validateBasicSalary() {
-        String text = basicSalaryText.getText().replace(",", "").trim(); // Remove existing commas before parsing
-        if (text.matches("\\d+")) {
-            String formattedText = formatter.format(Long.parseLong(text)); // Correctly format with commas
-            basicSalaryText.setText(formattedText);
-            basicSalaryText.setBackground(OK_COLOR);
-        } else {
-            basicSalaryText.setBackground(ERROR_COLOR);
-        }
-    }
-
-    private void validateGrossSemi() {
-        String text = grossSemiMonthlyRateText.getText().replace(",", "").trim(); // Remove existing commas before parsing
-        if (text.matches("\\d+")) {
-            String formattedText = formatter.format(Long.parseLong(text)); // Correctly format with commas
-            grossSemiMonthlyRateText.setText(formattedText);
-            grossSemiMonthlyRateText.setBackground(OK_COLOR);
-        } else {
-            grossSemiMonthlyRateText.setBackground(ERROR_COLOR);
-        }
-    }
-
-    private void validateRiceSubsidy() {
-        String text = riceSubsidyText.getText().replace(",", "").trim(); // Remove existing commas before parsing
-        if (text.matches("\\d+") && Integer.parseInt(text) == 1500) {
-            riceSubsidyText.setText("1,500"); // Always set this fixed format
-            riceSubsidyText.setBackground(OK_COLOR);
-        } else {
-            riceSubsidyText.setBackground(ERROR_COLOR);
-        }
-    }
-
-
-    private void validateHourlyRate() {
-        // double only
-        String text = hourlyRateText.getText().trim();
-        if (text.matches("\\d+(\\.\\d+)?")) {
-            hourlyRateText.setBackground(OK_COLOR);
-        } else {
-            hourlyRateText.setBackground(ERROR_COLOR);
-        }
-    }
     
-    // Helper Method: Reset Field Colors After Clearing
+    /**
+     * Resets field background colors to white (called after clearing).
+     */
     private void resetValidationColors() {
         JTextField[] fields = {
             lastNameText, firstNameText, usernameText, passwordText, 
@@ -372,10 +157,37 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
             tinNumberText1, pagIbigText, basicSalaryText, grossSemiMonthlyRateText, 
             riceSubsidyText, hourlyRateText
         };
-
         for (JTextField field : fields) {
-            field.setBackground(Color.WHITE); // Reset to default white
+            field.setBackground(Color.WHITE);
         }
+    }
+    
+    /**
+     * Checks if any required field is empty.
+     */
+    private boolean anyEmpty() {
+        String[] fields = {
+            lastNameText.getText().trim(),
+            firstNameText.getText().trim(),
+            addressText.getText().trim(),
+            phoneNumberText1.getText().trim(),
+            sssNumberText.getText().trim(),
+            philhealthNumberText1.getText().trim(),
+            tinNumberText1.getText().trim(),
+            pagIbigText.getText().trim(),
+            basicSalaryText.getText().trim(),
+            riceSubsidyText.getText().trim(),
+            grossSemiMonthlyRateText.getText().trim(),
+            hourlyRateText.getText().trim(),
+            usernameText.getText().trim(),
+            passwordText.getText().trim()
+        };
+        for (String field : fields) {
+            if (field.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
@@ -824,39 +636,40 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_grossSemiMonthlyRateTextActionPerformed
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
-    // Reset text fields
-    lastNameText.setText("");
-    firstNameText.setText("");
-    addressText.setText("");
-    phoneNumberText1.setText("");
-    sssNumberText.setText("");
-    philhealthNumberText1.setText("");
-    tinNumberText1.setText("");
-    pagIbigText.setText("");
-    basicSalaryText.setText("");
-    riceSubsidyText.setText("1,500"); // Default value
-    grossSemiMonthlyRateText.setText("");
-    hourlyRateText.setText("");
-    usernameText.setText("");
-    passwordText.setText("");
-    birthdayCalendar.setDate(new Date()); // Sets to today's date
+        // Reset text fields
+        lastNameText.setText("");
+        firstNameText.setText("");
+        addressText.setText("");
+        phoneNumberText1.setText("");
+        sssNumberText.setText("");
+        philhealthNumberText1.setText("");
+        tinNumberText1.setText("");
+        pagIbigText.setText("");
+        basicSalaryText.setText("");
+        riceSubsidyText.setText("1,500"); // Default
+        grossSemiMonthlyRateText.setText("");
+        hourlyRateText.setText("");
+        usernameText.setText("");
+        passwordText.setText("");
+        birthdayCalendar.setDate(new Date()); // Set to today
 
-    // Reset dropdown selections
-    roleBox.setSelectedIndex(-1);
-    statusBox.setSelectedIndex(-1);
-    positionBox.setSelectedIndex(-1);
-    supervisorBox.setSelectedIndex(-1);
-    phoneAllowanceBox.setSelectedIndex(-1);
-    clothingAllowanceBox.setSelectedIndex(-1);
+        // Reset dropdown selections
+        roleBox.setSelectedIndex(-1);
+        statusBox.setSelectedIndex(-1);
+        positionBox.setSelectedIndex(-1);
+        supervisorBox.setSelectedIndex(-1);
+        phoneAllowanceBox.setSelectedIndex(-1);
+        clothingAllowanceBox.setSelectedIndex(-1);
 
-    // Reset background colors (Validation Reset)
-    resetValidationColors();
+        // Reset background colors
+        resetValidationColors();
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void UpdateUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateUserButtonActionPerformed
         // Validate required fields
         if (anyEmpty()) {
-            JOptionPane.showMessageDialog(this, "All fields must be filled!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "All fields must be filled!", 
+                                          "Validation Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -873,8 +686,8 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         updatedUser[5]  = phoneNumberText1.getText().trim();
         updatedUser[6]  = sssNumberText.getText().trim();
         updatedUser[7]  = philhealthNumberText1.getText().trim();
-        updatedUser[8]  = pagIbigText.getText().trim();
-        updatedUser[9]  = tinNumberText1.getText().trim();
+        updatedUser[8]  = tinNumberText1.getText().trim();  // Notice order fix if needed
+        updatedUser[9]  = pagIbigText.getText().trim();     //  ...
         updatedUser[10] = statusBox.getSelectedItem().toString().trim();
         updatedUser[11] = positionBox.getSelectedItem().toString().trim();
         updatedUser[12] = supervisorBox.getSelectedItem().toString().trim();
@@ -888,51 +701,22 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         updatedUser[20] = passwordText.getText().trim();
         updatedUser[21] = roleBox.getSelectedItem().toString().trim();
 
-        // Call SystemAdministrator logic to update the user
+        // Update user via SystemAdministrator
         SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
         admin.updateUser(updatedUser[0], updatedUser);
 
-        JOptionPane.showMessageDialog(this, "User updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "User updated successfully!", 
+                                      "Success", JOptionPane.INFORMATION_MESSAGE);
 
-        // Refresh the existing SystemAdministratorPage instead of creating a new one
+        // Refresh the main admin page if open
         for (java.awt.Window window : java.awt.Window.getWindows()) {
             if (window instanceof SystemAdministratorPage) {
-                ((SystemAdministratorPage) window).loadUserData(); // Refresh data
+                ((SystemAdministratorPage) window).loadUserData(); 
                 window.setVisible(true);
                 break;
             }
         }
-
-        this.dispose(); // Close the current update window
-    }
-
-    /**
-     * Checks if any required field is empty.
-     */
-    private boolean anyEmpty() {
-        String[] fields = {
-            lastNameText.getText().trim(),
-            firstNameText.getText().trim(),
-            addressText.getText().trim(),
-            phoneNumberText1.getText().trim(),
-            sssNumberText.getText().trim(),
-            philhealthNumberText1.getText().trim(),
-            tinNumberText1.getText().trim(),
-            pagIbigText.getText().trim(),
-            basicSalaryText.getText().trim(),
-            riceSubsidyText.getText().trim(),
-            grossSemiMonthlyRateText.getText().trim(),
-            hourlyRateText.getText().trim(),
-            usernameText.getText().trim(),
-            passwordText.getText().trim()
-        };
-
-        for (String field : fields) {
-            if (field.isEmpty()) {
-                return true;
-            }
-        }
-        return false;
+        this.dispose();
     }//GEN-LAST:event_UpdateUserButtonActionPerformed
 
     private void hourlyRateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hourlyRateTextActionPerformed

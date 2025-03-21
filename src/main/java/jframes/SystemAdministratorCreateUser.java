@@ -24,17 +24,15 @@ import javax.swing.JTextField;
  */
 public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
-    // Colors for validation
+    // Colors for validation (still used for references if needed)
     private static final Color ERROR_COLOR = new Color(255, 200, 200);
     private static final Color OK_COLOR    = Color.WHITE;
 
-    // Constructor (without initComponents block)
+    // Constructor
     public SystemAdministratorCreateUser() {
-        // Normally NetBeans auto-calls initComponents(), but we omit it here
-        initComponents();            // <--- NetBeans typically inserts this
+        initComponents();
         setupRealTimeValidation();
-        generateEmployeeNumber();    // auto-generate new employee #
-        // Optionally set combos to -1 so they're unselected
+        generateEmployeeNumber();    
         roleBox.setSelectedIndex(-1);
         statusBox.setSelectedIndex(-1);
         positionBox.setSelectedIndex(-1);
@@ -52,28 +50,44 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     }
 
     // ---------------- B) Setup Real-Time Validation on Key Release ----------------
+    // Setup Real-Time Validation on Key Release
     private void setupRealTimeValidation() {
         KeyAdapter adapter = new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 Object src = e.getSource();
-                if      (src == lastNameText)             validateLastName();
-                else if (src == firstNameText)            validateFirstName();
-                else if (src == usernameText)             validateUsername();
-                else if (src == passwordText)             validatePassword();
-                else if (src == addressText)              validateAddress();
-                else if (src == phoneNumberText1)         validatePhoneNumber();
-                else if (src == sssNumberText)            validateSSSNumber();
-                else if (src == philhealthNumberText)     validatePhilhealth();
-                else if (src == tinNumberText)            validateTINNumber();
-                else if (src == pagIbigText)              validatePagIbig();
-                else if (src == basicSalaryText)          validateBasicSalary();
-                else if (src == grossSemiMonthlyRateText) validateGrossSemi();
-                else if (src == riceSubsidyText)          validateRiceSubsidy();
-                else if (src == hourlyRateText)           validateHourlyRate();
+
+                if      (src == lastNameText) 
+                    SystemAdministrator.validateLastName(lastNameText);
+                else if (src == firstNameText) 
+                    SystemAdministrator.validateFirstName(firstNameText);
+                else if (src == usernameText) 
+                    SystemAdministrator.validateUsername(usernameText);
+                else if (src == passwordText) 
+                    SystemAdministrator.validatePassword(passwordText);
+                else if (src == addressText) 
+                    SystemAdministrator.validateAddress(addressText);
+                else if (src == phoneNumberText1) 
+                    SystemAdministrator.validatePhoneNumber(phoneNumberText1);
+                else if (src == sssNumberText) 
+                    SystemAdministrator.validateSSSNumber(sssNumberText);
+                else if (src == philhealthNumberText) 
+                    SystemAdministrator.validatePhilhealth(philhealthNumberText);
+                else if (src == tinNumberText) 
+                    SystemAdministrator.validateTINNumber(tinNumberText);
+                else if (src == pagIbigText) 
+                    SystemAdministrator.validatePagIbig(pagIbigText);
+                else if (src == basicSalaryText) 
+                    SystemAdministrator.validateBasicSalary(basicSalaryText);
+                else if (src == grossSemiMonthlyRateText) 
+                    SystemAdministrator.validateGrossSemi(grossSemiMonthlyRateText);
+                else if (src == riceSubsidyText) 
+                    SystemAdministrator.validateRiceSubsidy(riceSubsidyText);
+                else if (src == hourlyRateText) 
+                    SystemAdministrator.validateHourlyRate(hourlyRateText);
             }
         };
-        // Add adapter to each text field
+
         lastNameText.addKeyListener(adapter);
         firstNameText.addKeyListener(adapter);
         usernameText.addKeyListener(adapter);
@@ -90,304 +104,53 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         hourlyRateText.addKeyListener(adapter);
     }
 
-    // ---------------- C) Validation Methods ----------------
-
-    private void validateLastName() {
-        String text = lastNameText.getText().replaceAll("[^A-Za-z]", ""); // Remove all non-alphabet characters
-
-        // Set error if max length is reached
-        boolean isTooLong = text.length() > 20;
-        if (isTooLong) {
-            text = text.substring(0, 20); // Trim to max valid length
-        }
-
-        boolean isValid = text.length() >= 2 && text.length() <= 20;
-        lastNameText.setText(text);
-        lastNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
-    }
-
-    private void validateFirstName() {
-        String text = firstNameText.getText().replaceAll("[^A-Za-z]", ""); // Remove all non-alphabet characters
-
-        // Set error if max length is reached
-        boolean isTooLong = text.length() > 35;
-        if (isTooLong) {
-            text = text.substring(0, 35); // Trim to max valid length
-        }
-
-        boolean isValid = text.length() >= 2 && text.length() <= 35;
-        firstNameText.setText(text);
-        firstNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
-    }
-
-    private void validateUsername() {
-        String text = usernameText.getText().trim();
-
-        // Enforce real-time length limit
-        boolean isTooLong = text.length() > 20;
-        if (isTooLong) {
-            text = text.substring(0, 20); // Trim to max valid length
-        }
-
-        // 1) length 10..20
-        boolean lengthOk = (text.length() >= 10 && text.length() <= 20);
-
-        // 2) not all digits => at least one non-digit
-        boolean notAllDigits = !text.matches("\\d+");
-
-        // 3) no consecutive '.' or '_'
-        boolean noConsecutiveDot = !text.contains("..");
-        boolean noConsecutiveUnderscore = !text.contains("__");
-
-        // 4) only alphanumeric or '.' or '_'
-        boolean validChars = text.matches("^[A-Za-z0-9._]+$");
-
-        usernameText.setText(text);
-        usernameText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && notAllDigits && noConsecutiveDot && noConsecutiveUnderscore && validChars ? OK_COLOR : ERROR_COLOR));
-    }
-
-
-    private void validatePassword() {
-        String text = passwordText.getText().trim();
-
-        // Enforce real-time length limit
-        boolean isTooLong = text.length() > 50;
-        if (isTooLong) {
-            text = text.substring(0, 50); // Trim to max valid length
-        }
-
-        // 1) length 9..50
-        boolean lengthOk = (text.length() >= 9 && text.length() <= 50);
-
-        // 2) must contain at least one letter, one digit, and one symbol ('.' or '_')
-        boolean hasLetter = text.matches(".*[A-Za-z].*");
-        boolean hasDigit = text.matches(".*\\d.*");
-        boolean hasSymbol = text.matches(".*[._].*");
-
-        // 3) only allows letters, digits, '.' and '_'
-        boolean onlyAllowed = text.matches("^[A-Za-z0-9._]+$");
-
-        passwordText.setText(text);
-        passwordText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && hasLetter && hasDigit && hasSymbol && onlyAllowed ? OK_COLOR : ERROR_COLOR));
-    }
-
-    private void validateAddress() {
-        String text = addressText.getText().trim();
-
-        // Enforce real-time length limit
-        boolean isTooLong = text.length() > 100;
-        if (isTooLong) {
-            text = text.substring(0, 100); // Trim to max valid length
-        }
-
-        // 1) length 12..100
-        boolean lengthOk = text.length() >= 12 && text.length() <= 100;
-
-        // 2) Only allows alphanumeric, commas, periods, and spaces
-        boolean validChars = text.matches("^[A-Za-z0-9,\\.\\s]+$");
-
-        // 3) No double commas or double periods
-        boolean noDoubleCommaOrDot = !text.contains(",,") && !text.contains("..");
-
-        addressText.setText(text);
-        addressText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && validChars && noDoubleCommaOrDot ? OK_COLOR : ERROR_COLOR));
-    }
-
-    private void validatePhoneNumber() {
-        String text = phoneNumberText1.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
-
-        if (text.length() > 12) {
-            text = text.substring(0, 12); // Trim to max valid length
-        }
-
-        boolean isValid = false;
-        String formatted = text;
-
-        if (text.startsWith("639") && text.length() == 12) {
-            formatted = text.substring(3); // Remove "639"
-            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
-            isValid = true;
-        } else if (text.startsWith("09") && text.length() == 11) {
-            formatted = text.substring(2); // Remove "09"
-            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
-            isValid = true;
-        } else if (text.length() == 9) {
-            formatted = text.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
-            isValid = true;
-        } 
-
-        // Check for invalid lengths
-        if (text.length() < 8 || text.length() == 10 || text.length() > 12) {
-            isValid = false;
-        }
-
-        phoneNumberText1.setText(formatted); // Set formatted text in input field
-        phoneNumberText1.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
-    }
-    
-    private void validateSSSNumber() {
-        String text = sssNumberText.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
-
-        if (text.length() > 10) {
-            text = text.substring(0, 10); // Trim to max valid length
-        }
-
-        boolean isValid = false;
-        String formatted = text;
-
-        if (text.length() == 10) {
-            formatted = text.replaceAll("(\\d{2})(\\d{7})(\\d{1})", "$1-$2-$3");
-            isValid = true;
-        }
-
-        sssNumberText.setText(formatted);
-        sssNumberText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
-    }
-    
-    private void validateTINNumber() {
-        String text = tinNumberText.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
-
-        if (text.length() > 12) {
-            text = text.substring(0, 12); // Trim to max valid length
-        }
-
-        boolean isValid = false;
-        String formatted = text;
-
-        if (text.length() == 12) {
-            formatted = text.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3-$4");
-            isValid = true;
-        }
-
-        tinNumberText.setText(formatted);
-        tinNumberText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
-    }
-
-    private void validatePhilhealth() {
-        String text = philhealthNumberText.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
-
-        if (text.length() > 12) {
-            text = text.substring(0, 12); // Trim to max valid length
-        }
-
-        boolean isValid = text.matches("\\d{12}"); // Must be exactly 12 digits
-
-        philhealthNumberText.setText(text);
-        philhealthNumberText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
-    }
-
-    private void validatePagIbig() {
-        String text = pagIbigText.getText().replaceAll("[^0-9]", ""); // Remove non-numeric chars
-
-        if (text.length() > 12) {
-            text = text.substring(0, 12); // Limit to 12 digits
-        }
-
-        boolean isValid = text.matches("\\d{12}"); // Must be exactly 12 digits
-
-        pagIbigText.setText(text);
-        pagIbigText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
-    }
-
-    // Formatter for numerical values with commas
-    private static final DecimalFormat formatter = new DecimalFormat("#,##0");
-
-    private void validateBasicSalary() {
-        String text = basicSalaryText.getText().replace(",", "").trim(); // Remove existing commas before parsing
-        if (text.matches("\\d+")) {
-            String formattedText = formatter.format(Long.parseLong(text)); // Correctly format with commas
-            basicSalaryText.setText(formattedText);
-            basicSalaryText.setBackground(OK_COLOR);
-        } else {
-            basicSalaryText.setBackground(ERROR_COLOR);
-        }
-    }
-
-    private void validateGrossSemi() {
-        String text = grossSemiMonthlyRateText.getText().replace(",", "").trim(); // Remove existing commas before parsing
-        if (text.matches("\\d+")) {
-            String formattedText = formatter.format(Long.parseLong(text)); // Correctly format with commas
-            grossSemiMonthlyRateText.setText(formattedText);
-            grossSemiMonthlyRateText.setBackground(OK_COLOR);
-        } else {
-            grossSemiMonthlyRateText.setBackground(ERROR_COLOR);
-        }
-    }
-
-    private void validateRiceSubsidy() {
-        String text = riceSubsidyText.getText().replace(",", "").trim(); // Remove existing commas before parsing
-        if (text.matches("\\d+") && Integer.parseInt(text) == 1500) {
-            riceSubsidyText.setText("1,500"); // Always set this fixed format
-            riceSubsidyText.setBackground(OK_COLOR);
-        } else {
-            riceSubsidyText.setBackground(ERROR_COLOR);
-        }
-    }
-
-
-    private void validateHourlyRate() {
-        // double only
-        String text = hourlyRateText.getText().trim();
-        if (text.matches("\\d+(\\.\\d+)?")) {
-            hourlyRateText.setBackground(OK_COLOR);
-        } else {
-            hourlyRateText.setBackground(ERROR_COLOR);
-        }
-    }
-
-    // ------------- D) Final "Create" Button Handler -------------
+    // ------------- C) "Create" Button Handler -------------
     public void handleCreateButtonAction() {
         // Check combos
         if (!isComboValid()) {
-            JOptionPane.showMessageDialog(
-                this,
+            JOptionPane.showMessageDialog(this,
                 "Some dropdown fields are invalid or unselected.",
                 "Validation Error",
                 JOptionPane.ERROR_MESSAGE
             );
-            return; // do NOT close
+            return;
         }
         // Check birthday
         if (!isBirthdayValid()) {
-            JOptionPane.showMessageDialog(
-                this,
+            JOptionPane.showMessageDialog(this,
                 "Must be 18 years old or older.",
                 "Validation Error",
                 JOptionPane.ERROR_MESSAGE
             );
-            return; // do NOT close
+            return;
         }
         // Check empties
         if (anyEmpty()) {
-            JOptionPane.showMessageDialog(
-                this,
+            JOptionPane.showMessageDialog(this,
                 "Some required fields are empty.",
                 "Validation Error",
                 JOptionPane.ERROR_MESSAGE
             );
-            return; // do NOT close
+            return;
         }
         // Check if any field is error color
         if (hasErrorFields()) {
-            JOptionPane.showMessageDialog(
-                this,
+            JOptionPane.showMessageDialog(this,
                 "One or more fields are invalid. Please correct them.",
                 "Validation Error",
                 JOptionPane.ERROR_MESSAGE
             );
-            return; // do NOT close
+            return;
         }
 
-        // If we reach here => all validations passed => do the creation
         JOptionPane.showMessageDialog(
             this,
             "User created successfully!",
             "Success",
             JOptionPane.INFORMATION_MESSAGE
         );
-        
-        // 4) If we reach here => all validations passed => do the creation
-        // Build or collect the final data for creation:
+
+        // Build final data for creation
         String empNum   = employeeNumberText.getText().trim();
         String lName    = lastNameText.getText().trim();
         String fName    = firstNameText.getText().trim();
@@ -411,37 +174,16 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         String phoneAll = phoneAllowanceBox.getSelectedItem().toString().trim();
         String clothAll = clothingAllowanceBox.getSelectedItem().toString().trim();
 
-        // Create your 22-column array or however you store data:
         String[] newUserData = {
-            empNum, 
-            lName,
-            fName,
-            birthday,
-            address,
-            phone,
-            sss,
-            phil,
-            tin,
-            pagibig,
-            stat,
-            pos,
-            sup,
-            basic,
-            rice,
-            phoneAll,
-            clothAll,
-            semi,
-            hourRate,
-            uname,
-            pword,
-            rChoice
+            empNum, lName, fName, birthday, address, phone, 
+            sss, phil, tin, pagibig, stat, pos, sup, basic, rice,
+            phoneAll, clothAll, semi, hourRate, uname, pword, rChoice
         };
 
-        // Now call your SystemAdministrator to create the user:
+        // Use SystemAdministrator to create user
         SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
         admin.createUser(newUserData);
 
-        // If creation is successful, show success message and dispose:
         JOptionPane.showMessageDialog(
             this,
             "User created successfully!",
@@ -449,7 +191,6 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
             JOptionPane.INFORMATION_MESSAGE
         );
 
-        // Now we can close
         new SystemAdministratorPage().setVisible(true);
         dispose();
     }
@@ -466,7 +207,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
     private boolean isBirthdayValid() {
         Date d = birthdayCalendar.getDate();
-        if (d == null) return false; // not selected
+        if (d == null) return false;
         LocalDate birth = d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate now   = LocalDate.now();
         return Period.between(birth, now).getYears() >= 18;

@@ -1,17 +1,21 @@
 package classes;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.awt.Color;
+import java.text.DecimalFormat;
 import javax.swing.JOptionPane;
 import java.util.List;
 import java.util.ArrayList;
+import javax.swing.JTextField;
 
 /**
  * Manages system-level user creation, deletion, updates
  * Splits data between Employee Details.csv (personal data) & User Accounts.csv (login credentials).
  */
 public class SystemAdministrator extends Employee {
+    
+    public static final Color ERROR_COLOR = new Color(255, 200, 200);
+    public static final Color OK_COLOR    = Color.WHITE;
+    private static final DecimalFormat formatter = new DecimalFormat("#,##0");
 
     public SystemAdministrator(int employeeNumber, String username, String password, String role) {
         super(employeeNumber);
@@ -223,4 +227,213 @@ public class SystemAdministrator extends Employee {
         }
         return null;
     }
+    
+    public static void validateLastName(JTextField lastNameText) {
+        String text = lastNameText.getText().replaceAll("[^A-Za-z]", ""); 
+        boolean isTooLong = text.length() > 20;
+        if (isTooLong) {
+            text = text.substring(0, 20);
+        }
+        boolean isValid = text.length() >= 2 && text.length() <= 20;
+        lastNameText.setText(text);
+        lastNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
+    }
+
+    public static void validateFirstName(JTextField firstNameText) {
+        String text = firstNameText.getText().replaceAll("[^A-Za-z]", "");
+        boolean isTooLong = text.length() > 35;
+        if (isTooLong) {
+            text = text.substring(0, 35);
+        }
+        boolean isValid = text.length() >= 2 && text.length() <= 35;
+        firstNameText.setText(text);
+        firstNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
+    }
+
+    public static void validateUsername(JTextField usernameText) {
+        String text = usernameText.getText().trim();
+        boolean isTooLong = text.length() > 20;
+        if (isTooLong) {
+            text = text.substring(0, 20);
+        }
+        boolean lengthOk = (text.length() >= 10 && text.length() <= 20);
+        boolean notAllDigits = !text.matches("\\d+");
+        boolean noConsecutiveDot = !text.contains("..");
+        boolean noConsecutiveUnderscore = !text.contains("__");
+        boolean validChars = text.matches("^[A-Za-z0-9._]+$");
+
+        usernameText.setText(text);
+        if (isTooLong) {
+            usernameText.setBackground(ERROR_COLOR);
+        } else if (lengthOk && notAllDigits && noConsecutiveDot && noConsecutiveUnderscore && validChars) {
+            usernameText.setBackground(OK_COLOR);
+        } else {
+            usernameText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    public static void validatePassword(JTextField passwordText) {
+        String text = passwordText.getText().trim();
+        boolean isTooLong = text.length() > 50;
+        if (isTooLong) {
+            text = text.substring(0, 50);
+        }
+        boolean lengthOk = (text.length() >= 9 && text.length() <= 50);
+        boolean hasLetter = text.matches(".*[A-Za-z].*");
+        boolean hasDigit = text.matches(".*\\d.*");
+        boolean hasSymbol = text.matches(".*[._].*");
+        boolean onlyAllowed = text.matches("^[A-Za-z0-9._]+$");
+
+        passwordText.setText(text);
+        if (isTooLong) {
+            passwordText.setBackground(ERROR_COLOR);
+        } else if (lengthOk && hasLetter && hasDigit && hasSymbol && onlyAllowed) {
+            passwordText.setBackground(OK_COLOR);
+        } else {
+            passwordText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    public static void validateAddress(JTextField addressText) {
+        String text = addressText.getText().trim();
+        boolean isTooLong = text.length() > 100;
+        if (isTooLong) {
+            text = text.substring(0, 100);
+        }
+        boolean lengthOk = text.length() >= 12 && text.length() <= 100;
+        boolean validChars = text.matches("^[A-Za-z0-9,\\.\\s]+$");
+        boolean noDoubleCommaOrDot = !text.contains(",,") && !text.contains("..");
+
+        addressText.setText(text);
+        if (isTooLong) {
+            addressText.setBackground(ERROR_COLOR);
+        } else if (lengthOk && validChars && noDoubleCommaOrDot) {
+            addressText.setBackground(OK_COLOR);
+        } else {
+            addressText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    public static void validatePhoneNumber(JTextField phoneField) {
+        String text = phoneField.getText().replaceAll("[^0-9]", "");
+        if (text.length() > 12) {
+            text = text.substring(0, 12);
+        }
+
+        boolean isValid = false;
+        String formatted = text;
+
+        if (text.startsWith("639") && text.length() == 12) {
+            formatted = text.substring(3);
+            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            isValid = true;
+        } else if (text.startsWith("09") && text.length() == 11) {
+            formatted = text.substring(2);
+            formatted = formatted.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            isValid = true;
+        } else if (text.length() == 9) {
+            formatted = text.replaceAll("(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3");
+            isValid = true;
+        }
+
+        // invalid if <8, ==10, or >12
+        if (text.length() < 8 || text.length() == 10 || text.length() > 12) {
+            isValid = false;
+        }
+
+        phoneField.setText(formatted);
+        phoneField.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    public static void validateSSSNumber(JTextField sssField) {
+        String text = sssField.getText().replaceAll("[^0-9]", "");
+        if (text.length() > 10) {
+            text = text.substring(0, 10);
+        }
+        boolean isValid = false;
+        String formatted = text;
+        if (text.length() == 10) {
+            formatted = text.replaceAll("(\\d{2})(\\d{7})(\\d{1})", "$1-$2-$3");
+            isValid = true;
+        }
+        sssField.setText(formatted);
+        sssField.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    public static void validateTINNumber(JTextField tinField) {
+        String text = tinField.getText().replaceAll("[^0-9]", "");
+        if (text.length() > 12) {
+            text = text.substring(0, 12);
+        }
+        boolean isValid = false;
+        String formatted = text;
+        if (text.length() == 12) {
+            formatted = text.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{3})", "$1-$2-$3-$4");
+            isValid = true;
+        }
+        tinField.setText(formatted);
+        tinField.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    public static void validatePhilhealth(JTextField philField) {
+        String text = philField.getText().replaceAll("[^0-9]", "");
+        if (text.length() > 12) {
+            text = text.substring(0, 12);
+        }
+        boolean isValid = text.matches("\\d{12}");
+        philField.setText(text);
+        philField.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    public static void validatePagIbig(JTextField pagibigField) {
+        String text = pagibigField.getText().replaceAll("[^0-9]", "");
+        if (text.length() > 12) {
+            text = text.substring(0, 12);
+        }
+        boolean isValid = text.matches("\\d{12}");
+        pagibigField.setText(text);
+        pagibigField.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
+    }
+
+    public static void validateBasicSalary(JTextField salaryField) {
+        String text = salaryField.getText().replace(",", "").trim();
+        if (text.matches("\\d+")) {
+            String formattedText = formatter.format(Long.parseLong(text));
+            salaryField.setText(formattedText);
+            salaryField.setBackground(OK_COLOR);
+        } else {
+            salaryField.setBackground(ERROR_COLOR);
+        }
+    }
+
+    public static void validateGrossSemi(JTextField grossField) {
+        String text = grossField.getText().replace(",", "").trim();
+        if (text.matches("\\d+")) {
+            String formattedText = formatter.format(Long.parseLong(text));
+            grossField.setText(formattedText);
+            grossField.setBackground(OK_COLOR);
+        } else {
+            grossField.setBackground(ERROR_COLOR);
+        }
+    }
+
+    public static void validateRiceSubsidy(JTextField riceField) {
+        String text = riceField.getText().replace(",", "").trim();
+        if (text.matches("\\d+") && Integer.parseInt(text) == 1500) {
+            riceField.setText("1,500");
+            riceField.setBackground(OK_COLOR);
+        } else {
+            riceField.setBackground(ERROR_COLOR);
+        }
+    }
+
+    public static void validateHourlyRate(JTextField hrField) {
+        String text = hrField.getText().trim();
+        if (text.matches("\\d+(\\.\\d+)?")) {
+            hrField.setBackground(OK_COLOR);
+        } else {
+            hrField.setBackground(ERROR_COLOR);
+        }
+    }
+    
 }
