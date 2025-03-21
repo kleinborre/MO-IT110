@@ -152,10 +152,10 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         // Build final data for creation
         String empNum   = employeeNumberText.getText().trim();
-        String lName    = lastNameText.getText().trim();
-        String fName    = firstNameText.getText().trim();
+        String lName    = lastNameText.getText();
+        String fName    = firstNameText.getText();
         String birthday = new SimpleDateFormat("MM/dd/yyyy").format(birthdayCalendar.getDate());
-        String address  = addressText.getText().trim();
+        String address  = addressText.getText();
         String phone    = phoneNumberText1.getText().trim();
         String sss      = sssNumberText.getText().trim();
         String phil     = philhealthNumberText.getText().trim();
