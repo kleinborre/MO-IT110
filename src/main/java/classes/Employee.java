@@ -79,8 +79,8 @@ public class Employee implements CSVHandler {
                     this.phoneNumber          = data[5];
                     this.sssNumber            = data[6];
                     this.philhealthNumber     = data[7];
-                    this.pagibigNumber        = data[8];
-                    this.tinNumber            = data[9];
+                    this.tinNumber            = data[8];
+                    this.pagibigNumber        = data[9];
                     this.status               = data[10];
                     this.position             = data[11];
                     this.immediateSupervisor  = data[12];
@@ -91,7 +91,7 @@ public class Employee implements CSVHandler {
                     this.grossSemiMonthlyRate = Double.parseDouble(data[17].trim().replace(",", ""));
                     this.hourlyRate           = Double.parseDouble(data[18].trim().replace(",", ""));
                 } catch (NumberFormatException e) {
-                    System.err.println("❌ Error parsing numeric values for Employee #" + employeeNumber);
+                    System.err.println("Error parsing numeric values for Employee #" + employeeNumber);
                     e.printStackTrace();
                 }
                 break;
@@ -201,7 +201,7 @@ public class Employee implements CSVHandler {
             // Only 19 columns for employee details
             String[] header = {
                 "Employee #", "Last Name", "First Name", "Birthday", "Address", "Phone Number",
-                "SSS #", "Philhealth #", "Pagibig #", "TIN #", "Status", "Position",
+                "SSS #", "Philhealth #", "TIN #", "Pagibig #", "Status", "Position",
                 "Immediate Supervisor", "Basic Salary", "Rice Subsidy", "Phone Allowance",
                 "Clothing Allowance", "Gross Semi-monthly Rate", "Hourly Rate"
             };

@@ -57,8 +57,8 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         phoneNumberText1.setText(userData[5]);
         sssNumberText.setText(userData[6]);
         philhealthNumberText1.setText(userData[7]);
-        tinNumberText1.setText(userData[9]);
-        pagIbigText.setText(userData[8]);
+        tinNumberText1.setText(userData[8]);
+        pagIbigText.setText(userData[9]);
         statusBox.setSelectedItem(userData[10]);
         positionBox.setSelectedItem(userData[11]);
         supervisorBox.setSelectedItem(userData[12]);
@@ -86,20 +86,20 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
                 Object src = e.getSource();
-                if (src == lastNameText) validateTextField(lastNameText, "^[A-Za-z]{2,35}$");
-                else if (src == firstNameText) validateTextField(firstNameText, "^[A-Za-z]{2,35}$");
+                if (src == lastNameText) validateLastName();
+                else if (src == firstNameText) validateFirstName();
                 else if (src == usernameText) validateUsername();
                 else if (src == passwordText) validatePassword();
                 else if (src == addressText) validateAddress();
                 else if (src == phoneNumberText1) validatePhoneNumber();
-                else if (src == sssNumberText) formatSSSNumber();
-                else if (src == tinNumberText1) formatTINNumber();
+                else if (src == sssNumberText) validateSSSNumber();
+                else if (src == tinNumberText1) validateTINNumber();
                 else if (src == philhealthNumberText1) validatePhilhealth();
                 else if (src == pagIbigText) validatePagIbig();
-                else if (src == basicSalaryText) validateNumber(basicSalaryText);
-                else if (src == grossSemiMonthlyRateText) validateNumber(grossSemiMonthlyRateText);
+                else if (src == basicSalaryText) validateBasicSalary();
+                else if (src == grossSemiMonthlyRateText) validateGrossSemi();
                 else if (src == riceSubsidyText) validateRiceSubsidy();
-                else if (src == hourlyRateText) validateNumber(hourlyRateText);
+                else if (src == hourlyRateText) validateHourlyRate();
             }
         };
 
@@ -119,37 +119,104 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         hourlyRateText.addKeyListener(adapter);
     }
 
-    private void validateTextField(JTextField field, String regex) {
-        if (field.getText().trim().matches(regex)) {
-            field.setBackground(OK_COLOR);
-        } else {
-            field.setBackground(ERROR_COLOR);
+    private void validateLastName() {
+        String text = lastNameText.getText().replaceAll("[^A-Za-z]", ""); // Remove all non-alphabet characters
+
+        // Set error if max length is reached
+        boolean isTooLong = text.length() > 20;
+        if (isTooLong) {
+            text = text.substring(0, 20); // Trim to max valid length
         }
+
+        boolean isValid = text.length() >= 2 && text.length() <= 20;
+        lastNameText.setText(text);
+        lastNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
+    }
+
+    private void validateFirstName() {
+        String text = firstNameText.getText().replaceAll("[^A-Za-z]", ""); // Remove all non-alphabet characters
+
+        // Set error if max length is reached
+        boolean isTooLong = text.length() > 35;
+        if (isTooLong) {
+            text = text.substring(0, 35); // Trim to max valid length
+        }
+
+        boolean isValid = text.length() >= 2 && text.length() <= 35;
+        firstNameText.setText(text);
+        firstNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
     }
 
     private void validateUsername() {
         String text = usernameText.getText().trim();
-        boolean valid = text.length() >= 10 && text.length() <= 20 && !text.matches("\\d+") && !text.contains("..") &&
-                !text.contains("__") && text.matches("^[A-Za-z0-9._]+$");
 
-        usernameText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+        // Enforce real-time length limit
+        boolean isTooLong = text.length() > 20;
+        if (isTooLong) {
+            text = text.substring(0, 20); // Trim to max valid length
+        }
+
+        // 1) length 10..20
+        boolean lengthOk = (text.length() >= 10 && text.length() <= 20);
+
+        // 2) not all digits => at least one non-digit
+        boolean notAllDigits = !text.matches("\\d+");
+
+        // 3) no consecutive '.' or '_'
+        boolean noConsecutiveDot = !text.contains("..");
+        boolean noConsecutiveUnderscore = !text.contains("__");
+
+        // 4) only alphanumeric or '.' or '_'
+        boolean validChars = text.matches("^[A-Za-z0-9._]+$");
+
+        usernameText.setText(text);
+        usernameText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && notAllDigits && noConsecutiveDot && noConsecutiveUnderscore && validChars ? OK_COLOR : ERROR_COLOR));
     }
 
     private void validatePassword() {
         String text = passwordText.getText().trim();
-        boolean valid = text.length() >= 9 && text.length() <= 50 && text.matches(".*[A-Za-z].*") &&
-                text.matches(".*\\d.*") && text.matches(".*[._].*") && text.matches("^[A-Za-z0-9._]+$");
 
-        passwordText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+        // Enforce real-time length limit
+        boolean isTooLong = text.length() > 50;
+        if (isTooLong) {
+            text = text.substring(0, 50); // Trim to max valid length
+        }
+
+        // 1) length 9..50
+        boolean lengthOk = (text.length() >= 9 && text.length() <= 50);
+
+        // 2) must contain at least one letter, one digit, and one symbol ('.' or '_')
+        boolean hasLetter = text.matches(".*[A-Za-z].*");
+        boolean hasDigit = text.matches(".*\\d.*");
+        boolean hasSymbol = text.matches(".*[._].*");
+
+        // 3) only allows letters, digits, '.' and '_'
+        boolean onlyAllowed = text.matches("^[A-Za-z0-9._]+$");
+
+        passwordText.setText(text);
+        passwordText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && hasLetter && hasDigit && hasSymbol && onlyAllowed ? OK_COLOR : ERROR_COLOR));
     }
 
     private void validateAddress() {
         String text = addressText.getText().trim();
-        boolean valid = text.length() >= 12 && text.length() <= 100 &&
-                text.matches("^[A-Za-z0-9,\\.\\s]+$") &&
-                !text.contains(",,") && !text.contains("..");
 
-        addressText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+        // Enforce real-time length limit
+        boolean isTooLong = text.length() > 100;
+        if (isTooLong) {
+            text = text.substring(0, 100); // Trim to max valid length
+        }
+
+        // 1) length 12..100
+        boolean lengthOk = text.length() >= 12 && text.length() <= 100;
+
+        // 2) Only allows alphanumeric, commas, periods, and spaces
+        boolean validChars = text.matches("^[A-Za-z0-9,\\.\\s]+$");
+
+        // 3) No double commas or double periods
+        boolean noDoubleCommaOrDot = !text.contains(",,") && !text.contains("..");
+
+        addressText.setText(text);
+        addressText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && validChars && noDoubleCommaOrDot ? OK_COLOR : ERROR_COLOR));
     }
 
     private void validatePhoneNumber() {
@@ -184,7 +251,7 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         phoneNumberText1.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
 
-    private void formatSSSNumber() {
+    private void validateSSSNumber() {
         String text = sssNumberText.getText().replaceAll("[^0-9-]", ""); // Remove letters & invalid characters
 
         // Remove excessive dashes
@@ -206,7 +273,7 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         }
     }
 
-    private void formatTINNumber() {
+    private void validateTINNumber() {
         String text = tinNumberText1.getText().replaceAll("[^0-9-]", ""); // Remove letters & invalid characters
 
         // Remove excessive dashes
@@ -254,14 +321,47 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         pagIbigText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
 
-    private void validateNumber(JTextField field) {
-        boolean valid = field.getText().trim().matches("\\d+");
-        field.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+    private void validateBasicSalary() {
+        String text = basicSalaryText.getText().replace(",", "").trim(); // Remove existing commas before parsing
+        if (text.matches("\\d+")) {
+            String formattedText = formatter.format(Long.parseLong(text)); // Correctly format with commas
+            basicSalaryText.setText(formattedText);
+            basicSalaryText.setBackground(OK_COLOR);
+        } else {
+            basicSalaryText.setBackground(ERROR_COLOR);
+        }
+    }
+
+    private void validateGrossSemi() {
+        String text = grossSemiMonthlyRateText.getText().replace(",", "").trim(); // Remove existing commas before parsing
+        if (text.matches("\\d+")) {
+            String formattedText = formatter.format(Long.parseLong(text)); // Correctly format with commas
+            grossSemiMonthlyRateText.setText(formattedText);
+            grossSemiMonthlyRateText.setBackground(OK_COLOR);
+        } else {
+            grossSemiMonthlyRateText.setBackground(ERROR_COLOR);
+        }
     }
 
     private void validateRiceSubsidy() {
-        boolean valid = riceSubsidyText.getText().trim().equals("1500");
-        riceSubsidyText.setBackground(valid ? OK_COLOR : ERROR_COLOR);
+        String text = riceSubsidyText.getText().replace(",", "").trim(); // Remove existing commas before parsing
+        if (text.matches("\\d+") && Integer.parseInt(text) == 1500) {
+            riceSubsidyText.setText("1,500"); // Always set this fixed format
+            riceSubsidyText.setBackground(OK_COLOR);
+        } else {
+            riceSubsidyText.setBackground(ERROR_COLOR);
+        }
+    }
+
+
+    private void validateHourlyRate() {
+        // double only
+        String text = hourlyRateText.getText().trim();
+        if (text.matches("\\d+(\\.\\d+)?")) {
+            hourlyRateText.setBackground(OK_COLOR);
+        } else {
+            hourlyRateText.setBackground(ERROR_COLOR);
+        }
     }
     
     // Helper Method: Reset Field Colors After Clearing
@@ -387,7 +487,7 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         roleBox.setBackground(new java.awt.Color(204, 204, 204));
         roleBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         roleBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Employee", "Employee|HRManager", "Employee|PayrollManager", "Employee|SystemAdministrator" }));
-        getContentPane().add(roleBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 240, 180, -1));
+        getContentPane().add(roleBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 240, 140, -1));
 
         jLabel5.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(102, 102, 102));
@@ -564,9 +664,10 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         jLabel15.setText("Rice Subsidy");
         getContentPane().add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 120, -1, -1));
 
+        riceSubsidyText.setEditable(false);
         riceSubsidyText.setBackground(new java.awt.Color(204, 204, 204));
         riceSubsidyText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        riceSubsidyText.setText("1500");
+        riceSubsidyText.setText("1,500");
         riceSubsidyText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 riceSubsidyTextActionPerformed(evt);
@@ -581,7 +682,12 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         phoneAllowanceBox.setBackground(new java.awt.Color(204, 204, 204));
         phoneAllowanceBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        phoneAllowanceBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "2000", "1000", "800", "500" }));
+        phoneAllowanceBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "2,000", "1,000", "800", "500" }));
+        phoneAllowanceBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                phoneAllowanceBoxActionPerformed(evt);
+            }
+        });
         getContentPane().add(phoneAllowanceBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 190, 140, -1));
 
         jLabel20.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -591,7 +697,7 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         clothingAllowanceBox.setBackground(new java.awt.Color(204, 204, 204));
         clothingAllowanceBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        clothingAllowanceBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Regular", "Probationary" }));
+        clothingAllowanceBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1,000", "800", "500" }));
         getContentPane().add(clothingAllowanceBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 240, 140, -1));
 
         jLabel21.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -772,12 +878,12 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         updatedUser[10] = statusBox.getSelectedItem().toString().trim();
         updatedUser[11] = positionBox.getSelectedItem().toString().trim();
         updatedUser[12] = supervisorBox.getSelectedItem().toString().trim();
-        updatedUser[13] = basicSalaryText.getText().replace(",", "").trim();
-        updatedUser[14] = riceSubsidyText.getText().replace(",", "").trim();
-        updatedUser[15] = phoneAllowanceBox.getSelectedItem().toString().replace(",", "").trim();
-        updatedUser[16] = clothingAllowanceBox.getSelectedItem().toString().replace(",", "").trim();
-        updatedUser[17] = grossSemiMonthlyRateText.getText().replace(",", "").trim();
-        updatedUser[18] = hourlyRateText.getText().replace(",", "").trim();
+        updatedUser[13] = basicSalaryText.getText().trim();
+        updatedUser[14] = riceSubsidyText.getText().trim();
+        updatedUser[15] = phoneAllowanceBox.getSelectedItem().toString();
+        updatedUser[16] = clothingAllowanceBox.getSelectedItem().toString();
+        updatedUser[17] = grossSemiMonthlyRateText.getText().trim();
+        updatedUser[18] = hourlyRateText.getText().trim();
         updatedUser[19] = usernameText.getText().trim();
         updatedUser[20] = passwordText.getText().trim();
         updatedUser[21] = roleBox.getSelectedItem().toString().trim();
@@ -836,6 +942,10 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     private void employeeNumberTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeNumberTextActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_employeeNumberTextActionPerformed
+
+    private void phoneAllowanceBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_phoneAllowanceBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_phoneAllowanceBoxActionPerformed
 
     /**
      * @param args the command line arguments
