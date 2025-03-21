@@ -167,9 +167,9 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
      */
     private boolean anyEmpty() {
         String[] fields = {
-            lastNameText.getText().trim(),
-            firstNameText.getText().trim(),
-            addressText.getText().trim(),
+            lastNameText.getText(),
+            firstNameText.getText(),
+            addressText.getText(),
             phoneNumberText1.getText().trim(),
             sssNumberText.getText().trim(),
             philhealthNumberText1.getText().trim(),
@@ -679,10 +679,10 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         // Build updated user data array (22 fields)
         String[] updatedUser = new String[22];
         updatedUser[0]  = employeeNumberText.getText().trim();
-        updatedUser[1]  = lastNameText.getText().trim();
-        updatedUser[2]  = firstNameText.getText().trim();
+        updatedUser[1]  = lastNameText.getText();
+        updatedUser[2]  = firstNameText.getText();
         updatedUser[3]  = birthday;
-        updatedUser[4]  = addressText.getText().trim();
+        updatedUser[4]  = addressText.getText();
         updatedUser[5]  = phoneNumberText1.getText().trim();
         updatedUser[6]  = sssNumberText.getText().trim();
         updatedUser[7]  = philhealthNumberText1.getText().trim();

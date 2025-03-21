@@ -229,22 +229,38 @@ public class SystemAdministrator extends Employee {
     }
     
     public static void validateLastName(JTextField lastNameText) {
-        String text = lastNameText.getText().replaceAll("[^A-Za-z]", ""); 
+        String text = lastNameText.getText();
+
+        // Allow spaces but remove double spaces or more
+        text = text.replaceAll("\\s{2,}", " ");
+
+        // Remove all non-alphabet characters except spaces
+        text = text.replaceAll("[^A-Za-z ]", "");
+
         boolean isTooLong = text.length() > 20;
         if (isTooLong) {
             text = text.substring(0, 20);
         }
+
         boolean isValid = text.length() >= 2 && text.length() <= 20;
         lastNameText.setText(text);
         lastNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
     }
 
     public static void validateFirstName(JTextField firstNameText) {
-        String text = firstNameText.getText().replaceAll("[^A-Za-z]", "");
+        String text = firstNameText.getText();
+
+        // Allow spaces but remove double spaces or more
+        text = text.replaceAll("\\s{2,}", " ");
+
+        // Remove all non-alphabet characters except spaces
+        text = text.replaceAll("[^A-Za-z ]", "");
+
         boolean isTooLong = text.length() > 35;
         if (isTooLong) {
             text = text.substring(0, 35);
         }
+
         boolean isValid = text.length() >= 2 && text.length() <= 35;
         firstNameText.setText(text);
         firstNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
@@ -295,11 +311,16 @@ public class SystemAdministrator extends Employee {
     }
 
     public static void validateAddress(JTextField addressText) {
-        String text = addressText.getText().trim();
+        String text = addressText.getText();
+
+        // Allow spaces but remove double spaces or more
+        text = text.replaceAll("\\s{2,}", " ");
+
         boolean isTooLong = text.length() > 100;
         if (isTooLong) {
             text = text.substring(0, 100);
         }
+
         boolean lengthOk = text.length() >= 12 && text.length() <= 100;
         boolean validChars = text.matches("^[A-Za-z0-9,\\.\\s]+$");
         boolean noDoubleCommaOrDot = !text.contains(",,") && !text.contains("..");
