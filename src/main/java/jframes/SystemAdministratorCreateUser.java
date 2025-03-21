@@ -63,9 +63,9 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
                 else if (src == passwordText)             validatePassword();
                 else if (src == addressText)              validateAddress();
                 else if (src == phoneNumberText1)         validatePhoneNumber();
-                else if (src == sssNumberText)            formatSSSNumber();
+                else if (src == sssNumberText)            validateSSSNumber();
                 else if (src == philhealthNumberText)     validatePhilhealth();
-                else if (src == tinNumberText)            formatTINNumber();
+                else if (src == tinNumberText)            validateTINNumber();
                 else if (src == pagIbigText)              validatePagIbig();
                 else if (src == basicSalaryText)          validateBasicSalary();
                 else if (src == grossSemiMonthlyRateText) validateGrossSemi();
@@ -93,27 +93,41 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     // ---------------- C) Validation Methods ----------------
 
     private void validateLastName() {
-        // letters only, min 2, max 35
-        String text = lastNameText.getText().trim();
-        if (text.matches("^[A-Za-z]{2,35}$")) {
-            lastNameText.setBackground(OK_COLOR);
-        } else {
-            lastNameText.setBackground(ERROR_COLOR);
+        String text = lastNameText.getText().replaceAll("[^A-Za-z]", ""); // Remove all non-alphabet characters
+
+        // Set error if max length is reached
+        boolean isTooLong = text.length() > 20;
+        if (isTooLong) {
+            text = text.substring(0, 20); // Trim to max valid length
         }
+
+        boolean isValid = text.length() >= 2 && text.length() <= 20;
+        lastNameText.setText(text);
+        lastNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
     }
 
     private void validateFirstName() {
-        // letters only, min 2, max 35
-        String text = firstNameText.getText().trim();
-        if (text.matches("^[A-Za-z]{2,35}$")) {
-            firstNameText.setBackground(OK_COLOR);
-        } else {
-            firstNameText.setBackground(ERROR_COLOR);
+        String text = firstNameText.getText().replaceAll("[^A-Za-z]", ""); // Remove all non-alphabet characters
+
+        // Set error if max length is reached
+        boolean isTooLong = text.length() > 35;
+        if (isTooLong) {
+            text = text.substring(0, 35); // Trim to max valid length
         }
+
+        boolean isValid = text.length() >= 2 && text.length() <= 35;
+        firstNameText.setText(text);
+        firstNameText.setBackground(isTooLong ? ERROR_COLOR : (isValid ? OK_COLOR : ERROR_COLOR));
     }
 
     private void validateUsername() {
         String text = usernameText.getText().trim();
+
+        // Enforce real-time length limit
+        boolean isTooLong = text.length() > 20;
+        if (isTooLong) {
+            text = text.substring(0, 20); // Trim to max valid length
+        }
 
         // 1) length 10..20
         boolean lengthOk = (text.length() >= 10 && text.length() <= 20);
@@ -128,47 +142,55 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         // 4) only alphanumeric or '.' or '_'
         boolean validChars = text.matches("^[A-Za-z0-9._]+$");
 
-        if (lengthOk && notAllDigits && noConsecutiveDot && noConsecutiveUnderscore && validChars) {
-            usernameText.setBackground(OK_COLOR);
-        } else {
-            usernameText.setBackground(ERROR_COLOR);
-        }
+        usernameText.setText(text);
+        usernameText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && notAllDigits && noConsecutiveDot && noConsecutiveUnderscore && validChars ? OK_COLOR : ERROR_COLOR));
     }
 
 
     private void validatePassword() {
-        // 9-50 chars, must contain letter, digit, '.' or '_'
-        // and only letters, digits, '.' or '_'
         String text = passwordText.getText().trim();
-        boolean lengthOk = (text.length() >= 9 && text.length() <= 50);
-        boolean hasLetter = text.matches(".*[A-Za-z].*");
-        boolean hasDigit  = text.matches(".*\\d.*");
-        boolean hasSymbol = text.matches(".*[._].*");
-        boolean onlyAllowed = text.matches("^[A-Za-z0-9._]+$");
-        if (lengthOk && hasLetter && hasDigit && hasSymbol && onlyAllowed) {
-            passwordText.setBackground(OK_COLOR);
-        } else {
-            passwordText.setBackground(ERROR_COLOR);
+
+        // Enforce real-time length limit
+        boolean isTooLong = text.length() > 50;
+        if (isTooLong) {
+            text = text.substring(0, 50); // Trim to max valid length
         }
+
+        // 1) length 9..50
+        boolean lengthOk = (text.length() >= 9 && text.length() <= 50);
+
+        // 2) must contain at least one letter, one digit, and one symbol ('.' or '_')
+        boolean hasLetter = text.matches(".*[A-Za-z].*");
+        boolean hasDigit = text.matches(".*\\d.*");
+        boolean hasSymbol = text.matches(".*[._].*");
+
+        // 3) only allows letters, digits, '.' and '_'
+        boolean onlyAllowed = text.matches("^[A-Za-z0-9._]+$");
+
+        passwordText.setText(text);
+        passwordText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && hasLetter && hasDigit && hasSymbol && onlyAllowed ? OK_COLOR : ERROR_COLOR));
     }
 
     private void validateAddress() {
-        // Alphanumeric + commas + periods + spaces, length 12-100
-        // No double commas or double periods
         String text = addressText.getText().trim();
-        if (text.length() < 12 || text.length() > 100) {
-            addressText.setBackground(ERROR_COLOR);
-            return;
+
+        // Enforce real-time length limit
+        boolean isTooLong = text.length() > 100;
+        if (isTooLong) {
+            text = text.substring(0, 100); // Trim to max valid length
         }
-        if (!text.matches("^[A-Za-z0-9,\\.\\s]+$")) {
-            addressText.setBackground(ERROR_COLOR);
-            return;
-        }
-        if (text.contains(",,") || text.contains("..")) {
-            addressText.setBackground(ERROR_COLOR);
-            return;
-        }
-        addressText.setBackground(OK_COLOR);
+
+        // 1) length 12..100
+        boolean lengthOk = text.length() >= 12 && text.length() <= 100;
+
+        // 2) Only allows alphanumeric, commas, periods, and spaces
+        boolean validChars = text.matches("^[A-Za-z0-9,\\.\\s]+$");
+
+        // 3) No double commas or double periods
+        boolean noDoubleCommaOrDot = !text.contains(",,") && !text.contains("..");
+
+        addressText.setText(text);
+        addressText.setBackground(isTooLong ? ERROR_COLOR : (lengthOk && validChars && noDoubleCommaOrDot ? OK_COLOR : ERROR_COLOR));
     }
 
     private void validatePhoneNumber() {
@@ -203,7 +225,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         phoneNumberText1.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
     
-    private void formatSSSNumber() {
+    private void validateSSSNumber() {
         String text = sssNumberText.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
 
         if (text.length() > 10) {
@@ -222,7 +244,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         sssNumberText.setBackground(isValid ? OK_COLOR : ERROR_COLOR);
     }
     
-    private void formatTINNumber() {
+    private void validateTINNumber() {
         String text = tinNumberText.getText().replaceAll("[^0-9]", ""); // Remove all non-numeric characters
 
         if (text.length() > 12) {
@@ -399,8 +421,8 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
             phone,
             sss,
             phil,
-            pagibig,
             tin,
+            pagibig,
             stat,
             pos,
             sup,
@@ -791,6 +813,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
         supervisorBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "N/A", "Garcia, Manuel III", "Lim, Antonio", "Villanueva, Andrea Mae", "San, Jose Brad", "Aquino, Bianca Sofia ", "Alvaro, Roderick", "Salcedo, Anthony", "Lim, Antonio", "Romualdez, Fredrick ", "Mata, Christian", "De Leon, Selena", "Reyes, Isabella" }));
         getContentPane().add(supervisorBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 290, 140, -1));
 
+        riceSubsidyText.setEditable(false);
         riceSubsidyText.setBackground(new java.awt.Color(204, 204, 204));
         riceSubsidyText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         riceSubsidyText.setText("1,500");
@@ -832,7 +855,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
         clothingAllowanceBox.setBackground(new java.awt.Color(204, 204, 204));
         clothingAllowanceBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        clothingAllowanceBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Regular", "Probationary" }));
+        clothingAllowanceBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1,000", "800", "500", " " }));
         getContentPane().add(clothingAllowanceBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 240, 140, -1));
 
         jLabel20.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
