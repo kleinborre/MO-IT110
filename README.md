@@ -1,20 +1,29 @@
-### **🔐 Login Credentials for Users**
+### **🔐 Login Credentials for Users** 
 
-- **All employees** can log in using their **Employee Number** and **Username**.  
-- **Username** is based on the employee number (default format — can be modified via admin access).  
+- **All employees** can log in using either their **Employee Number** or **Username**.  
+
+#### For current MotorPH employees (Employee Numbers: `10001` to `10034`):  
+- **Username** follows the default format: `employee` + Employee Number (modifiable via admin access).  
   - 📌 **Examples:**  
     - `10001` → `employee1`  
     - `10002` → `employee2`  
     - `10003` → `employee3`  
-- **Default Password:** `Motorph2025_` *(changeable via admin access)*  
+- **Default Password:** `Motorph2025_`  
+
+---
+
+#### For newly created accounts (`10035` and above):  
+- **Username Format:** `motorph` + `lastName` (e.g., `motorphrizal`, all lowercase)  
+- **Default Password Format:** `Motorph` + `employeeNumber` + `_` (e.g., `Motorph10035_`)  
+- **Note:** New users can log in using either **Employee Number** or **Username**.
 
 ---
 
 ### **🛡️ Roles & Access Control**
 
-- All employees authenticate using the **Employee** role by default.  
-- 🔄 **Special Users** may be assigned **dual roles**, configurable via the **role selection box**.  
-  - They can still log in using the same **Username/Employee ID** and **Password**.
+- All users are assigned the **Employee** role by default.  
+- 🔄 **Special users** can have **dual roles**, selectable via the **role dropdown** during login.  
+  - They use the same login credentials (Username/Employee Number and Password).  
 
 #### **👤 Special User Role Mapping:**  
 - `10005 - employee5` → *Employee / System Administrator*  
@@ -28,7 +37,11 @@
 
 ---
 
-### **🚀 System Access (JAR File)**  
-The Payroll System can be accessed directly by running the JAR file:  
-📁 `target/MotorPHOOP-1.0.0-jar-with-dependencies.jar`  
-after cloning the repository.
+### **🚀 System Access (JAR File & IDE)**  
+You can access the Payroll System using either of the following:
+
+- **JAR File:**  
+  📁 `target/MotorPHOOP-1.0.0-jar-with-dependencies.jar`  
+
+- **NetBeans IDE:**  
+  Open the project via NetBeans after cloning the repository.
