@@ -27,9 +27,24 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
     // Colors for validation
     private static final Color ERROR_COLOR = new Color(255, 200, 200);
     private static final Color OK_COLOR    = Color.WHITE;
+    
+    private String[] employeeData;
 
     // Constructor
     public SystemAdministratorCreateUser() {
+        initComponents();
+        setupRealTimeValidation();
+        generateEmployeeNumber();    
+        roleBox.setSelectedIndex(-1);
+        statusBox.setSelectedIndex(-1);
+        positionBox.setSelectedIndex(-1);
+        supervisorBox.setSelectedIndex(-1);
+        phoneAllowanceBox.setSelectedIndex(-1);
+        clothingAllowanceBox.setSelectedIndex(-1);
+    }
+    
+        public SystemAdministratorCreateUser(String[] employeeData) {
+        this.employeeData = employeeData;
         initComponents();
         setupRealTimeValidation();
         generateEmployeeNumber();    
@@ -197,7 +212,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
             JOptionPane.INFORMATION_MESSAGE
         );
 
-        new SystemAdministratorPage().setVisible(true);
+        new SystemAdministratorPage(employeeData).setVisible(true);
         dispose();
     }
 
@@ -732,7 +747,7 @@ public class SystemAdministratorCreateUser extends javax.swing.JFrame {
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new SystemAdministratorPage().setVisible(true);
+        new SystemAdministratorPage(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 
