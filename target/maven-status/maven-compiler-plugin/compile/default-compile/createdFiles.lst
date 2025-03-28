@@ -12,7 +12,6 @@ jframes\EmployeeProfileInformation$16.class
 jframes\EmployeeOvertime$1.class
 jframes\SystemAdministratorPage$5.class
 jframes\EmployeePage$5.class
-classes\Login.class
 classes\OvertimeRequest.class
 jframes\SystemAdministratorUpdateUser$6.class
 jframes\EmployeeLeave$2.class
@@ -65,6 +64,7 @@ main\MotorPHOOP.class
 jframes\HRManagerAttendance$4.class
 jframes\SystemAdministratorPage$1.class
 classes\UserAccount.class
+jframes\EmployeePayslip$6.class
 jframes\SystemAdministratorUpdateUser$8.class
 jframes\SystemAdministratorCreateUser$18.class
 classes\PayrollManager.class
