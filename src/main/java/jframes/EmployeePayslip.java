@@ -321,8 +321,17 @@ public class EmployeePayslip extends javax.swing.JFrame {
         getContentPane().add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 120, -1, -1));
 
         jYearChooser.setBackground(new java.awt.Color(204, 204, 204));
+        jYearChooser.setAutoscrolls(true);
+        jYearChooser.setEndYear(2025);
+        jYearChooser.setFocusable(false);
+        jYearChooser.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jYearChooser.setOpaque(false);
+        jYearChooser.setRequestFocusEnabled(false);
+        jYearChooser.setStartYear(2015);
+        jYearChooser.setVerifyInputWhenFocusTarget(false);
         getContentPane().add(jYearChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 150, 70, -1));
 
+        hourlyRateText.setEditable(false);
         hourlyRateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         hourlyRateText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -331,12 +340,20 @@ public class EmployeePayslip extends javax.swing.JFrame {
         });
         getContentPane().add(hourlyRateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 310, 130, -1));
 
+        basicSalaryText.setEditable(false);
         basicSalaryText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        basicSalaryText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                basicSalaryTextActionPerformed(evt);
+            }
+        });
         getContentPane().add(basicSalaryText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 250, 130, -1));
 
+        totalHoursText.setEditable(false);
         totalHoursText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(totalHoursText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 370, 130, -1));
 
+        grossSalaryText.setEditable(false);
         grossSalaryText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         grossSalaryText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -345,15 +362,18 @@ public class EmployeePayslip extends javax.swing.JFrame {
         });
         getContentPane().add(grossSalaryText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 480, 130, -1));
 
+        endDateText.setEditable(false);
         endDateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(endDateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 150, 130, -1));
 
+        overtimeHoursText.setEditable(false);
         overtimeHoursText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(overtimeHoursText, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 430, 130, -1));
 
         overtimeHoursText3.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(overtimeHoursText3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 430, 130, -1));
 
+        startDateText.setEditable(false);
         startDateText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         startDateText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -362,42 +382,55 @@ public class EmployeePayslip extends javax.swing.JFrame {
         });
         getContentPane().add(startDateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 150, 130, -1));
 
+        phoneAllowanceText.setEditable(false);
         phoneAllowanceText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(phoneAllowanceText, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 310, 130, -1));
 
+        riceSubsidyText.setEditable(false);
         riceSubsidyText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(riceSubsidyText, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 250, 130, -1));
 
+        clothingAllowanceText.setEditable(false);
         clothingAllowanceText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(clothingAllowanceText, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 370, 130, -1));
 
+        totalBenefitsText.setEditable(false);
         totalBenefitsText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(totalBenefitsText, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 480, 130, -1));
 
+        philhealthDeductionText.setEditable(false);
         philhealthDeductionText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(philhealthDeductionText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 310, 130, -1));
 
+        sssDeductionText.setEditable(false);
         sssDeductionText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(sssDeductionText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 250, 130, -1));
 
+        netPayText.setEditable(false);
         netPayText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(netPayText, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 480, 130, -1));
 
+        pagibigDeductionText.setEditable(false);
         pagibigDeductionText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(pagibigDeductionText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 370, 130, -1));
 
+        witholdingTaxDeductionText.setEditable(false);
         witholdingTaxDeductionText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(witholdingTaxDeductionText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 430, 130, -1));
 
+        totalDeductionsText.setEditable(false);
         totalDeductionsText.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(totalDeductionsText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 480, 130, -1));
 
+        grossSalaryText1.setEditable(false);
         grossSalaryText1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(grossSalaryText1, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 250, 130, -1));
 
+        totalBenefitsText1.setEditable(false);
         totalBenefitsText1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(totalBenefitsText1, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 310, 130, -1));
 
+        totalDeductionsText1.setEditable(false);
         totalDeductionsText1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         getContentPane().add(totalDeductionsText1, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 370, 130, -1));
 
@@ -425,6 +458,10 @@ public class EmployeePayslip extends javax.swing.JFrame {
     private void grossSalaryTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_grossSalaryTextActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_grossSalaryTextActionPerformed
+
+    private void basicSalaryTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_basicSalaryTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_basicSalaryTextActionPerformed
 
     /**
      * @param args the command line arguments

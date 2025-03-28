@@ -34,7 +34,6 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         this.status = status;
     }
 
-    /** Getters */
     public String getDate() {
         return date;
     }
@@ -51,7 +50,6 @@ public class OvertimeRequest extends Employee implements CSVHandler {
         return status;
     }
 
-    /** Setters */
     public void setDate(String date) {
         this.date = date;
     }
