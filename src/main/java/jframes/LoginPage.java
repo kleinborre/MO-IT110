@@ -33,7 +33,6 @@ public class LoginPage extends javax.swing.JFrame {
     private void initComponents() {
 
         loginButton = new buttons.redButton();
-        roleBox = new javax.swing.JComboBox<>();
         usernameText = new javax.swing.JTextField();
         passwordText = new javax.swing.JPasswordField();
         errorLabel = new javax.swing.JLabel();
@@ -55,18 +54,7 @@ public class LoginPage extends javax.swing.JFrame {
                 loginButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(loginButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 390, 150, 50));
-
-        roleBox.setBackground(new java.awt.Color(204, 204, 204));
-        roleBox.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
-        roleBox.setForeground(new java.awt.Color(102, 102, 102));
-        roleBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Employee", "HR Manager", "Payroll Manager", "System Administrator" }));
-        roleBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                roleBoxActionPerformed(evt);
-            }
-        });
-        getContentPane().add(roleBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 180, 320, 30));
+        getContentPane().add(loginButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 360, 210, 50));
 
         usernameText.setBackground(new java.awt.Color(204, 204, 204));
         usernameText.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
@@ -77,7 +65,7 @@ public class LoginPage extends javax.swing.JFrame {
                 usernameTextActionPerformed(evt);
             }
         });
-        getContentPane().add(usernameText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 260, 320, 30));
+        getContentPane().add(usernameText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 210, 320, 30));
 
         passwordText.setBackground(new java.awt.Color(204, 204, 204));
         passwordText.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
@@ -92,13 +80,13 @@ public class LoginPage extends javax.swing.JFrame {
                 passwordTextKeyPressed(evt);
             }
         });
-        getContentPane().add(passwordText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 330, 320, 30));
+        getContentPane().add(passwordText, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 290, 320, 30));
 
         errorLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         errorLabel.setForeground(new java.awt.Color(204, 0, 51));
         errorLabel.setToolTipText("");
         errorLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        getContentPane().add(errorLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 360, 320, 20));
+        getContentPane().add(errorLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 320, 320, 20));
 
         background.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Login.png"))); // NOI18N
@@ -121,7 +109,6 @@ public class LoginPage extends javax.swing.JFrame {
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         String inputUsername = usernameText.getText().trim();
         String inputPassword = new String(passwordText.getPassword()).trim();
-        String selectedRole  = roleBox.getSelectedItem().toString().trim().replaceAll("\\s", "").toLowerCase();
 
         errorLabel.setText(""); // Clear previous errors
 
@@ -135,50 +122,54 @@ public class LoginPage extends javax.swing.JFrame {
             return;
         }
 
-        // 1) Authenticate with User Accounts.csv
-        boolean authenticated = UserAccount.authenticate(inputUsername, inputPassword, selectedRole);
-        if (!authenticated) {
-            errorLabel.setText("Invalid credentials or role!");
-            return;
-        }
-
-        // 2) If credentials are valid, find the 22-column "joined" user row
+        // Load all users from SystemAdministrator (joined CSVs)
         SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
-        String[][] allUsers = admin.getAllUsers(); // This method returns 22 columns per row
+        String[][] allUsers = admin.getAllUsers();
         String[] matchedUser = null;
 
         for (String[] row : allUsers) {
-            // row[0] => employeeNumber
-            // row[19] => username
-            // row[20] => password
-            // row[21] => role(s)
+            String employeeNumber = row[0];
+            String username = row[19];
+            String password = row[20];
 
-            boolean matchesIDOrUsername =
-                row[0].equalsIgnoreCase(inputUsername)  // typed employee number
-                || row[19].equalsIgnoreCase(inputUsername); // typed username
+            boolean matches = (employeeNumber.equalsIgnoreCase(inputUsername) || username.equalsIgnoreCase(inputUsername))
+                              && password.equals(inputPassword);
 
-            boolean matchesPassword = row[20].equals(inputPassword);
-
-            if (matchesIDOrUsername && matchesPassword) {
-                // 3) Check if the role is valid in row[21]
-                String[] storedRoles = row[21].toLowerCase().split("\\|");
-                for (String r : storedRoles) {
-                    if (r.equals(selectedRole)) {
-                        matchedUser = row;
-                        break;
-                    }
-                }
+            if (matches) {
+                matchedUser = row;
+                break;
             }
-            if (matchedUser != null) break;
         }
 
-        // 4) If we never found a matching row, show error
         if (matchedUser == null) {
-            errorLabel.setText("Could not locate user record!");
+            errorLabel.setText("Invalid credentials!");
             return;
         }
 
-        // 5) Otherwise, open the correct dashboard
+        // Determine role(s)
+        String[] roles = matchedUser[21].trim().toLowerCase().split("\\|");
+
+        String selectedRole = "employee"; // default
+        if (roles.length == 2) {
+            for (String r : roles) {
+                if (!r.equals("employee")) {
+                    selectedRole = r; // override with special role
+                    break;
+                }
+            }
+        }
+    
+        String firstName = matchedUser[2]; // Column index 2 = First Name
+        String lastName = matchedUser[1];  // Column index 1 = Last Name
+        String formattedRole = formatRoleDisplay(selectedRole);
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Login successful.\nWelcome, " + formattedRole + ".\n" + firstName + " " + lastName,
+            "MotorPH Payroll System",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+
         openUserDashboard(selectedRole, matchedUser);
     }
 
@@ -197,15 +188,25 @@ public class LoginPage extends javax.swing.JFrame {
                 new SystemAdministratorPage().setVisible(true);
                 break;
             default:
-                errorLabel.setText("Invalid role selected!");
+                errorLabel.setText("Invalid role mapping!");
                 return;
         }
         dispose(); // Close login window
     }//GEN-LAST:event_loginButtonActionPerformed
+    
+    private String formatRoleDisplay(String role) {
+        switch (role.toLowerCase()) {
+            case "hrmanager": return "HR Manager";
+            case "payrollmanager": return "Payroll Manager";
+            case "systemadministrator": return "System Administrator";
+            default: return capitalize(role); // fallback
+        }
+    }
 
-    private void roleBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roleBoxActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_roleBoxActionPerformed
+    private String capitalize(String input) {
+        if (input == null || input.isEmpty()) return input;
+        return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
+    }
 
     private void passwordTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordTextActionPerformed
         // TODO add your handling code here:
@@ -257,7 +258,6 @@ public class LoginPage extends javax.swing.JFrame {
     private javax.swing.JLabel errorLabel;
     private buttons.redButton loginButton;
     private javax.swing.JPasswordField passwordText;
-    private javax.swing.JComboBox<String> roleBox;
     private javax.swing.JTextField usernameText;
     // End of variables declaration//GEN-END:variables
 
