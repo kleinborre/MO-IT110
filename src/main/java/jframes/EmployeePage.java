@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -34,6 +35,7 @@ public class EmployeePage extends javax.swing.JFrame {
         this.employeeData = new String[22]; // Ensure it has 22 empty values
         initComponents();
         populateEmployeeInfo();
+        employeeRoleButton.setEnabled(isSpecialRoleUser());
         startRealTimeClock();
         setupFilters();
         updateAttendanceTable(-1, -1); // Load all records initially
@@ -44,6 +46,7 @@ public class EmployeePage extends javax.swing.JFrame {
         this.employeeData = employeeData;
         initComponents();
         populateEmployeeInfo();
+        employeeRoleButton.setEnabled(isSpecialRoleUser());
         startRealTimeClock();
         setupFilters();
         updateAttendanceTable(-1, -1); // Load all records initially
@@ -139,6 +142,18 @@ public class EmployeePage extends javax.swing.JFrame {
     clockInButton.setEnabled(!hasClockedIn);
     clockoutButton.setEnabled(hasClockedIn && !hasClockedOut);
     }    
+    
+    private boolean isSpecialRoleUser() {
+        if (employeeData == null || employeeData.length < 22) return false;
+
+        String[] roles = employeeData[21].toLowerCase().split("\\|");
+        for (String role : roles) {
+            if (!role.equals("employee")) {
+                return true; // has a special role
+            }
+        }
+        return false; // employee-only
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -167,6 +182,7 @@ public class EmployeePage extends javax.swing.JFrame {
         jYearChooser = new com.toedter.calendar.JYearChooser();
         jLabel4 = new javax.swing.JLabel();
         refreshTableButton = new buttons.grayButton();
+        employeeRoleButton = new buttons.grayButton();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -288,7 +304,7 @@ public class EmployeePage extends javax.swing.JFrame {
         dateTimeProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         dateTimeProfileLabel.setText("Date & Time");
         dateTimeProfileLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        getContentPane().add(dateTimeProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(288, 140, 610, -1));
+        getContentPane().add(dateTimeProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 140, 610, -1));
 
         jLabel1.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(102, 102, 102));
@@ -314,6 +330,15 @@ public class EmployeePage extends javax.swing.JFrame {
         refreshTableButton.setText("Refresh");
         refreshTableButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         getContentPane().add(refreshTableButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 330, 100, 30));
+
+        employeeRoleButton.setText("Switch to Special Role");
+        employeeRoleButton.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        employeeRoleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                employeeRoleButtonActionPerformed(evt);
+            }
+        });
+        getContentPane().add(employeeRoleButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 200, 40));
 
         background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Employee Dashboard.png"))); // NOI18N
         background.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -348,9 +373,18 @@ public class EmployeePage extends javax.swing.JFrame {
     }//GEN-LAST:event_payslipButtonActionPerformed
 
     private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutButtonActionPerformed
-        // TODO add your handling code here:
-        new LoginPage().setVisible(true);
-        dispose();
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Do you really want to log out of your session?",
+            "MotorPH Payroll System - Confirm Logout",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            new LoginPage().setVisible(true);
+            dispose();
+        }
     }//GEN-LAST:event_logoutButtonActionPerformed
 
     private void clockInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clockInButtonActionPerformed
@@ -428,6 +462,28 @@ public class EmployeePage extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_clockoutButtonActionPerformed
 
+    private void employeeRoleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeRoleButtonActionPerformed
+        String[] roles = employeeData[21].toLowerCase().split("\\|");
+
+        for (String role : roles) {
+            if (!role.equals("employee")) {
+                switch (role) {
+                    case "hrmanager":
+                        new HRManagerPage(employeeData).setVisible(true);
+                        break;
+                    case "payrollmanager":
+                        new PayrollManagerPage(employeeData).setVisible(true);
+                        break;
+                    case "systemadministrator":
+                        new SystemAdministratorPage(employeeData).setVisible(true);
+                        break;
+                }
+                dispose();
+                return;
+            }
+        }
+    }//GEN-LAST:event_employeeRoleButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -469,6 +525,7 @@ public class EmployeePage extends javax.swing.JFrame {
     private buttons.grayButton clockInButton;
     private buttons.grayButton clockoutButton;
     private javax.swing.JLabel dateTimeProfileLabel;
+    private buttons.grayButton employeeRoleButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

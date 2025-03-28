@@ -13,11 +13,18 @@ import javax.swing.table.DefaultTableModel;
  * @author STUDY MODE
  */
 public class HRManagerAttendance extends javax.swing.JFrame {
-
+    
+    private String[] employeeData;
     /**
      * Creates new form HRManagerAttendance
      */
     public HRManagerAttendance() {
+        initComponents();
+        loadAttendanceRecords(); // Load all attendance records on startup
+    }
+    
+    public HRManagerAttendance(String[] employeeData) {
+        this.employeeData = employeeData;
         initComponents();
         loadAttendanceRecords(); // Load all attendance records on startup
     }
@@ -146,7 +153,7 @@ public class HRManagerAttendance extends javax.swing.JFrame {
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
-        new HRManagerPage().setVisible(true);
+        new HRManagerPage(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_backButtonActionPerformed
 
