@@ -10,6 +10,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Date;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -20,30 +23,40 @@ import javax.swing.JTextField;
  */
 public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
-    private String[] selectedUser; // 22 columns
+    private String[] selectedUser; // Full record from CSV (22 columns)
     private static final DecimalFormat formatter = new DecimalFormat("#,##0");
 
-    // Validation Colors (still used for local references, but real checks are in SystemAdministrator)
+    // Validation Colors
     private static final Color ERROR_COLOR = new Color(255, 200, 200);
     private static final Color OK_COLOR    = Color.WHITE;
 
     public SystemAdministratorUpdateUser(String[] selectedUser) {
         this.selectedUser = selectedUser;
         initComponents();
-        populateFields(selectedUser);
+        populateFields(this.selectedUser);
         setupRealTimeValidation();
     }
 
     /**
-     * Fill the form fields with the user data.
+     * Populates the form fields with the full user record.
+     * If the passed array does not contain 22 fields (because the table omits username/password),
+     * then the full record is retrieved via the employee number.
      */
     private void populateFields(String[] userData) {
+        // If the passed record is not full (22 columns), retrieve the full record from CSV.
         if (userData == null || userData.length != 22) {
-            System.out.println("Error: userData must be 22 columns, got " 
-                               + (userData != null ? userData.length : 0));
-            return;
+            String empNum = (userData != null && userData.length > 0) ? userData[0] : "";
+            SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
+            String[] fullRecord = admin.getUserByEmployeeNumber(empNum);
+            if (fullRecord != null && fullRecord.length == 22) {
+                userData = fullRecord;
+            } else {
+                System.out.println("Error: Could not retrieve full user data for employee number: " + empNum);
+                return;
+            }
         }
 
+        // Map CSV data to UI fields.
         employeeNumberText.setText(userData[0]);
         employeeNumberText.setEditable(false);
         lastNameText.setText(userData[1]);
@@ -61,39 +74,35 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         phoneNumberText1.setText(userData[5]);
         sssNumberText.setText(userData[6]);
         philhealthNumberText1.setText(userData[7]);
+        // In the full record, index 8 = TIN and index 9 = Pag-ibig.
+        // For display on update UI we want: TIN in its field and Pag-ibig in its field.
         tinNumberText1.setText(userData[8]);
         pagIbigText.setText(userData[9]);
+
         statusBox.setSelectedItem(userData[10]);
         positionBox.setSelectedItem(userData[11]);
         supervisorBox.setSelectedItem(userData[12]);
-
         basicSalaryText.setText(formatNumber(userData[13]));
         riceSubsidyText.setText(formatNumber(userData[14]));
         phoneAllowanceBox.setSelectedItem(formatNumber(userData[15]));
         clothingAllowanceBox.setSelectedItem(formatNumber(userData[16]));
         grossSemiMonthlyRateText.setText(formatNumber(userData[17]));
         hourlyRateText.setText(formatNumber(userData[18]));
-
-        usernameText.setText(userData[19]);
-        passwordText.setText(userData[20]);
+        // Username and password are not shown in the UI.
         roleBox.setSelectedItem(userData[21]);
+        
+        // Save the full record so that later, in the update handler, we can retain the original username/password.
+        this.selectedUser = userData;
     }
 
-    /**
-     * Utility for formatting numeric strings with commas.
-     */
     private String formatNumber(String number) {
         try {
             return formatter.format(Long.parseLong(number.replace(",", "").trim()));
         } catch (NumberFormatException e) {
-            return number; // If not purely numeric, just return as-is
+            return number;
         }
     }
 
-    /**
-     * Sets up real-time validation by attaching a KeyAdapter 
-     * that calls the static methods in SystemAdministrator.
-     */
     private void setupRealTimeValidation() {
         KeyAdapter adapter = new KeyAdapter() {
             @Override
@@ -104,10 +113,7 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
                     SystemAdministrator.validateLastName(lastNameText);
                 else if (src == firstNameText) 
                     SystemAdministrator.validateFirstName(firstNameText);
-                else if (src == usernameText) 
-                    SystemAdministrator.validateUsername(usernameText);
-                else if (src == passwordText) 
-                    SystemAdministrator.validatePassword(passwordText);
+                // Username and password validations are removed.
                 else if (src == addressText) 
                     SystemAdministrator.validateAddress(addressText);
                 else if (src == phoneNumberText1) 
@@ -133,8 +139,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         lastNameText.addKeyListener(adapter);
         firstNameText.addKeyListener(adapter);
-        usernameText.addKeyListener(adapter);
-        passwordText.addKeyListener(adapter);
         addressText.addKeyListener(adapter);
         phoneNumberText1.addKeyListener(adapter);
         sssNumberText.addKeyListener(adapter);
@@ -147,25 +151,20 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         hourlyRateText.addKeyListener(adapter);
     }
     
-    /**
-     * Resets field background colors to white (called after clearing).
-     */
     private void resetValidationColors() {
         JTextField[] fields = {
-            lastNameText, firstNameText, usernameText, passwordText, 
-            addressText, phoneNumberText1, sssNumberText, philhealthNumberText1,
-            tinNumberText1, pagIbigText, basicSalaryText, grossSemiMonthlyRateText, 
-            riceSubsidyText, hourlyRateText
+            lastNameText, firstNameText, addressText, phoneNumberText1,
+            sssNumberText, philhealthNumberText1, tinNumberText1, pagIbigText,
+            basicSalaryText, grossSemiMonthlyRateText, riceSubsidyText, hourlyRateText
         };
+
         for (JTextField field : fields) {
             field.setBackground(Color.WHITE);
         }
     }
     
-    /**
-     * Checks if any required field is empty.
-     */
     private boolean anyEmpty() {
+        // Username and password are no longer included.
         String[] fields = {
             lastNameText.getText(),
             firstNameText.getText(),
@@ -178,9 +177,7 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
             basicSalaryText.getText().trim(),
             riceSubsidyText.getText().trim(),
             grossSemiMonthlyRateText.getText().trim(),
-            hourlyRateText.getText().trim(),
-            usernameText.getText().trim(),
-            passwordText.getText().trim()
+            hourlyRateText.getText().trim()
         };
         for (String field : fields) {
             if (field.isEmpty()) {
@@ -188,6 +185,105 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
             }
         }
         return false;
+    }
+    
+    private boolean hasErrorFields() {
+        JTextField[] fields = {
+            lastNameText, firstNameText, addressText, phoneNumberText1,
+            sssNumberText, philhealthNumberText1, tinNumberText1, pagIbigText,
+            basicSalaryText, grossSemiMonthlyRateText, riceSubsidyText, hourlyRateText
+        };
+        for (JTextField field : fields) {
+            if (field.getBackground().equals(ERROR_COLOR)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean showValidationErrors() {
+        StringBuilder errorMsg = new StringBuilder();
+
+        if (lastNameText.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid Last Name\n");
+        }
+        if (firstNameText.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid First Name\n");
+        }
+        if (addressText.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid Address\n");
+        }
+        if (phoneNumberText1.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid Phone Number\n");
+        }
+        if (sssNumberText.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid SSS Number\n");
+        }
+        if (philhealthNumberText1.getBackground().equals(ERROR_COLOR)
+            || (philhealthNumberText1 != null && philhealthNumberText1.getBackground().equals(ERROR_COLOR))) {
+            errorMsg.append("- Invalid PhilHealth Number\n");
+        }
+        if (tinNumberText1.getBackground().equals(ERROR_COLOR)
+            || (tinNumberText1 != null && tinNumberText1.getBackground().equals(ERROR_COLOR))) {
+            errorMsg.append("- Invalid TIN Number\n");
+        }
+        if (pagIbigText.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid Pag-ibig Number\n");
+        }
+        if (basicSalaryText.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid Basic Salary\n");
+        }
+        if (grossSemiMonthlyRateText.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid Gross Semi-Monthly Rate\n");
+        }
+        if (riceSubsidyText.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid Rice Subsidy\n");
+        }
+        if (hourlyRateText.getBackground().equals(ERROR_COLOR)) {
+            errorMsg.append("- Invalid Hourly Rate\n");
+        }
+
+        // Combo box validations (optional but useful)
+        if (roleBox.getSelectedIndex() == -1) {
+            errorMsg.append("- Role is not selected\n");
+        }
+        if (statusBox.getSelectedIndex() == -1) {
+            errorMsg.append("- Status is not selected\n");
+        }
+        if (positionBox.getSelectedIndex() == -1) {
+            errorMsg.append("- Position is not selected\n");
+        }
+        if (supervisorBox.getSelectedIndex() == -1) {
+            errorMsg.append("- Immediate Supervisor is not selected\n");
+        }
+        if (phoneAllowanceBox.getSelectedIndex() == -1) {
+            errorMsg.append("- Phone Allowance is not selected\n");
+        }
+        if (clothingAllowanceBox.getSelectedIndex() == -1) {
+            errorMsg.append("- Clothing Allowance is not selected\n");
+        }
+
+        // Birthday validation
+        if (birthdayCalendar.getDate() == null) {
+            errorMsg.append("- Birthday is not selected\n");
+        } else {
+            LocalDate birth = birthdayCalendar.getDate().toInstant()
+                    .atZone(ZoneId.systemDefault()).toLocalDate();
+            int age = Period.between(birth, LocalDate.now()).getYears();
+            if (age < 18) {
+                errorMsg.append("- Must be at least 18 years old\n");
+            }
+        }
+
+        // If there are errors, show them
+        if (errorMsg.length() > 0) {
+            JOptionPane.showMessageDialog(this,
+                "Please fix the following issues:\n\n" + errorMsg.toString(),
+                "Validation Summary", JOptionPane.ERROR_MESSAGE);
+            return true; // has errors
+        }
+
+        return false; // no errors
     }
     
     /**
@@ -201,9 +297,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         backButton = new buttons.whiteButton();
         jLabel7 = new javax.swing.JLabel();
-        usernameText = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        passwordText = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         roleBox = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
@@ -244,7 +337,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         UpdateUserButton = new buttons.redButton();
         jLabel18 = new javax.swing.JLabel();
         hourlyRateText = new javax.swing.JTextField();
-        jLabel22 = new javax.swing.JLabel();
         employeeNumberText = new javax.swing.JTextField();
         background = new javax.swing.JLabel();
 
@@ -268,43 +360,20 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         jLabel7.setText("Employee #");
         getContentPane().add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 370, -1, -1));
 
-        usernameText.setBackground(new java.awt.Color(204, 204, 204));
-        usernameText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        usernameText.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                usernameTextActionPerformed(evt);
-            }
-        });
-        getContentPane().add(usernameText, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 140, 140, -1));
-
-        jLabel4.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel4.setText("Password");
-        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 170, -1, -1));
-
-        passwordText.setBackground(new java.awt.Color(204, 204, 204));
-        passwordText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        passwordText.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                passwordTextActionPerformed(evt);
-            }
-        });
-        getContentPane().add(passwordText, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 190, 140, -1));
-
         jLabel3.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(102, 102, 102));
         jLabel3.setText("Login Role");
-        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 220, -1, -1));
+        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 120, -1, -1));
 
         roleBox.setBackground(new java.awt.Color(204, 204, 204));
         roleBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         roleBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Employee", "Employee|HRManager", "Employee|PayrollManager", "Employee|SystemAdministrator" }));
-        getContentPane().add(roleBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 240, 140, -1));
+        getContentPane().add(roleBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 140, 140, -1));
 
         jLabel5.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(102, 102, 102));
         jLabel5.setText("First Name");
-        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 270, -1, -1));
+        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 170, -1, -1));
 
         firstNameText.setBackground(new java.awt.Color(204, 204, 204));
         firstNameText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -313,12 +382,12 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
                 firstNameTextActionPerformed(evt);
             }
         });
-        getContentPane().add(firstNameText, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 290, 140, -1));
+        getContentPane().add(firstNameText, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 190, 140, -1));
 
         jLabel6.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(102, 102, 102));
         jLabel6.setText("Last Name");
-        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 320, -1, -1));
+        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 220, -1, -1));
 
         lastNameText.setBackground(new java.awt.Color(204, 204, 204));
         lastNameText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -327,15 +396,15 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
                 lastNameTextActionPerformed(evt);
             }
         });
-        getContentPane().add(lastNameText, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 340, 140, -1));
+        getContentPane().add(lastNameText, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 240, 140, -1));
 
         jLabel2.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(102, 102, 102));
         jLabel2.setText("Birthday");
-        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 370, -1, -1));
+        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 270, -1, -1));
 
         birthdayCalendar.setBackground(new java.awt.Color(204, 204, 204));
-        getContentPane().add(birthdayCalendar, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 390, 190, 110));
+        getContentPane().add(birthdayCalendar, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 290, 190, 110));
 
         jLabel8.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(102, 102, 102));
@@ -344,7 +413,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         addressText.setBackground(new java.awt.Color(204, 204, 204));
         addressText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        addressText.setText("N/A");
         addressText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addressTextActionPerformed(evt);
@@ -359,7 +427,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         phoneNumberText1.setBackground(new java.awt.Color(204, 204, 204));
         phoneNumberText1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        phoneNumberText1.setText("N/A");
         phoneNumberText1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 phoneNumberText1ActionPerformed(evt);
@@ -374,7 +441,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         sssNumberText.setBackground(new java.awt.Color(204, 204, 204));
         sssNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        sssNumberText.setText("N/A");
         sssNumberText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 sssNumberTextActionPerformed(evt);
@@ -389,7 +455,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         philhealthNumberText1.setBackground(new java.awt.Color(204, 204, 204));
         philhealthNumberText1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        philhealthNumberText1.setText("N/A");
         philhealthNumberText1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 philhealthNumberText1ActionPerformed(evt);
@@ -404,7 +469,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         tinNumberText1.setBackground(new java.awt.Color(204, 204, 204));
         tinNumberText1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        tinNumberText1.setText("N/A");
         tinNumberText1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 tinNumberText1ActionPerformed(evt);
@@ -419,7 +483,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
 
         pagIbigText.setBackground(new java.awt.Color(204, 204, 204));
         pagIbigText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        pagIbigText.setText("N/A");
         pagIbigText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 pagIbigTextActionPerformed(evt);
@@ -558,11 +621,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         });
         getContentPane().add(hourlyRateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 340, 140, -1));
 
-        jLabel22.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        jLabel22.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel22.setText("Username");
-        getContentPane().add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 120, -1, -1));
-
         employeeNumberText.setBackground(new java.awt.Color(204, 204, 204));
         employeeNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         employeeNumberText.addActionListener(new java.awt.event.ActionListener() {
@@ -580,16 +638,9 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
+        new SystemAdministratorPage().setVisible(true);
         this.dispose(); 
     }//GEN-LAST:event_backButtonActionPerformed
-
-    private void usernameTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usernameTextActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_usernameTextActionPerformed
-
-    private void passwordTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordTextActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_passwordTextActionPerformed
 
     private void firstNameTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_firstNameTextActionPerformed
         // TODO add your handling code here:
@@ -649,8 +700,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         riceSubsidyText.setText("1,500"); // Default
         grossSemiMonthlyRateText.setText("");
         hourlyRateText.setText("");
-        usernameText.setText("");
-        passwordText.setText("");
         birthdayCalendar.setDate(new Date()); // Set to today
 
         // Reset dropdown selections
@@ -666,17 +715,22 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void UpdateUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateUserButtonActionPerformed
-        // Validate required fields
         if (anyEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields must be filled!", 
                                           "Validation Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        
+        if (showValidationErrors()) {
+            return; // Stop execution if validation fails
+        }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
         String birthday = dateFormat.format(birthdayCalendar.getDate());
 
-        // Build updated user data array (22 fields)
+        // Build updated user data array (22 fields).
+        // Since the UI no longer allows editing of username and password,
+        // we retain the original values from the previously stored full record.
         String[] updatedUser = new String[22];
         updatedUser[0]  = employeeNumberText.getText().trim();
         updatedUser[1]  = lastNameText.getText();
@@ -686,8 +740,8 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         updatedUser[5]  = phoneNumberText1.getText().trim();
         updatedUser[6]  = sssNumberText.getText().trim();
         updatedUser[7]  = philhealthNumberText1.getText().trim();
-        updatedUser[8]  = tinNumberText1.getText().trim();  // Notice order fix if needed
-        updatedUser[9]  = pagIbigText.getText().trim();     //  ...
+        updatedUser[8]  = tinNumberText1.getText().trim();
+        updatedUser[9]  = pagIbigText.getText().trim();
         updatedUser[10] = statusBox.getSelectedItem().toString().trim();
         updatedUser[11] = positionBox.getSelectedItem().toString().trim();
         updatedUser[12] = supervisorBox.getSelectedItem().toString().trim();
@@ -697,13 +751,13 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         updatedUser[16] = clothingAllowanceBox.getSelectedItem().toString();
         updatedUser[17] = grossSemiMonthlyRateText.getText().trim();
         updatedUser[18] = hourlyRateText.getText().trim();
-        updatedUser[19] = usernameText.getText().trim();
-        updatedUser[20] = passwordText.getText().trim();
+        // Retain the original username and password from the full record.
+        updatedUser[19] = selectedUser[19]; 
+        updatedUser[20] = selectedUser[20];
         updatedUser[21] = roleBox.getSelectedItem().toString().trim();
 
-        // Update user via SystemAdministrator
-        SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
-        admin.updateUser(updatedUser[0], updatedUser);
+        SystemAdministrator adminObj = new SystemAdministrator(0, "", "", "");
+        adminObj.updateUser(updatedUser[0], updatedUser);
 
         JOptionPane.showMessageDialog(this, "User updated successfully!", 
                                       "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -711,7 +765,7 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         // Refresh the main admin page if open
         for (java.awt.Window window : java.awt.Window.getWindows()) {
             if (window instanceof SystemAdministratorPage) {
-                ((SystemAdministratorPage) window).loadUserData(); 
+                ((SystemAdministratorPage) window).loadUserData();
                 window.setVisible(true);
                 break;
             }
@@ -790,9 +844,7 @@ public static void main(String args[]) {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -800,7 +852,6 @@ public static void main(String args[]) {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JTextField lastNameText;
     private javax.swing.JTextField pagIbigText;
-    private javax.swing.JTextField passwordText;
     private javax.swing.JTextField philhealthNumberText1;
     private javax.swing.JComboBox<String> phoneAllowanceBox;
     private javax.swing.JTextField phoneNumberText1;
@@ -811,6 +862,5 @@ public static void main(String args[]) {
     private javax.swing.JComboBox<String> statusBox;
     private javax.swing.JComboBox<String> supervisorBox;
     private javax.swing.JTextField tinNumberText1;
-    private javax.swing.JTextField usernameText;
     // End of variables declaration//GEN-END:variables
 }

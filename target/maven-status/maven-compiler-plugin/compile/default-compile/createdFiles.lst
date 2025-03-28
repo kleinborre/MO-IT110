@@ -31,7 +31,6 @@ jframes\HRManagerPage$5.class
 jframes\HRManagerPage$1.class
 classes\Attendance.class
 jframes\EmployeeLeaveRequest$3.class
-jframes\SystemAdministratorCreateUser$20.class
 jframes\EmployeeProfileInformation$11.class
 jframes\EmployeeProfileInformationUpdateInfo$18.class
 jframes\EmployeeProfileInformation$3.class
@@ -43,7 +42,6 @@ buttons\grayButton.class
 jframes\SystemAdministratorCreateUser$8.class
 jframes\EmployeePage$6.class
 jframes\EmployeeProfileInformation$17.class
-jframes\SystemAdministratorCreateUser$21.class
 jframes\EmployeeLeaveRequest$2.class
 jframes\EmployeeOvertime$2.class
 jframes\EmployeeProfileInformation.class
@@ -101,12 +99,12 @@ jframes\SystemAdministratorUpdateUser$13.class
 jframes\EmployeeProfileInformationUpdateInfo$5.class
 buttons\redButton$1.class
 jframes\SystemAdministratorPage$2.class
-jframes\SystemAdministratorUpdateUser$20.class
 jframes\PayrollManagerPage$4.class
 jframes\EmployeePage$2.class
 jframes\LoginPage$1.class
 jframes\SystemAdministratorPage.class
 jframes\PayrollManagerMonthlyPayrollSummary.class
+jframes\SystemAdministratorPage$8.class
 jframes\SystemAdministratorCreateUser.class
 jframes\EmployeePage$12.class
 jframes\EmployeeOvertime$4.class
@@ -186,6 +184,5 @@ jframes\EmployeePayslip$1.class
 jframes\EmployeeOvertimeRequest.class
 jframes\EmployeePage$14.class
 jframes\PayrollManagerMonthlyPayrollSummary$3.class
-jframes\SystemAdministratorUpdateUser$21.class
 jframes\SystemAdministratorPage$6.class
 jframes\SystemAdministratorUpdateUser$16.class

@@ -30,18 +30,33 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
     
     void loadUserData() {
         SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
-        String[][] userData = admin.getAllUsers(); // 22-column joined data
-
-        // The table header matches 22 columns
+        String[][] allData = admin.getAllUsers(); // 22-column joined data
+        
+        // Prepare a new array with 20 columns (skipping username and password)
+        String[][] userData = new String[allData.length][20];
+        for (int i = 0; i < allData.length; i++) {
+            // Copy columns 0 to 18 (Employee #, Last Name, First Name, Birthday, Address, Phone Number, SSS #, Philhealth #, Pag-ibig #, TIN #, Status, Position, Immediate Supervisor, Basic Salary, Rice Subsidy, Phone Allowance, Clothing Allowance, Gross Semi-monthly Rate, Hourly Rate)
+            for (int j = 0; j < 19; j++) {
+                userData[i][j] = allData[i][j];
+            }
+            // Set column 19 to the Role (which is in column index 21 of the joined data)
+            userData[i][19] = allData[i][21];
+        }
+        
+        // Updated header (20 columns)
         String[] columnHeaders = {
             "Employee #", "Last Name", "First Name", "Birthday", "Address", "Phone Number",
             "SSS #", "Philhealth #", "Pag-ibig #", "TIN #", "Status", "Position",
             "Immediate Supervisor", "Basic Salary", "Rice Subsidy", "Phone Allowance",
-            "Clothing Allowance", "Gross Semi-monthly Rate", "Hourly Rate",
-            "Username", "Password", "Role"
+            "Clothing Allowance", "Gross Semi-monthly Rate", "Hourly Rate", "Role"
         };
-
-        DefaultTableModel model = new DefaultTableModel(userData, columnHeaders);
+        
+        DefaultTableModel model = new DefaultTableModel(userData, columnHeaders) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         userAccountTable.setModel(model);
     }
 
@@ -85,17 +100,17 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         userAccountTable.setForeground(new java.awt.Color(51, 51, 51));
         userAccountTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Employee #", "First Name", "Last Name", "Birthday", "Address", "Phone Number", "SSS #", "Philhealth #", "TIN #", "Pag-ibig #", "Status", "Position", "Supervisor", "Basic Salary", "Rice Subsidy", "Phone Allowance", "Clothing Allowance", "Gross Semi-Monthly Rate", "Hourly Rate", "Username", "Password", "Role"
+                "Employee #", "First Name", "Last Name", "Birthday", "Address", "Phone Number", "SSS #", "Philhealth #", "TIN #", "Pag-ibig #", "Status", "Position", "Supervisor", "Basic Salary", "Rice Subsidy", "Phone Allowance", "Clothing Allowance", "Gross Semi-Monthly Rate", "Hourly Rate", "Role"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -134,8 +149,6 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
             userAccountTable.getColumnModel().getColumn(17).setResizable(false);
             userAccountTable.getColumnModel().getColumn(18).setResizable(false);
             userAccountTable.getColumnModel().getColumn(19).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(20).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(21).setResizable(false);
         }
 
         getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 110, 840, 350));
@@ -192,7 +205,7 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
     }//GEN-LAST:event_createButtonActionPerformed
 
     private void userAccountTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_userAccountTableMouseClicked
-    int row = userAccountTable.getSelectedRow();
+        int row = userAccountTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "No row selected!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -206,39 +219,33 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
 
         String empNumber = selectedUser[0];
 
-        // Removed "Cancel" button
         int choice = JOptionPane.showOptionDialog(
             this,
             "Do you want to UPDATE or DELETE this user?",
             "User Action",
-            JOptionPane.YES_NO_OPTION,  // Only "YES" (Update) and "NO" (Delete)
+            JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE,
             null,
-            new String[]{"Update", "Delete"}, // Removed "Cancel"
+            new String[]{"Update", "Delete"},
             "Update"
         );
 
         if (choice == 0) { // Update
             SystemAdministratorUpdateUser updateUserFrame = new SystemAdministratorUpdateUser(selectedUser);
             updateUserFrame.setVisible(true);
-
-            // Dispose the current window when the update form is opened
-            this.dispose(); 
-
-            // Wait for the update form to close, then refresh the table
+            this.dispose();
             updateUserFrame.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosed(java.awt.event.WindowEvent windowEvent) {
-                    new SystemAdministratorPage().setVisible(true); // Reopen the main admin page after update
+                    new SystemAdministratorPage().setVisible(true);
                 }
             });
-
         } else if (choice == 1) { // Delete
             int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this user?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
                 admin.deleteUser(empNumber);
-                loadUserData(); // Refresh table after deletion
+                loadUserData();
             }
         }
     }//GEN-LAST:event_userAccountTableMouseClicked
