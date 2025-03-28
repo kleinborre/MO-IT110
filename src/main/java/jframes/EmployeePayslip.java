@@ -324,7 +324,6 @@ public class EmployeePayslip extends javax.swing.JFrame {
         jYearChooser.setAutoscrolls(true);
         jYearChooser.setEndYear(2025);
         jYearChooser.setFocusable(false);
-        jYearChooser.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jYearChooser.setOpaque(false);
         jYearChooser.setRequestFocusEnabled(false);
         jYearChooser.setStartYear(2015);
