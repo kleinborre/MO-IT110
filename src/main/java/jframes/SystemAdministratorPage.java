@@ -12,13 +12,20 @@ import javax.swing.table.DefaultTableModel;
  * @author STUDY MODE
  */
 public class SystemAdministratorPage extends javax.swing.JFrame {
-
+    
+    private String[] employeeData;
     /**
      * Creates new form SystemAdministratorPage
      */
     public SystemAdministratorPage() {
         initComponents();
         loadUserData(); // Load CSV data into userAccountTable
+    }
+    
+    public SystemAdministratorPage(String[] employeeData) {
+        this.employeeData = employeeData;
+        initComponents();
+        loadUserData();
     }
     
     void loadUserData() {
@@ -53,6 +60,7 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         userAccountTable = new javax.swing.JTable();
         createButton = new buttons.redButton();
         jLabel1 = new javax.swing.JLabel();
+        employeeRoleButton = new buttons.grayButton();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -146,6 +154,15 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         jLabel1.setText("(Clicked the table to update or delete a user.)");
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 470, -1, -1));
 
+        employeeRoleButton.setText("Switch to Employee Role");
+        employeeRoleButton.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        employeeRoleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                employeeRoleButtonActionPerformed(evt);
+            }
+        });
+        getContentPane().add(employeeRoleButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 200, 40));
+
         background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Admin Dashboard.png"))); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
@@ -154,9 +171,18 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutButtonActionPerformed
-        // TODO add your handling code here:
-        new LoginPage().setVisible(true);
-        dispose();
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Do you really want to log out of your session?",
+            "MotorPH Payroll System - Confirm Logout",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            new LoginPage().setVisible(true);
+            dispose();
+        }
     }//GEN-LAST:event_logoutButtonActionPerformed
 
     private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButtonActionPerformed
@@ -217,6 +243,13 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_userAccountTableMouseClicked
 
+    private void employeeRoleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeRoleButtonActionPerformed
+        if (employeeData != null) {
+            new EmployeePage(employeeData).setVisible(true);
+            dispose();
+        }
+    }//GEN-LAST:event_employeeRoleButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -255,6 +288,7 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
     private buttons.redButton createButton;
+    private buttons.grayButton employeeRoleButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private buttons.whiteButton logoutButton;

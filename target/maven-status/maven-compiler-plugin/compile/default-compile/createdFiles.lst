@@ -86,6 +86,7 @@ jframes\HRManagerPage$9.class
 jframes\HRManagerAttendance$2.class
 jframes\SystemAdministratorCreateUser$5.class
 jframes\EmployeeProfileInformation$6.class
+jframes\PayrollManagerPage$5.class
 jframes\EmployeeLeave$3.class
 jframes\EmployeeOvertime$5.class
 classes\HRManager.class
@@ -170,8 +171,10 @@ jframes\SystemAdministratorUpdateUser$15.class
 jframes\SystemAdministratorCreateUser$14.class
 jframes\EmployeePage$3.class
 jframes\SystemAdministratorUpdateUser.class
+jframes\HRManagerPage$10.class
 jframes\EmployeeProfileInformationUpdateInfo.class
 jframes\EmployeeProfileInformation$15.class
+jframes\SystemAdministratorPage$7.class
 jframes\EmployeePayslip.class
 jframes\EmployeeOvertimeRequest$2.class
 jframes\HRManagerPage.class
@@ -181,6 +184,7 @@ jframes\EmployeeProfileInformationUpdateInfo$1.class
 jframes\SystemAdministratorCreateUser$13.class
 jframes\EmployeePayslip$1.class
 jframes\EmployeeOvertimeRequest.class
+jframes\EmployeePage$14.class
 jframes\PayrollManagerMonthlyPayrollSummary$3.class
 jframes\SystemAdministratorUpdateUser$21.class
 jframes\SystemAdministratorPage$6.class

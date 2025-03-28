@@ -12,14 +12,35 @@ import javax.swing.JOptionPane;
  * @author STUDY MODE
  */
 public class HRManagerPage extends javax.swing.JFrame {
-
+    
+    private String[] employeeData;
     /**
      * Creates new form HRManagerPage
      */
     public HRManagerPage() {
         initComponents();
+        populateEmployeeInfo();
         loadLeaveRequests();
         loadOvertimeRequests();
+    }
+    
+    public HRManagerPage(String[] employeeData) {
+        this.employeeData = employeeData;
+        initComponents();
+        populateEmployeeInfo();
+        loadLeaveRequests();
+        loadOvertimeRequests();
+    }
+    
+    // Method to populate employee information on the GUI
+    private void populateEmployeeInfo() {
+        if (employeeData == null || employeeData.length != 22) {
+            System.out.println("Error: Incorrect employee data format.");
+            return;
+        }
+
+        nameProfileLabel.setText(employeeData[2] + " " + employeeData[1]);
+        positionProfileLabel.setText(employeeData[11]);
     }
     
     /**
@@ -76,9 +97,8 @@ public class HRManagerPage extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        logoutButton = new buttons.whiteButton();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        logoutButton = new buttons.whiteButton();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         hrManagerLeaveTable = new javax.swing.JTable();
@@ -89,6 +109,9 @@ public class HRManagerPage extends javax.swing.JFrame {
         approveLeaveRequestButton1 = new buttons.redButton();
         rejectLeaveRequestButton1 = new buttons.grayButton();
         employeeAttendanceButton = new buttons.redButton();
+        employeeRoleButton = new buttons.grayButton();
+        nameProfileLabel = new javax.swing.JLabel();
+        positionProfileLabel = new javax.swing.JLabel();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -96,6 +119,11 @@ public class HRManagerPage extends javax.swing.JFrame {
         setMaximumSize(new java.awt.Dimension(960, 540));
         setResizable(false);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel1.setText("Employees Overtime Request List");
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 330, -1, -1));
 
         logoutButton.setText("Logout");
         logoutButton.setFont(new java.awt.Font("Inter", 0, 18)); // NOI18N
@@ -105,16 +133,6 @@ public class HRManagerPage extends javax.swing.JFrame {
             }
         });
         getContentPane().add(logoutButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 10, 110, 40));
-
-        jLabel1.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel1.setText("Employees Overtime Request List");
-        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 330, -1, -1));
-
-        jLabel2.setFont(new java.awt.Font("Inter", 0, 24)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel2.setText("HR Manager");
-        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 240, -1, -1));
 
         jLabel3.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(102, 102, 102));
@@ -224,7 +242,29 @@ public class HRManagerPage extends javax.swing.JFrame {
                 employeeAttendanceButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(employeeAttendanceButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 300, 180, 40));
+        getContentPane().add(employeeAttendanceButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 280, 180, 40));
+
+        employeeRoleButton.setText("Switch to Employee Role");
+        employeeRoleButton.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        employeeRoleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                employeeRoleButtonActionPerformed(evt);
+            }
+        });
+        getContentPane().add(employeeRoleButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 200, 40));
+
+        nameProfileLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        nameProfileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        nameProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nameProfileLabel.setText("Name");
+        getContentPane().add(nameProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(59, 230, 140, -1));
+
+        positionProfileLabel.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        positionProfileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        positionProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        positionProfileLabel.setText("Position");
+        positionProfileLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        getContentPane().add(positionProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 250, 200, -1));
 
         background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/HR Dashboard.png"))); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 960, -1));
@@ -234,9 +274,18 @@ public class HRManagerPage extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutButtonActionPerformed
-        // TODO add your handling code here:
-        new LoginPage().setVisible(true);
-        dispose();
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Do you really want to log out of your session?",
+            "MotorPH Payroll System - Confirm Logout",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            new LoginPage().setVisible(true);
+            dispose();
+        }
     }//GEN-LAST:event_logoutButtonActionPerformed
 
     private void approveOvertimeRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_approveOvertimeRequestButtonActionPerformed
@@ -307,9 +356,16 @@ public class HRManagerPage extends javax.swing.JFrame {
 
     private void employeeAttendanceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeAttendanceButtonActionPerformed
         // TODO add your handling code here:
-        new HRManagerAttendance().setVisible(true);
+        new HRManagerAttendance(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_employeeAttendanceButtonActionPerformed
+
+    private void employeeRoleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeRoleButtonActionPerformed
+        if (employeeData != null) {
+            new EmployeePage(employeeData).setVisible(true);
+            dispose();
+        }
+    }//GEN-LAST:event_employeeRoleButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -351,14 +407,16 @@ public class HRManagerPage extends javax.swing.JFrame {
     private buttons.redButton approveOvertimeRequestButton;
     private javax.swing.JLabel background;
     private buttons.redButton employeeAttendanceButton;
+    private buttons.grayButton employeeRoleButton;
     private javax.swing.JTable hrManagerLeaveTable;
     private javax.swing.JTable hrManagerOvertimeTable;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private buttons.whiteButton logoutButton;
+    private javax.swing.JLabel nameProfileLabel;
+    private javax.swing.JLabel positionProfileLabel;
     private buttons.grayButton rejectLeaveRequestButton1;
     private buttons.grayButton rejectOvertimeRequestButton;
     // End of variables declaration//GEN-END:variables

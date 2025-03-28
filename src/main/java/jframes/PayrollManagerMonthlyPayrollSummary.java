@@ -15,12 +15,21 @@ import java.util.List;
 public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
 
     private PayrollManager payrollManager;
+    private String[] employeeData;
 
     public PayrollManagerMonthlyPayrollSummary() {
         initComponents();
         addListeners();
         loadPayrollSummary();
     }
+    
+    public PayrollManagerMonthlyPayrollSummary(String[] employeeData) {
+        this.employeeData = employeeData;
+        initComponents();
+        addListeners();
+        loadPayrollSummary();
+    }
+    
 
     private void addListeners() {
         payrollSummaryJMonthChooser1.addPropertyChangeListener(evt -> loadPayrollSummary());
@@ -189,7 +198,7 @@ public class PayrollManagerMonthlyPayrollSummary extends javax.swing.JFrame {
 
     private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutButtonActionPerformed
         // TODO add your handling code here:
-        new PayrollManagerPage().setVisible(true);
+        new PayrollManagerPage(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_logoutButtonActionPerformed
 

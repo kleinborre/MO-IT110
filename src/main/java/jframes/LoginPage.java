@@ -179,13 +179,13 @@ public class LoginPage extends javax.swing.JFrame {
                 new EmployeePage(userData).setVisible(true);
                 break;
             case "hrmanager":
-                new HRManagerPage().setVisible(true);
+                new HRManagerPage(userData).setVisible(true);
                 break;
             case "payrollmanager":
-                new PayrollManagerPage().setVisible(true);
+                new PayrollManagerPage(userData).setVisible(true);
                 break;
             case "systemadministrator":
-                new SystemAdministratorPage().setVisible(true);
+                new SystemAdministratorPage(userData).setVisible(true);
                 break;
             default:
                 errorLabel.setText("Invalid role mapping!");

@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
 /**
@@ -15,14 +16,34 @@ import javax.swing.Timer;
  * @author STUDY MODE
  */
 public class PayrollManagerPage extends javax.swing.JFrame {
-
+    
+    private String[] employeeData;
     /**
      * Creates new form PayrollManagerPage
      */
     public PayrollManagerPage() {      
         startRealTimeClock();
         initComponents();
+        populateEmployeeInfo();
     }
+    
+    public PayrollManagerPage(String[] employeeData) {
+        this.employeeData = employeeData;
+        startRealTimeClock();
+        initComponents();
+        populateEmployeeInfo();
+    }
+    
+    // Method to populate employee information on the GUI
+    private void populateEmployeeInfo() {
+        if (employeeData == null || employeeData.length != 22) {
+            System.out.println("Error: Incorrect employee data format.");
+            return;
+        }
+
+        nameProfileLabel.setText(employeeData[2] + " " + employeeData[1]);
+        positionProfileLabel.setText(employeeData[11]);
+    }    
     
     private void startRealTimeClock() {
         Timer timer = new Timer(1000, new ActionListener() {
@@ -46,9 +67,11 @@ public class PayrollManagerPage extends javax.swing.JFrame {
     private void initComponents() {
 
         logoutButton = new buttons.whiteButton();
-        jLabel2 = new javax.swing.JLabel();
         profileInformationButton = new buttons.redButton();
         dateTimeProfileLabel = new javax.swing.JLabel();
+        employeeRoleButton = new buttons.grayButton();
+        nameProfileLabel = new javax.swing.JLabel();
+        positionProfileLabel = new javax.swing.JLabel();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -66,11 +89,6 @@ public class PayrollManagerPage extends javax.swing.JFrame {
         });
         getContentPane().add(logoutButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 10, 110, 40));
 
-        jLabel2.setFont(new java.awt.Font("Inter", 0, 24)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(102, 102, 102));
-        jLabel2.setText("Payroll Manager");
-        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 240, -1, -1));
-
         profileInformationButton.setText("Payroll Summary");
         profileInformationButton.setAlignmentY(0.0F);
         profileInformationButton.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
@@ -79,14 +97,36 @@ public class PayrollManagerPage extends javax.swing.JFrame {
                 profileInformationButtonActionPerformed(evt);
             }
         });
-        getContentPane().add(profileInformationButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 300, 180, 40));
+        getContentPane().add(profileInformationButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 280, 160, 40));
 
         dateTimeProfileLabel.setFont(new java.awt.Font("Inter", 0, 48)); // NOI18N
         dateTimeProfileLabel.setForeground(new java.awt.Color(102, 102, 102));
         dateTimeProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         dateTimeProfileLabel.setText("Date & Time");
         dateTimeProfileLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        getContentPane().add(dateTimeProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 129, 610, 100));
+        getContentPane().add(dateTimeProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 130, 620, 100));
+
+        employeeRoleButton.setText("Switch to Employee Role");
+        employeeRoleButton.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        employeeRoleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                employeeRoleButtonActionPerformed(evt);
+            }
+        });
+        getContentPane().add(employeeRoleButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 200, 40));
+
+        nameProfileLabel.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        nameProfileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        nameProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nameProfileLabel.setText("Name");
+        getContentPane().add(nameProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(59, 230, 140, -1));
+
+        positionProfileLabel.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        positionProfileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        positionProfileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        positionProfileLabel.setText("Position");
+        positionProfileLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        getContentPane().add(positionProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 250, 200, -1));
 
         background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Manager Dashboard.png"))); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -96,16 +136,32 @@ public class PayrollManagerPage extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutButtonActionPerformed
-        // TODO add your handling code here:
-        new LoginPage().setVisible(true);
-        dispose();
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Do you really want to log out of your session?",
+            "MotorPH Payroll System - Confirm Logout",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            new LoginPage().setVisible(true);
+            dispose();
+        }
     }//GEN-LAST:event_logoutButtonActionPerformed
 
     private void profileInformationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_profileInformationButtonActionPerformed
         // TODO add your handling code here:
-        new PayrollManagerMonthlyPayrollSummary().setVisible(true);
+        new PayrollManagerMonthlyPayrollSummary(employeeData).setVisible(true);
         dispose();
     }//GEN-LAST:event_profileInformationButtonActionPerformed
+
+    private void employeeRoleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_employeeRoleButtonActionPerformed
+        if (employeeData != null) {
+            new EmployeePage(employeeData).setVisible(true);
+            dispose();
+        }
+    }//GEN-LAST:event_employeeRoleButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -145,8 +201,10 @@ public class PayrollManagerPage extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
     private javax.swing.JLabel dateTimeProfileLabel;
-    private javax.swing.JLabel jLabel2;
+    private buttons.grayButton employeeRoleButton;
     private buttons.whiteButton logoutButton;
+    private javax.swing.JLabel nameProfileLabel;
+    private javax.swing.JLabel positionProfileLabel;
     private buttons.redButton profileInformationButton;
     // End of variables declaration//GEN-END:variables
 }
