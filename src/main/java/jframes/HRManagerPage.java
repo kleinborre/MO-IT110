@@ -19,7 +19,7 @@ public class HRManagerPage extends javax.swing.JFrame {
      */
     public HRManagerPage() {
         initComponents();
-        populateEmployeeInfo();
+        initFilters();
         loadLeaveRequests();
         loadOvertimeRequests();
     }
@@ -28,17 +28,14 @@ public class HRManagerPage extends javax.swing.JFrame {
         this.employeeData = employeeData;
         initComponents();
         populateEmployeeInfo();
+        initFilters();
         loadLeaveRequests();
         loadOvertimeRequests();
     }
     
     // Method to populate employee information on the GUI
     private void populateEmployeeInfo() {
-        if (employeeData == null || employeeData.length != 22) {
-            System.out.println("Error: Incorrect employee data format.");
-            return;
-        }
-
+        if (employeeData == null || employeeData.length != 22) return;
         nameProfileLabel.setText(employeeData[2] + " " + employeeData[1]);
         positionProfileLabel.setText(employeeData[11]);
     }
@@ -47,37 +44,34 @@ public class HRManagerPage extends javax.swing.JFrame {
      * Loads all Leave Requests into hrManagerLeaveTable.
      */
     private void loadLeaveRequests() {
+        String selectedStatus = leaveRequestStatusComboBox.getSelectedItem().toString();
         DefaultTableModel model = (DefaultTableModel) hrManagerLeaveTable.getModel();
         model.setRowCount(0);
-
         List<String[]> leaveRequests = LeaveRequest.getAllLeaveRequests();
+
         for (String[] request : leaveRequests) {
-            model.addRow(new Object[]{
-                request[0], // Employee Number
-                request[1], // Name
-                request[2], // Leave Type
-                request[3], // Start Date
-                request[4], // End Date
-                request[5]  // Status
-            });
+            if (selectedStatus.equals("All") || request[5].equalsIgnoreCase(selectedStatus)) {
+                model.addRow(new Object[]{request[0], request[1], request[2], request[3], request[4], request[5]});
+            }
         }
     }
 
     private void loadOvertimeRequests() {
+        String selectedStatus = overtimeRequestStatusComboBox.getSelectedItem().toString();
         DefaultTableModel model = (DefaultTableModel) hrManagerOvertimeTable.getModel();
         model.setRowCount(0);
-
         List<String[]> overtimeRequests = OvertimeRequest.getAllOvertimeRequests();
+
         for (String[] request : overtimeRequests) {
-            model.addRow(new Object[]{
-                request[0], // Employee Number
-                request[1], // Name
-                request[2], // Date
-                request[3], // Overtime Hours
-                request[4], // Overtime Pay
-                request[5]  // Status
-            });
+            if (selectedStatus.equals("All") || request[5].equalsIgnoreCase(selectedStatus)) {
+                model.addRow(new Object[]{request[0], request[1], request[2], request[3], request[4], request[5]});
+            }
         }
+    }
+    
+    private void initFilters() {
+        leaveRequestStatusComboBox.addActionListener(e -> loadLeaveRequests());
+        overtimeRequestStatusComboBox.addActionListener(e -> loadOvertimeRequests());
     }
 
     /**
@@ -99,6 +93,7 @@ public class HRManagerPage extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         logoutButton = new buttons.whiteButton();
+        jLabel4 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         hrManagerLeaveTable = new javax.swing.JTable();
@@ -112,6 +107,9 @@ public class HRManagerPage extends javax.swing.JFrame {
         employeeRoleButton = new buttons.grayButton();
         nameProfileLabel = new javax.swing.JLabel();
         positionProfileLabel = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        overtimeRequestStatusComboBox = new javax.swing.JComboBox<>();
+        leaveRequestStatusComboBox = new javax.swing.JComboBox<>();
         background = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -133,6 +131,11 @@ public class HRManagerPage extends javax.swing.JFrame {
             }
         });
         getContentPane().add(logoutButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 10, 110, 40));
+
+        jLabel4.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel4.setText("Filter: ");
+        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 100, -1, 20));
 
         jLabel3.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(102, 102, 102));
@@ -266,6 +269,19 @@ public class HRManagerPage extends javax.swing.JFrame {
         positionProfileLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         getContentPane().add(positionProfileLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 250, 200, -1));
 
+        jLabel5.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel5.setText("Filter: ");
+        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 330, -1, 20));
+
+        overtimeRequestStatusComboBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        overtimeRequestStatusComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Pending", "Approved", "Rejected" }));
+        getContentPane().add(overtimeRequestStatusComboBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(800, 330, 110, -1));
+
+        leaveRequestStatusComboBox.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
+        leaveRequestStatusComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Pending", "Approved", "Rejected" }));
+        getContentPane().add(leaveRequestStatusComboBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(788, 100, 110, -1));
+
         background.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/HR Dashboard.png"))); // NOI18N
         getContentPane().add(background, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 960, -1));
 
@@ -291,7 +307,13 @@ public class HRManagerPage extends javax.swing.JFrame {
     private void approveOvertimeRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_approveOvertimeRequestButtonActionPerformed
         int row = hrManagerOvertimeTable.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an overtime request to approve.");
+            JOptionPane.showMessageDialog(this, "Please select an overtime request.");
+            return;
+        }
+
+        String status = hrManagerOvertimeTable.getValueAt(row, 5).toString();
+        if (!status.equalsIgnoreCase("Pending")) {
+            JOptionPane.showMessageDialog(this, "Action not allowed. Request already " + status.toLowerCase() + ".");
             return;
         }
 
@@ -299,7 +321,6 @@ public class HRManagerPage extends javax.swing.JFrame {
         String date = hrManagerOvertimeTable.getValueAt(row, 2).toString();
 
         HRManager.approveOvertimeRequest(employeeNumber, date);
-
         JOptionPane.showMessageDialog(this, "Overtime request approved.");
         loadOvertimeRequests();
     }//GEN-LAST:event_approveOvertimeRequestButtonActionPerformed
@@ -307,7 +328,13 @@ public class HRManagerPage extends javax.swing.JFrame {
     private void rejectOvertimeRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rejectOvertimeRequestButtonActionPerformed
         int row = hrManagerOvertimeTable.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an overtime request to reject.");
+            JOptionPane.showMessageDialog(this, "Please select an overtime request.");
+            return;
+        }
+
+        String status = hrManagerOvertimeTable.getValueAt(row, 5).toString();
+        if (!status.equalsIgnoreCase("Pending")) {
+            JOptionPane.showMessageDialog(this, "Action not allowed. Request already " + status.toLowerCase() + ".");
             return;
         }
 
@@ -315,7 +342,6 @@ public class HRManagerPage extends javax.swing.JFrame {
         String date = hrManagerOvertimeTable.getValueAt(row, 2).toString();
 
         HRManager.rejectOvertimeRequest(employeeNumber, date);
-
         JOptionPane.showMessageDialog(this, "Overtime request rejected.");
         loadOvertimeRequests();
     }//GEN-LAST:event_rejectOvertimeRequestButtonActionPerformed
@@ -323,7 +349,13 @@ public class HRManagerPage extends javax.swing.JFrame {
     private void approveLeaveRequestButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_approveLeaveRequestButton1ActionPerformed
         int row = hrManagerLeaveTable.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a leave request to approve.");
+            JOptionPane.showMessageDialog(this, "Please select a leave request.");
+            return;
+        }
+
+        String status = hrManagerLeaveTable.getValueAt(row, 5).toString();
+        if (!status.equalsIgnoreCase("Pending")) {
+            JOptionPane.showMessageDialog(this, "Action not allowed. Request already " + status.toLowerCase() + ".");
             return;
         }
 
@@ -332,7 +364,6 @@ public class HRManagerPage extends javax.swing.JFrame {
         String startDate = hrManagerLeaveTable.getValueAt(row, 3).toString();
 
         HRManager.approveLeaveRequest(employeeNumber, leaveType, startDate);
-
         JOptionPane.showMessageDialog(this, "Leave request approved.");
         loadLeaveRequests();
     }//GEN-LAST:event_approveLeaveRequestButton1ActionPerformed
@@ -340,7 +371,13 @@ public class HRManagerPage extends javax.swing.JFrame {
     private void rejectLeaveRequestButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rejectLeaveRequestButton1ActionPerformed
         int row = hrManagerLeaveTable.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a leave request to reject.");
+            JOptionPane.showMessageDialog(this, "Please select a leave request.");
+            return;
+        }
+
+        String status = hrManagerLeaveTable.getValueAt(row, 5).toString();
+        if (!status.equalsIgnoreCase("Pending")) {
+            JOptionPane.showMessageDialog(this, "Action not allowed. Request already " + status.toLowerCase() + ".");
             return;
         }
 
@@ -349,7 +386,6 @@ public class HRManagerPage extends javax.swing.JFrame {
         String startDate = hrManagerLeaveTable.getValueAt(row, 3).toString();
 
         HRManager.rejectLeaveRequest(employeeNumber, leaveType, startDate);
-
         JOptionPane.showMessageDialog(this, "Leave request rejected.");
         loadLeaveRequests();
     }//GEN-LAST:event_rejectLeaveRequestButton1ActionPerformed
@@ -412,10 +448,14 @@ public class HRManagerPage extends javax.swing.JFrame {
     private javax.swing.JTable hrManagerOvertimeTable;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JComboBox<String> leaveRequestStatusComboBox;
     private buttons.whiteButton logoutButton;
     private javax.swing.JLabel nameProfileLabel;
+    private javax.swing.JComboBox<String> overtimeRequestStatusComboBox;
     private javax.swing.JLabel positionProfileLabel;
     private buttons.grayButton rejectLeaveRequestButton1;
     private buttons.grayButton rejectOvertimeRequestButton;
