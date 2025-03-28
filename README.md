@@ -3,7 +3,7 @@
 - **All employees** can log in using either their **Employee Number** or **Username**.  
 
 #### For current MotorPH employees (Employee Numbers: `10001` to `10034`):  
-- **Username** follows the default format: `employee` + Employee Number (modifiable via admin access).  
+- **Username** follows the default format: `employee` + Employee Number
   - 📌 **Examples:**  
     - `10001` → `employee1`  
     - `10002` → `employee2`  
