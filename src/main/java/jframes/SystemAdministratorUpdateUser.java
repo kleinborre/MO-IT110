@@ -29,8 +29,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     // Validation Colors
     private static final Color ERROR_COLOR = new Color(255, 200, 200);
     private static final Color OK_COLOR    = Color.WHITE;
-    
-    private String[] employeeData;
 
     public SystemAdministratorUpdateUser(String[] selectedUser) {
         this.selectedUser = selectedUser;
@@ -38,14 +36,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         populateFields(this.selectedUser);
         setupRealTimeValidation();
     }
-    
-    public SystemAdministratorUpdateUser(String[] selectedUser, String[] employeeData) {
-        this.employeeData = employeeData;
-        this.selectedUser = selectedUser;
-        initComponents();
-        populateFields(this.selectedUser);
-        setupRealTimeValidation();
-    }    
 
     /**
      * Populates the form fields with the full user record.
@@ -535,7 +525,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         jLabel17.setText("Basic Salary");
         getContentPane().add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 320, -1, -1));
 
-        basicSalaryText.setEditable(false);
         basicSalaryText.setBackground(new java.awt.Color(204, 204, 204));
         basicSalaryText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         basicSalaryText.addActionListener(new java.awt.event.ActionListener() {
@@ -591,7 +580,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         jLabel21.setText("Semi-Monthly Rate");
         getContentPane().add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 270, -1, -1));
 
-        grossSemiMonthlyRateText.setEditable(false);
         grossSemiMonthlyRateText.setBackground(new java.awt.Color(204, 204, 204));
         grossSemiMonthlyRateText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         grossSemiMonthlyRateText.addActionListener(new java.awt.event.ActionListener() {
@@ -624,7 +612,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         jLabel18.setText("Hourly Rate");
         getContentPane().add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 320, -1, -1));
 
-        hourlyRateText.setEditable(false);
         hourlyRateText.setBackground(new java.awt.Color(204, 204, 204));
         hourlyRateText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         hourlyRateText.addActionListener(new java.awt.event.ActionListener() {
@@ -634,7 +621,6 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
         });
         getContentPane().add(hourlyRateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 340, 140, -1));
 
-        employeeNumberText.setEditable(false);
         employeeNumberText.setBackground(new java.awt.Color(204, 204, 204));
         employeeNumberText.setFont(new java.awt.Font("Inter", 0, 14)); // NOI18N
         employeeNumberText.addActionListener(new java.awt.event.ActionListener() {
@@ -652,7 +638,7 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
-
+        new SystemAdministratorPage().setVisible(true);
         this.dispose(); 
     }//GEN-LAST:event_backButtonActionPerformed
 
@@ -802,33 +788,33 @@ public class SystemAdministratorUpdateUser extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
+public static void main(String args[]) {
+    /* Set the Nimbus look and feel */
+    try {
+        for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            if ("Nimbus".equals(info.getName())) {
+                javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                break;
             }
-        } catch (Exception ex) {
-            java.util.logging.Logger.getLogger(SystemAdministratorUpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-
-        /* Create and display the form with test data */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                // Provide test data to avoid constructor error
-                String[] testUser = {
-                    "10001", "Garcia", "Manuel III", "10/11/1983", "Valero Carpark Building",
-                    "966-860-270", "44-4506057-3", "820126853951", "442-605-657-000", "691295330870",
-                    "Regular", "Chief Executive Officer", "N/A", "90000", "1500", "2000",
-                    "1000", "45000", "535.71", "employee1", "password", "employee"
-                };
-                new SystemAdministratorUpdateUser(testUser).setVisible(true);
-            }
-        });
+    } catch (Exception ex) {
+        java.util.logging.Logger.getLogger(SystemAdministratorUpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
     }
+
+    /* Create and display the form with test data */
+    java.awt.EventQueue.invokeLater(new Runnable() {
+        public void run() {
+            // Provide test data to avoid constructor error
+            String[] testUser = {
+                "10001", "Garcia", "Manuel III", "10/11/1983", "Valero Carpark Building",
+                "966-860-270", "44-4506057-3", "820126853951", "442-605-657-000", "691295330870",
+                "Regular", "Chief Executive Officer", "N/A", "90000", "1500", "2000",
+                "1000", "45000", "535.71", "employee1", "password", "employee"
+            };
+            new SystemAdministratorUpdateUser(testUser).setVisible(true);
+        }
+    });
+}
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

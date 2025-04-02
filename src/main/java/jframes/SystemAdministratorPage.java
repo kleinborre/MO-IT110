@@ -130,45 +130,25 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         jScrollPane1.setViewportView(userAccountTable);
         if (userAccountTable.getColumnModel().getColumnCount() > 0) {
             userAccountTable.getColumnModel().getColumn(0).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(0).setHeaderValue("Employee #");
             userAccountTable.getColumnModel().getColumn(1).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(1).setHeaderValue("First Name");
             userAccountTable.getColumnModel().getColumn(2).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(2).setHeaderValue("Last Name");
             userAccountTable.getColumnModel().getColumn(3).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(3).setHeaderValue("Birthday");
             userAccountTable.getColumnModel().getColumn(4).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(4).setHeaderValue("Address");
             userAccountTable.getColumnModel().getColumn(5).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(5).setHeaderValue("Phone Number");
             userAccountTable.getColumnModel().getColumn(6).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(6).setHeaderValue("SSS #");
             userAccountTable.getColumnModel().getColumn(7).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(7).setHeaderValue("Philhealth #");
             userAccountTable.getColumnModel().getColumn(8).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(8).setHeaderValue("TIN #");
             userAccountTable.getColumnModel().getColumn(9).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(9).setHeaderValue("Pag-ibig #");
             userAccountTable.getColumnModel().getColumn(10).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(10).setHeaderValue("Status");
             userAccountTable.getColumnModel().getColumn(11).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(11).setHeaderValue("Position");
             userAccountTable.getColumnModel().getColumn(12).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(12).setHeaderValue("Supervisor");
             userAccountTable.getColumnModel().getColumn(13).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(13).setHeaderValue("Basic Salary");
             userAccountTable.getColumnModel().getColumn(14).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(14).setHeaderValue("Rice Subsidy");
             userAccountTable.getColumnModel().getColumn(15).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(15).setHeaderValue("Phone Allowance");
             userAccountTable.getColumnModel().getColumn(16).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(16).setHeaderValue("Clothing Allowance");
             userAccountTable.getColumnModel().getColumn(17).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(17).setHeaderValue("Gross Semi-Monthly Rate");
             userAccountTable.getColumnModel().getColumn(18).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(18).setHeaderValue("Hourly Rate");
             userAccountTable.getColumnModel().getColumn(19).setResizable(false);
-            userAccountTable.getColumnModel().getColumn(19).setHeaderValue("Role");
         }
 
         getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 110, 840, 350));
@@ -220,7 +200,7 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
 
     private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButtonActionPerformed
         // TODO add your handling code here:
-        new SystemAdministratorCreateUser(employeeData).setVisible(true);
+        new SystemAdministratorCreateUser().setVisible(true);
         dispose();
     }//GEN-LAST:event_createButtonActionPerformed
 
@@ -251,24 +231,21 @@ public class SystemAdministratorPage extends javax.swing.JFrame {
         );
 
         if (choice == 0) { // Update
-            SystemAdministratorUpdateUser updateUserFrame = new SystemAdministratorUpdateUser(selectedUser, employeeData);
+            SystemAdministratorUpdateUser updateUserFrame = new SystemAdministratorUpdateUser(selectedUser);
             updateUserFrame.setVisible(true);
             this.dispose();
-
             updateUserFrame.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosed(java.awt.event.WindowEvent windowEvent) {
-                    SystemAdministratorPage adminPage = new SystemAdministratorPage(employeeData);
-                    adminPage.setVisible(true);
+                    new SystemAdministratorPage().setVisible(true);
                 }
             });
-
         } else if (choice == 1) { // Delete
             int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this user?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 SystemAdministrator admin = new SystemAdministrator(0, "", "", "");
                 admin.deleteUser(empNumber);
-                loadUserData();  // Refresh table
+                loadUserData();
             }
         }
     }//GEN-LAST:event_userAccountTableMouseClicked
